@@ -1,0 +1,16 @@
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\bin\Debug\net10.0\EGM.Application.deps.json
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\bin\Debug\net10.0\EGM.Application.dll
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\bin\Debug\net10.0\EGM.Application.pdb
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\bin\Debug\net10.0\EGM.Domain.dll
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\bin\Debug\net10.0\EGM.Domain.pdb
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.csproj.AssemblyReference.cache
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.AssemblyInfoInputs.cache
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.AssemblyInfo.cs
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.csproj.CoreCompileInputs.cache
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.sourcelink.json
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Appl.DE4BD2F7.Up2Date
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.dll
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\refint\EGM.Application.dll
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\EGM.Application.pdb
+C:\Users\mrkfk\OneDrive\Desktop\EGM-Project\EGM.Application\obj\Debug\net10.0\ref\EGM.Application.dll
