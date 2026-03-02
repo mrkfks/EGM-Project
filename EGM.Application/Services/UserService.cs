@@ -1,5 +1,6 @@
 using EGM.Domain.Entities;
 using EGM.Domain.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace EGM.Application.Services
 {
@@ -12,12 +13,14 @@ namespace EGM.Application.Services
             _userRepository = userRepository;
         }
 
-        public User? ValidateUser(int sicil, string passwordHash)
+        public User? ValidateUser(int sicil, string password)
         {
             var user = _userRepository.GetBySicil(sicil);
             if (user == null) return null;
 
-            return user.PasswordHash == passwordHash ? user : user;
+            //Hash Doğrulama
+            bool isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            return isValid ? user : null;
         }
         public void RegisterUser(User user)
         {

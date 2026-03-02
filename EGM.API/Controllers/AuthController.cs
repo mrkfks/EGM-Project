@@ -26,20 +26,28 @@ namespace EGM.API.Controllers
         {
             var user = _userService.ValidateUser(request.Sicil, request.Password);
             if (user == null)
-            return Unauthorized("Geçersiz sicil veya şifre");
+                return Unauthorized("Geçersiz sicil veya şifre.");
 
-            //JWT token üretimi
+            // Hash doğrulama
+            bool isValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            if (!isValid)
+                return Unauthorized("Geçersiz sicil veya şifre.");
+
             var token = JwtHelper.GenerateToken(
                 user,
                 _configuration["Jwt:Key"]!,
                 _configuration["Jwt:Issuer"]!
             );
-            return Ok(new{Token = token});
+
+            return Ok(new { Token = token });
         }
+
+
 
         [HttpPost("register")]
         public IActionResult Register(RegisterRequest request)
         {
+            var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             var user = new User
             {
                 Sicil = request.Sicil,
@@ -51,7 +59,7 @@ namespace EGM.API.Controllers
             };
 
             _userService.RegisterUser(user);
-            return Ok ("Kullanıcı başarıyla kaydedildi.");
+            return Ok("Kullanıcı başarıyla kaydedildi.");
         }
     }
 }
