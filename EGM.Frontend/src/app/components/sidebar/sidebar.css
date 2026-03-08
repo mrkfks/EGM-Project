@@ -1,0 +1,20 @@
+.bg-navy {
+  background-color: #001f3f !important;
+}
+
+.text-navy {
+  color: #001f3f !important;
+}
+
+/* Sidebar sola sabitlenir, navbar'ın hemen altından başlar */
+.egm-sidebar {
+  position: fixed !important;
+  top: var(--egm-navbar-height, 64px);
+  left: 0;
+  width: var(--egm-sidebar-width, 200px) !important;
+  height: calc(100vh - var(--egm-navbar-height, 64px)) !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1000;
+  box-sizing: border-box;
+}

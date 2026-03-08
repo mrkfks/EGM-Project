@@ -9,6 +9,7 @@
       "EGM.API/1.0.0": {
         "dependencies": {
           "BCrypt.Net-Next": "4.1.0",
+          "EGM.Application": "1.0.0",
           "EGM.Infrastructure": "1.0.0",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.3",
           "Microsoft.AspNetCore.OpenApi": "10.0.3",
@@ -820,7 +821,7 @@
       },
       "EGM.Infrastructure/1.0.0": {
         "dependencies": {
-          "EGM.Application": "1.0.0",
+          "EGM.Domain": "1.0.0",
           "Microsoft.EntityFrameworkCore": "10.0.3",
           "Microsoft.EntityFrameworkCore.Sqlite": "10.0.3",
           "Microsoft.IdentityModel.Tokens": "8.16.0",

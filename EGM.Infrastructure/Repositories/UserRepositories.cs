@@ -45,7 +45,7 @@ namespace EGM.Infrastructure.Repositories
 
         public void Update(User user)
         {
-            _context.Users.Add(user);
+            _context.Users.Update(user);
             _context.SaveChanges();
         }
 

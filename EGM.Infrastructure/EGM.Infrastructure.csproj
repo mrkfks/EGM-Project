@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\EGM.Application\EGM.Application.csproj" />
+    <ProjectReference Include="..\EGM.Domain\EGM.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

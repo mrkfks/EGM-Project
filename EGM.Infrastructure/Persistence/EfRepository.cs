@@ -1,4 +1,4 @@
-using EGM.Application.Common.Interfaces;
+using EGM.Domain.Interfaces;
 using EGM.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;

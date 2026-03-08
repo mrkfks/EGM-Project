@@ -1,6 +1,5 @@
 using EGM.Domain.Entities;
 using EGM.Domain.Interfaces;
-using Microsoft.AspNetCore.Identity;
 
 namespace EGM.Application.Services
 {

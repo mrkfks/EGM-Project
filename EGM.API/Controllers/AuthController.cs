@@ -28,11 +28,6 @@ namespace EGM.API.Controllers
             if (user == null)
                 return Unauthorized("Geçersiz sicil veya şifre.");
 
-            // Hash doğrulama
-            bool isValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
-            if (!isValid)
-                return Unauthorized("Geçersiz sicil veya şifre.");
-
             var token = JwtHelper.GenerateToken(
                 user,
                 _configuration["Jwt:Key"]!,
@@ -51,7 +46,7 @@ namespace EGM.API.Controllers
             var user = new User
             {
                 Sicil = request.Sicil,
-                PasswordHash = request.Password,
+                PasswordHash = hashedPassword,
                 Role = request.Role,
                 GSM = request.GSM,
                 FullName = request.FullName,

@@ -1,0 +1,19 @@
+:root{
+	--egm-navbar-height: 64px;
+	--egm-sidebar-width: 200px;
+	--egm-bg: #061a2a; /* daha koyu arka plan */
+	--egm-accent: #0f6fa3;
+	--egm-muted: #cfe6f5;
+	--egm-text: #ffffff;
+}
+
+.main-content{
+	margin-top: var(--egm-navbar-height);
+	margin-left: var(--egm-sidebar-width);
+	padding: 1.25rem;
+	min-height: calc(100vh - var(--egm-navbar-height));
+}
+
+@media (max-width:900px){
+	.main-content{margin-left:0}
+}

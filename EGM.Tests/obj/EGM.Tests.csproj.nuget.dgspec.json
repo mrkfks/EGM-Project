@@ -735,8 +735,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj": {
-                "projectPath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj"
+              "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {
+                "projectPath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj"
               }
             }
           }

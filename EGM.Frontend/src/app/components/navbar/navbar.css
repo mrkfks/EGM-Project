@@ -1,0 +1,18 @@
+.bg-navy {
+  background-color: #001f3f !important;
+}
+
+.text-navy {
+  color: #001f3f !important;
+}
+
+/* Navbar yukarıya sabitlenir */
+nav.navbar {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
+  height: var(--egm-navbar-height, 64px);
+  overflow: hidden;
+}

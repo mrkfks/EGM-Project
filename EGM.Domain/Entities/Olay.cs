@@ -35,6 +35,9 @@ namespace EGM.Domain.Entities
         public Hassasiyet Hassasiyet { get; set; }
         public double RiskPuani { get; set; }
 
+        public DateTime? GercekBaslangicTarihi { get; set; }
+        public DateTime? GercekBitisTarihi { get; set; }
+
         public ICollection<YuruyusRota> YuruyusRotasi { get; set; } = new List<YuruyusRota>();
 
         public ICollection<OperasyonelFaaliyet> OperasyonelFaaliyetler { get; set; } = new List<OperasyonelFaaliyet>();

@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EGM.Infrastructure\EGM.Infrastructure.csproj" />
+    <ProjectReference Include="..\EGM.Application\EGM.Application.csproj" />
   </ItemGroup>
 
 </Project>

@@ -45,40 +45,118 @@ namespace EGM.Infrastructure
         {
             base.OnModelCreating(modelBuilder);
 
-            // Supheli TcKimlikNo için max length
+            // ── User ────────────────────────────────────────────────────
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Sicil)
+                .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
+
+            // ── Supheli ─────────────────────────────────────────────────
             modelBuilder.Entity<Supheli>()
                 .Property(s => s.TcKimlikNo)
                 .HasMaxLength(256);
 
-            // KatilimciGrup ilişkisi
+            modelBuilder.Entity<Supheli>()
+                .HasOne(s => s.OperasyonelFaaliyet)
+                .WithMany(f => f.Supheliler)
+                .HasForeignKey(s => s.OperasyonelFaaliyetId);
+
+            // ── Sehit ───────────────────────────────────────────────────
+            modelBuilder.Entity<Sehit>()
+                .Property(s => s.TcKimlikNo)
+                .HasMaxLength(256);
+
+            modelBuilder.Entity<Sehit>()
+                .HasOne(s => s.OperasyonelFaaliyet)
+                .WithMany(f => f.Sehitler)
+                .HasForeignKey(s => s.OperasyonelFaaliyetId);
+
+            // ── Olu ─────────────────────────────────────────────────────
+            modelBuilder.Entity<Olu>()
+                .Property(o => o.TcKimlikNo)
+                .HasMaxLength(256);
+
+            modelBuilder.Entity<Olu>()
+                .HasOne(o => o.OperasyonelFaaliyet)
+                .WithMany(f => f.Oluler)
+                .HasForeignKey(o => o.OperasyonelFaaliyetId);
+
+            // ── KatilimciGrup ───────────────────────────────────────────
             modelBuilder.Entity<KatilimciGrup>()
                 .HasOne(k => k.OperasyonelFaaliyet)
                 .WithMany(f => f.KatilimciGruplar)
                 .HasForeignKey(k => k.OperasyonelFaaliyetId);
 
-            // Olay - Organizator ilişkisi
+            // ── OperasyonelFaaliyet - Olay ──────────────────────────────
+            modelBuilder.Entity<OperasyonelFaaliyet>()
+                .HasOne(f => f.Olay)
+                .WithMany(o => o.OperasyonelFaaliyetler)
+                .HasForeignKey(f => f.OlayId);
+
+            // ── Olay - Organizator ──────────────────────────────────────
             modelBuilder.Entity<Olay>()
                 .HasOne(o => o.Organizator)
                 .WithMany(org => org.Olaylar)
                 .HasForeignKey(o => o.OrganizatorId);
 
-            // Olay - Konu ilişkisi
+            // ── Olay - Konu ─────────────────────────────────────────────
             modelBuilder.Entity<Olay>()
                 .HasOne(o => o.Konu)
                 .WithMany(k => k.Olaylar)
                 .HasForeignKey(o => o.KonuId);
 
-            // Olay - YuruyusRota ilişkisi
+            // ── SosyalMedyaOlay - Olay ──────────────────────────────────
+            modelBuilder.Entity<SosyalMedyaOlay>()
+                .HasOne(s => s.Olay)
+                .WithMany(o => o.SosyalMedyaOlaylar)
+                .HasForeignKey(s => s.OlayId);
+
+            // ── YuruyusRota - Olay ──────────────────────────────────────
             modelBuilder.Entity<YuruyusRota>()
                 .HasOne(r => r.Olay)
                 .WithMany(o => o.YuruyusRotasi)
                 .HasForeignKey(r => r.OlayId);
 
+            // ── SecimSonucu ilişkileri ───────────────────────────────────
+            modelBuilder.Entity<SecimSonucu>()
+                .HasOne(s => s.Aday)
+                .WithMany()
+                .HasForeignKey(s => s.AdayId);
+
+            modelBuilder.Entity<SecimSonucu>()
+                .HasOne(s => s.Parti)
+                .WithMany()
+                .HasForeignKey(s => s.PartiId);
+
+            modelBuilder.Entity<SecimSonucu>()
+                .HasOne(s => s.Kaynak)
+                .WithMany()
+                .HasForeignKey(s => s.KaynakId);
+
+            // ── VIPZiyaret - GuvenlikPlani ───────────────────────────────
+            modelBuilder.Entity<GuvenlikPlani>()
+                .HasOne(g => g.VIPZiyaret)
+                .WithMany(v => v.GuvenlikPlanlari)
+                .HasForeignKey(g => g.VIPZiyaretId);
+
+            // ── VIPZiyaret - Ekip ───────────────────────────────────────
+            modelBuilder.Entity<Ekip>()
+                .HasOne(e => e.VIPZiyaret)
+                .WithMany(v => v.EkipAtamasi)
+                .HasForeignKey(e => e.VIPZiyaretId);
+
+            // ── KategoriOrganizator - Organizator (M:N) ─────────────────
+            modelBuilder.Entity<KategoriOrganizator>()
+                .HasMany(k => k.Organizatorler)
+                .WithMany(o => o.Kategoriler);
+
+            // ── AuditLog ────────────────────────────────────────────────
             modelBuilder.Entity<AuditLog>()
-            .Property(a => a.Changes)
-            .HasColumnType("nvarchar(max)");
-
-
+                .Property(a => a.Changes)
+                .HasColumnType("TEXT");
         }
     }
 }
