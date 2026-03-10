@@ -1,1 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
+/* sadece login sayfası için gölgeli, yarı saydam arka plan ve scroll kapatma */
+body.login-page {
+  background-color: #143a74;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  background-attachment: fixed;
+  min-height: 100vh;
+  color: #fff;
+  overflow: hidden; /* sayfada scroll olmasın istiyorsanız */
+}
