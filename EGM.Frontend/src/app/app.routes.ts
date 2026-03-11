@@ -5,7 +5,7 @@ import { Olay } from './pages/olay/olay';
 
 
 export const routes: Routes = [
-    {path: '', redirectTo:'home', pathMatch: 'full'},
+    {path: '', redirectTo:'login', pathMatch: 'full'},
     {path: 'home', component: Home},
     {path: 'login', component:Login},
     {path: 'olay', component:Olay}

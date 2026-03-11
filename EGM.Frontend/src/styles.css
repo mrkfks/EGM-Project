@@ -1,11 +1,77 @@
-/* sadece login sayfası için gölgeli, yarı saydam arka plan ve scroll kapatma */
-body.login-page {
-  background-color: #143a74;
-  background-repeat: no-repeat;
-  background-position: center center;
-  background-size: cover;
-  background-attachment: fixed;
-  min-height: 100vh;
-  color: #fff;
-  overflow: hidden; /* sayfada scroll olmasın istiyorsanız */
+@import "leaflet/dist/leaflet.css";
+
+/* ── Tam boy uygulama layout ─────────────────────────── */
+html, body, app-root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  z-index: 1000; /* Haritanın diğer componentlerin üstünde görünmesi için */
+  overflow: hidden;
+}
+
+.app-body {
+  display: flex;
+  flex: 1 1 auto;
+  z-index: 200; /* Sidebar daha düşük z-index olsun; harita üstte kalacak */
+  min-height: 0;          /* flex overflow için zorunlu */
+  overflow: hidden;
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+  z-index: 1000; /* Harita kapsayıcısı her zaman üstte */
+/* Angular host elementlerini layout'tan çıkar,
+   iç elementler (<nav>, <aside>) doğrudan flex child olur */
+app-navbar,
+app-sidebar {
+  z-index: 1000; /* Leaflet pane'leri için de z-index ayarı */
+  display: contents;
+}
+
+.egm-sidebar {
+  flex: 0 0 190px;
+  max-width: 190px;
+  overflow-y: auto;
+}
+
+/* ── İçerik alanı ───────────────────────────────────── */
+.main-content {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;           /* flex'te taşmayı önler */
+  overflow: hidden;
+}
+
+/* Angular component host elementleri */
+app-home {
+  display: block;
+  position: absolute;
+  inset: 0;
+}
+
+/* ── Home sayfası ───────────────────────────────────── */
+.home-page {
+  position: absolute;
+  inset: 0;               /* main-content'i tamamen kapla */
+  overflow: hidden;
+}
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* Offline: tile yokken açık mavi arka plan */
+.leaflet-container {
+  background: #d4e8f0;
+}
+
+/* Home sayfasında scroll kapatma */
+body.no-scroll { overflow: hidden; }

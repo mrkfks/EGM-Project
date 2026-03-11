@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Türkiye Haritası — Offline</title>
+  <!--
+    KURULUM (bir kez çalıştırın):
+      cd EGM.Frontend
+      New-Item -ItemType Directory -Force public/offline-map/lib
+      New-Item -ItemType Directory -Force public/offline-map/lib/images
+      Copy-Item node_modules/leaflet/dist/leaflet.js     public/offline-map/lib/
+      Copy-Item node_modules/leaflet/dist/leaflet.css    public/offline-map/lib/
+      Copy-Item node_modules/leaflet/dist/images/*       public/offline-map/lib/images/
+
+    ÇALIŞTIRMA (CORS için yerel sunucu şart):
+      cd EGM.Frontend/public
+      npx serve . -p 3000
+      → http://localhost:3000/offline-map/
+
+      VEYA  (Python varsa):
+      python -m http.server 3000 --directory EGM.Frontend/public
+      → http://localhost:3000/offline-map/
+  -->
+  <link rel="stylesheet" href="./lib/leaflet.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; font-family: sans-serif; }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+      background: #d4e8f0; /* tile yokken arka plan */
+    }
+
+    /* Bilgi paneli */
+    #info-panel {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      background: #fff;
+      padding: 14px 18px;
+      border-radius: 10px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+      min-width: 200px;
+      display: none;
+      z-index: 1000;
+    }
+    #info-panel.visible { display: block; }
+    #info-panel h3 { color: #1a3a5c; margin-bottom: 4px; font-size: 16px; }
+    #info-panel p  { color: #555; font-size: 13px; }
+
+    /* Hata ekranı */
+    #error-screen {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      padding: 40px;
+      font-family: sans-serif;
+    }
+    #error-screen h2 { color: #c0392b; }
+    #error-screen pre {
+      background: #f5f5f5;
+      padding: 14px;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-size: 13px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="map"></div>
+
+  <div id="info-panel">
+    <h3 id="il-adi">—</h3>
+    <p id="il-detay">Bir ile tıklayın</p>
+  </div>
+
+  <div id="error-screen">
+    <h2>❌ Harita yüklenemedi</h2>
+    <p>GeoJSON dosyası fetch edilemedi. En olası neden: <code>file://</code> protokolü üzerinden CORS.</p>
+    <h3 style="margin-top:18px">Çözüm — yerel sunucu başlatın:</h3>
+    <pre>cd EGM.Frontend/public
+npx serve . -p 3000</pre>
+    <p style="margin-top:10px">Ardından tarayıcıda açın:<br>
+      <a href="http://localhost:3000/offline-map/">http://localhost:3000/offline-map/</a>
+    </p>
+    <hr style="margin:20px 0" />
+    <p style="color:#888;font-size:12px" id="error-detail"></p>
+  </div>
+
+  <script src="./lib/leaflet.js"></script>
+  <script>
+    // ─── Harita ───────────────────────────────────────────────────────────
+    const map = L.map('map', {
+      zoomControl: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      dragging: false,
+      boxZoom: false,
+      keyboard: false
+    });
+
+    // ─── Stil tanımları ───────────────────────────────────────────────────
+    const DEFAULT_STYLE = { color: '#1a3a5c', weight: 1.5, fillColor: '#4a90d9', fillOpacity: 0.4 };
+    const HOVER_STYLE   = { fillColor: '#e67e22', fillOpacity: 0.7 };
+
+    // ─── Bilgi paneli ─────────────────────────────────────────────────────
+    const panel   = document.getElementById('info-panel');
+    const ilAdi   = document.getElementById('il-adi');
+    const ilDetay = document.getElementById('il-detay');
+
+    function showPanel(name) {
+      ilAdi.textContent   = name;
+      ilDetay.textContent = 'Seçilen il: ' + name;
+      panel.classList.add('visible');
+    }
+
+    // ─── GeoJSON yükleme ──────────────────────────────────────────────────
+    fetch('../assets/turkey-provinces-simplified.geojson')
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status + ': ' + r.url);
+        return r.json();
+      })
+      .then(function(geo) {
+        var geojsonLayer = L.geoJSON(geo, {
+          style: function() { return Object.assign({}, DEFAULT_STYLE); },
+          onEachFeature: function(feature, layer) {
+            var name = (feature.properties && (
+                         feature.properties.Name  ||
+                         feature.properties.name  ||
+                         feature.properties.NAME_1
+                       )) || 'İsimsiz İl';
+
+            // Tooltip (hover üzerinde isim)
+            layer.bindTooltip(name, { sticky: true });
+
+            layer.on({
+              mouseover: function(e) {
+                e.target.setStyle(HOVER_STYLE);
+                e.target.bringToFront();
+              },
+              mouseout: function(e) {
+                geojsonLayer.resetStyle(e.target);
+              },
+              click: function(e) {
+                L.popup()
+                  .setLatLng(e.latlng)
+                  .setContent('<b>' + name + '</b>')
+                  .openOn(map);
+                showPanel(name);
+              }
+            });
+          }
+        }).addTo(map);
+
+        // Türkiye'yi tam görünüme al
+        map.fitBounds(geojsonLayer.getBounds(), { padding: [30, 30], animate: false });
+      })
+      .catch(function(err) {
+        console.error(err);
+        document.getElementById('error-detail').textContent = 'Hata: ' + err.message;
+        document.getElementById('error-screen').style.display = 'block';
+      });
+  </script>
+</body>
+</html>
