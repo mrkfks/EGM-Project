@@ -1,6 +1,6 @@
 @import "leaflet/dist/leaflet.css";
 
-/* ── Tam boy uygulama layout ─────────────────────────── */
+/* ── Tam boy uygulama layout (flexbox) ───────────────── */
 html, body, app-root {
   height: 100%;
   margin: 0;
@@ -12,25 +12,20 @@ html, body, app-root {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  z-index: 1000; /* Haritanın diğer componentlerin üstünde görünmesi için */
   overflow: hidden;
 }
 
 .app-body {
   display: flex;
   flex: 1 1 auto;
-  z-index: 200; /* Sidebar daha düşük z-index olsun; harita üstte kalacak */
   min-height: 0;          /* flex overflow için zorunlu */
   overflow: hidden;
 }
 
 /* ── Sidebar ─────────────────────────────────────────── */
-  z-index: 1000; /* Harita kapsayıcısı her zaman üstte */
-/* Angular host elementlerini layout'tan çıkar,
-   iç elementler (<nav>, <aside>) doğrudan flex child olur */
 app-navbar,
 app-sidebar {
-  z-index: 1000; /* Leaflet pane'leri için de z-index ayarı */
+  z-index: 1000;
   display: contents;
 }
 
@@ -40,38 +35,73 @@ app-sidebar {
   overflow-y: auto;
 }
 
-/* ── İçerik alanı ───────────────────────────────────── */
+/* ── İçerik alanı (harita kapsayıcısı) ──────────────── */
 .main-content {
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
-  min-width: 0;           /* flex'te taşmayı önler */
+  min-width: 0;
   overflow: hidden;
 }
 
-/* Angular component host elementleri */
+/* Angular component host — main-content'i tam kapla */
 app-home {
   display: block;
   position: absolute;
   inset: 0;
 }
 
-/* ── Home sayfası ───────────────────────────────────── */
 .home-page {
   position: absolute;
-  inset: 0;               /* main-content'i tamamen kapla */
+  inset: 0;
   overflow: hidden;
 }
 
+/* Harita kapsayıcısı: üst elementi tamamen doldur */
 #map {
   position: absolute;
   inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* Offline: tile yokken açık mavi arka plan */
+/* Deniz rengi */
 .leaflet-container {
-  background: #d4e8f0;
+  background: #a8d8ef;
 }
 
-/* Home sayfasında scroll kapatma */
+/* ── Küçük ekran optimizasyonları ────────────────────── */
+@media (max-width: 768px) {
+  .egm-sidebar { display: none; }
+  app-navbar { display: block; }
+
+  .leaflet-container svg .leaflet-interactive {
+    stroke-width: 1px !important;
+    transition: fill 100ms ease, fill-opacity 100ms ease, stroke-width 100ms ease;
+  }
+  .leaflet-container svg .leaflet-interactive.hovered {
+    stroke-width: 1.8px !important;
+  }
+  .leaflet-tooltip { font-size: 12px; padding: 2px 6px; }
+}
+
+/* Scroll kapatma */
 body.no-scroll { overflow: hidden; }
+
+/* Leaflet SVG hover geçişleri */
+.leaflet-container svg .leaflet-interactive {
+  transition: fill 120ms ease, fill-opacity 120ms ease, stroke-width 120ms ease;
+  vector-effect: non-scaling-stroke;
+}
+
+.leaflet-container svg .leaflet-interactive.hovered {
+  fill: #e67e22 !important;
+  fill-opacity: 0.85 !important;
+  stroke-width: 2.4px !important;
+}
+
+/* Leaflet attribution küçültme */
+.leaflet-control-attribution {
+  font-size: 9px !important;
+  opacity: 0.6;
+}
