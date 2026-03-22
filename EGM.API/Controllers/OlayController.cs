@@ -4,6 +4,7 @@ using EGM.Domain.Constants;
 using EGM.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace EGM.API.Controllers
 {
@@ -20,6 +21,7 @@ namespace EGM.API.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<IActionResult> GetAll()
         {
             var olaylar = await _olayService.GetAllAsync();
@@ -27,7 +29,51 @@ namespace EGM.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("bbox")]
+        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Client, NoStore = false)]
+        public async Task<IActionResult> GetByBbox([FromQuery] double? minLat, [FromQuery] double? minLon, [FromQuery] double? maxLat, [FromQuery] double? maxLon)
+        {
+            if (!minLat.HasValue || !minLon.HasValue || !maxLat.HasValue || !maxLon.HasValue)
+                return BadRequest("minLat, minLon, maxLat ve maxLon sorgu parametreleri gereklidir.");
+
+            var olaylar = await _olayService.GetByBoundingBoxAsync(minLat.Value, minLon.Value, maxLat.Value, maxLon.Value);
+            var result = olaylar.Select(o => MapToResponse(o));
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// BBOX içindeki olayları grid hücrelerine göre kümelere böler.
+        /// gridSize parametresi derece cinsinden hücre boyutudur (varsayılan: 0.5°).
+        /// Küçük zoom değerleri için büyük gridSize (örn. 2.0), yüksek zoom için
+        /// küçük gridSize (örn. 0.1) kullanın.
+        /// </summary>
+        [HttpGet("clustered")]
+        [ResponseCache(Duration = 30, Location = ResponseCacheLocation.Client, NoStore = false)]
+        public async Task<IActionResult> GetClustered(
+            [FromQuery] double? minLat, [FromQuery] double? minLon,
+            [FromQuery] double? maxLat, [FromQuery] double? maxLon,
+            [FromQuery] double gridSize = 0.5)
+        {
+            if (!minLat.HasValue || !minLon.HasValue || !maxLat.HasValue || !maxLon.HasValue)
+                return BadRequest("minLat, minLon, maxLat ve maxLon sorgu parametreleri gereklidir.");
+
+            if (gridSize <= 0 || gridSize > 10)
+                return BadRequest("gridSize 0 ile 10 arasında olmalıdır.");
+
+            var clusters = await _olayService.GetClusteredAsync(
+                minLat.Value, minLon.Value, maxLat.Value, maxLon.Value, gridSize);
+
+            var result = clusters.Select(c => new OlayClusterDto
+            {
+                Lat = Math.Round(c.Lat, 6),
+                Lon = Math.Round(c.Lon, 6),
+                Count = c.Count
+            });
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
+        [ResponseCache(Duration = 60, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<IActionResult> GetById(int id)
         {
             var olay = await _olayService.GetByIdAsync(id);

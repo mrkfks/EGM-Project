@@ -47,6 +47,17 @@ namespace EGM.Application.DTOs
         public DateTime? GercekBitisTarihi { get; set; }
     }
 
+    // ── Kümeleme (Clustering) ────────────────────────────────────────────
+    public class OlayClusterDto
+    {
+        /// <summary>Kümenin merkez enlemi</summary>
+        public double Lat { get; set; }
+        /// <summary>Kümenin merkez boylamı</summary>
+        public double Lon { get; set; }
+        /// <summary>Bu hücredeki olay sayısı</summary>
+        public int Count { get; set; }
+    }
+
     // ── OperasyonelFaaliyet ──────────────────────────────────────────────
     public class OperasyonelFaaliyetCreateDto
     {

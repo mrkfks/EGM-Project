@@ -1,11 +1,14 @@
 @import "leaflet/dist/leaflet.css";
 
-/* ── Tam boy uygulama layout (flexbox) ───────────────── */
+/* ══════════════════════════════════════════════════════════════════════════════
+   TEMEL LAYOUT
+══════════════════════════════════════════════════════════════════════════════ */
 html, body, app-root {
   height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
 }
 
 .app-layout {
@@ -18,16 +21,11 @@ html, body, app-root {
 .app-body {
   display: flex;
   flex: 1 1 auto;
-  min-height: 0;          /* flex overflow için zorunlu */
+  min-height: 0;
   overflow: hidden;
 }
 
-/* ── Sidebar ─────────────────────────────────────────── */
-app-navbar,
-app-sidebar {
-  z-index: 1000;
-  display: contents;
-}
+app-navbar, app-sidebar { z-index: 1000; display: contents; }
 
 .egm-sidebar {
   flex: 0 0 190px;
@@ -35,7 +33,6 @@ app-sidebar {
   overflow-y: auto;
 }
 
-/* ── İçerik alanı (harita kapsayıcısı) ──────────────── */
 .main-content {
   position: relative;
   flex: 1 1 auto;
@@ -44,8 +41,7 @@ app-sidebar {
   overflow: hidden;
 }
 
-/* Angular component host — main-content'i tam kapla */
-app-home {
+app-home, app-province {
   display: block;
   position: absolute;
   inset: 0;
@@ -57,7 +53,6 @@ app-home {
   overflow: hidden;
 }
 
-/* Harita kapsayıcısı: üst elementi tamamen doldur */
 #map {
   position: absolute;
   inset: 0;
@@ -65,43 +60,290 @@ app-home {
   height: 100%;
 }
 
-/* Deniz rengi */
-.leaflet-container {
-  background: #a8d8ef;
-}
-
-/* ── Küçük ekran optimizasyonları ────────────────────── */
-@media (max-width: 768px) {
-  .egm-sidebar { display: none; }
-  app-navbar { display: block; }
-
-  .leaflet-container svg .leaflet-interactive {
-    stroke-width: 1px !important;
-    transition: fill 100ms ease, fill-opacity 100ms ease, stroke-width 100ms ease;
-  }
-  .leaflet-container svg .leaflet-interactive.hovered {
-    stroke-width: 1.8px !important;
-  }
-  .leaflet-tooltip { font-size: 12px; padding: 2px 6px; }
-}
-
-/* Scroll kapatma */
 body.no-scroll { overflow: hidden; }
 
-/* Leaflet SVG hover geçişleri */
-.leaflet-container svg .leaflet-interactive {
-  transition: fill 120ms ease, fill-opacity 120ms ease, stroke-width 120ms ease;
-  vector-effect: non-scaling-stroke;
+/* ══════════════════════════════════════════════════════════════════════════════
+   HARITA SARMALAYICI
+══════════════════════════════════════════════════════════════════════════════ */
+.egm-map-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
 }
 
-.leaflet-container svg .leaflet-interactive.hovered {
-  fill: #e67e22 !important;
-  fill-opacity: 0.85 !important;
-  stroke-width: 2.4px !important;
+/* ── Araç çubuğu ─────────────────────────────────────── */
+.egm-toolbar {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+  pointer-events: auto;
+  white-space: nowrap;
 }
 
-/* Leaflet attribution küçültme */
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #1a3a5c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+  transition: background 0.15s;
+}
+.toolbar-btn:hover { background: #0e2a47; }
+.tb-icon { font-size: 14px; }
+
+.egm-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.92);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  max-width: 420px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bc-item { color: #555; }
+.bc-link  { cursor: pointer; color: #1a5276; text-decoration: underline dotted; }
+.bc-link:hover { color: #0a2a40; }
+.bc-active { color: #1a3a5c; font-weight: 600; }
+.bc-sep   { color: #999; font-size: 15px; }
+
+.egm-select {
+  padding: 6px 10px;
+  border: 1px solid #b0bcca;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.95);
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  outline: none;
+  transition: border-color 0.15s;
+  min-width: 160px;
+}
+.egm-select:focus { border-color: #1a5276; }
+
+/* ── Harita canvas ───────────────────────────────────── */
+.egm-map-canvas {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Bilgi paneli ────────────────────────────────────── */
+.egm-info-panel {
+  position: absolute;
+  top: 70px;
+  right: 10px;
+  z-index: 4500;
+  background: rgba(255,255,255,0.96);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  padding: 14px 16px;
+  min-width: 180px;
+  max-width: 240px;
+  border-left: 4px solid #1a5276;
+  animation: slideIn 0.2s ease;
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.ip-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.ip-icon  { font-size: 18px; }
+.ip-title { font-size: 15px; font-weight: 700; color: #1a3a5c; }
+
+.ip-body { display: flex; flex-direction: column; gap: 8px; }
+
+.ip-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+}
+.ip-label    { color: #666; }
+.ip-value    { font-weight: 600; color: #1a3a5c; }
+.ip-highlight { color: #922b21; }
+
+.ip-clear-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 5px 0;
+  background: transparent;
+  border: 1px solid #c0392b;
+  color: #c0392b;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.ip-clear-btn:hover { background: #c0392b; color: #fff; }
+
+/* ── Lejand ──────────────────────────────────────────── */
+.egm-legend {
+  position: absolute;
+  bottom: 30px;
+  right: 10px;
+  z-index: 4500;
+  background: rgba(255,255,255,0.93);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+  padding: 10px 14px;
+  font-size: 12px;
+  min-width: 150px;
+}
+.leg-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: #1a3a5c;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.leg-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+  color: #444;
+}
+.leg-box {
+  display: inline-block;
+  width: 18px;
+  height: 12px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Yükleniyor ──────────────────────────────────────── */
+.egm-map-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5000;
+  background: rgba(255,255,255,0.92);
+  padding: 12px 22px;
+  border-radius: 8px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  font-size: 14px;
+  color: #1a3a5c;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #cce3f5;
+  border-top-color: #1a5276;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   LEAFLET OVERRİDES
+══════════════════════════════════════════════════════════════════════════════ */
+
+/* Deniz rengi (Leaflet container arka planı) */
+.leaflet-container { background: #a8cfe8; }
+
+/* Kontrol z-index — uygulama başlığı/sidebar üzerinde */
+.leaflet-control,
+.leaflet-control-container { z-index: 4000 !important; }
+
+/* Kontrol buton boyutu */
+.leaflet-bar a {
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+  font-size: 16px !important;
+  text-align: center !important;
+}
+
+/* Attribution küçük */
 .leaflet-control-attribution {
   font-size: 9px !important;
-  opacity: 0.6;
+  opacity: 0.55;
+  background: rgba(255,255,255,0.7) !important;
+}
+
+/* Sağ taraftaki kontrolleri dikey ortala (fullscreen, locate vb.) */
+.leaflet-top.leaflet-right {
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  right: 10px !important;
+  left: auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  align-items: center !important;
+}
+
+/* SVG hover geçişleri (tüm vektörel katmanlar) */
+.leaflet-container svg .leaflet-interactive {
+  transition: fill 150ms ease, fill-opacity 150ms ease, stroke-width 120ms ease;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+
+/* Harita tooltip — il/ilçe adları */
+.map-tooltip {
+  background: rgba(26,58,92,0.9) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 5px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 3px 8px !important;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+  white-space: nowrap !important;
+}
+.map-tooltip::before { display: none !important; }
+
+/* Komşu ülke tooltip (daha hafif stil) */
+.map-country-label {
+  background: rgba(80,90,100,0.75) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+.map-country-label::before { display: none !important; }
+
+/* ── Küçük ekran ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .egm-sidebar { display: none; }
+  .egm-toolbar { top: 6px; left: 50%; transform: translateX(-50%); gap: 5px; }
+  .egm-breadcrumb { display: none; }
+  .egm-legend { display: none; }
+  .egm-info-panel { right: 6px; top: 55px; }
+  .leaflet-control-attribution { display: none !important; }
 }

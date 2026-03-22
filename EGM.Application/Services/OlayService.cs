@@ -2,6 +2,9 @@
 using EGM.Domain.Entities;
 using EGM.Domain.Enums;
 using EGM.Domain.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace EGM.Application.Services
 {
@@ -142,6 +145,47 @@ namespace EGM.Application.Services
         {
             var all = await _rotaRepository.ListAllAsync();
             return all.Where(r => r.OlayId == olayId).OrderBy(r => r.SiraNo).ToList();
+        }
+
+        // BBOX ile filtreleme: minLat, minLon, maxLat, maxLon
+        public async Task<IReadOnlyList<Olay>> GetByBoundingBoxAsync(double minLat, double minLon, double maxLat, double maxLon)
+        {
+            var all = await _olayRepository.ListAllAsync();
+            return all.Where(o => o.Latitude.HasValue && o.Longitude.HasValue
+                                  && o.Latitude.Value >= minLat && o.Latitude.Value <= maxLat
+                                  && o.Longitude.Value >= minLon && o.Longitude.Value <= maxLon)
+                      .ToList();
+        }
+
+        /// <summary>
+        /// BBOX içindeki olayları grid hücrelerine göre kümeler.
+        /// gridSize: hücre boyutu (derece cinsinden). Zoom arttıkça küçülür.
+        /// </summary>
+        public async Task<IReadOnlyList<(double Lat, double Lon, int Count)>> GetClusteredAsync(
+            double minLat, double minLon, double maxLat, double maxLon, double gridSize)
+        {
+            var all = await _olayRepository.ListAllAsync();
+            var inBbox = all.Where(o => o.Latitude.HasValue && o.Longitude.HasValue
+                                        && o.Latitude.Value >= minLat && o.Latitude.Value <= maxLat
+                                        && o.Longitude.Value >= minLon && o.Longitude.Value <= maxLon);
+
+            var clusters = inBbox
+                .GroupBy(o =>
+                {
+                    var row = Math.Floor(o.Latitude!.Value / gridSize);
+                    var col = Math.Floor(o.Longitude!.Value / gridSize);
+                    return (row, col);
+                })
+                .Select(g =>
+                {
+                    var (row, col) = g.Key;
+                    double centerLat = (row + 0.5) * gridSize;
+                    double centerLon = (col + 0.5) * gridSize;
+                    return (Lat: centerLat, Lon: centerLon, Count: g.Count());
+                })
+                .ToList();
+
+            return clusters;
         }
     }
 }

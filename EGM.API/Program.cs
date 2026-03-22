@@ -43,7 +43,7 @@ builder.Services.AddAuthorization();
 
 // ── Veritabanı ───────────────────────────────────────────────────────────
 builder.Services.AddDbContext<EGMDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ── Generic Repository ───────────────────────────────────────────────────
 builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
@@ -69,6 +69,7 @@ builder.Services.AddScoped<VIPZiyaretService>();
 
 // ── Controllers ve Swagger ───────────────────────────────────────────────
 builder.Services.AddControllers();
+builder.Services.AddResponseCaching();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -82,6 +83,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseResponseCaching();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
