@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "cw0Cs6k15Cw=",
+  "dgSpecHash": "9uG3TPvz5D0=",
   "success": true,
-  "projectFilePath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.API\\EGM.API.csproj",
+  "projectFilePath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM-Project\\EGM.API\\EGM.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mrkfk\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
     "C:\\Users\\mrkfk\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",

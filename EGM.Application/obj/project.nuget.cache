@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "pOWrsb5NAqs=",
+  "dgSpecHash": "77DhjuAzGIg=",
   "success": true,
-  "projectFilePath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
+  "projectFilePath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mrkfk\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
     "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\10.0.3\\microsoft.aspnetcore.authentication.jwtbearer.10.0.3.nupkg.sha512",

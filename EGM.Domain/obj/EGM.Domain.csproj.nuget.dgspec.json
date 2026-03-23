@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {}
+    "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {
+    "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
         "projectName": "EGM.Domain",
-        "projectPath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
+        "projectPath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
         "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM.Domain\\obj\\",
+        "outputPath": "C:\\Users\\mrkfk\\OneDrive\\Desktop\\EGM-Project\\EGM-Project\\EGM.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
