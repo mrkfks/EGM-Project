@@ -1,6 +1,5 @@
 using EGM.Application.DTOs;
 using EGM.Application.Services;
-using EGM.Domain.Constants;
 using EGM.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +27,7 @@ namespace EGM.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var olay = await _olayService.GetByIdAsync(id);
             if (olay == null) return NotFound();
@@ -36,14 +35,14 @@ namespace EGM.API.Controllers
         }
 
         [HttpGet("{id}/rota")]
-        public async Task<IActionResult> GetRota(int id)
+        public async Task<IActionResult> GetRota(Guid id)
         {
             var rota = await _olayService.GetRotaAsync(id);
             return Ok(rota);
         }
 
         [HttpPost]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
+        [Authorize(Policy = "CityStaffOrAbove")]
         public async Task<IActionResult> Create([FromBody] OlayCreateDto dto)
         {
             var olay = new Olay
@@ -63,23 +62,25 @@ namespace EGM.API.Controllers
                 KatilimciSayisi = dto.KatilimciSayisi,
                 Aciklama = dto.Aciklama,
                 KaynakKurum = dto.KaynakKurum,
-                Hassasiyet = dto.Hassasiyet
+                Hassasiyet = dto.Hassasiyet,
+                CityId = dto.CityId
             };
+            // CreatedByUserId ve CityId otomatik atama OlayService içinde yapılır
             var created = await _olayService.CreateOlayAsync(olay);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, MapToResponse(created));
         }
 
         [HttpPost("{id}/rota")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> AddRota(int id, [FromBody] RotaNoktasiCreateDto dto)
+        [Authorize(Policy = "CityStaffOrAbove")]
+        public async Task<IActionResult> AddRota(Guid id, [FromBody] RotaNoktasiCreateDto dto)
         {
             var rota = await _olayService.AddRotaNoktasiAsync(id, dto.NoktaAdi!, dto.Latitude, dto.Longitude, dto.SiraNo);
             return Ok(rota);
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Update(int id, [FromBody] OlayCreateDto dto)
+        [Authorize(Policy = "CityStaffOrAbove")]
+        public async Task<IActionResult> Update(Guid id, [FromBody] OlayCreateDto dto)
         {
             var updated = new Olay
             {
@@ -100,17 +101,20 @@ namespace EGM.API.Controllers
                 KaynakKurum = dto.KaynakKurum,
                 Hassasiyet = dto.Hassasiyet
             };
-            return await _olayService.UpdateOlayAsync(id, updated) ? NoContent() : NotFound();
+            var (success, error) = await _olayService.UpdateOlayAsync(id, updated);
+            if (!success && error != null) return Forbid();
+            if (!success)                  return NotFound();
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Delete(int id)
+        [Authorize(Policy = "HQManagerOnly")]
+        public async Task<IActionResult> Delete(Guid id)
             => await _olayService.DeleteOlayAsync(id) ? NoContent() : NotFound();
 
         [HttpPut("{id}/baslat")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Baslat(int id)
+        [Authorize(Policy = "CityManagerOrAbove")]
+        public async Task<IActionResult> Baslat(Guid id)
         {
             var olay = await _olayService.BaslatOlayAsync(id);
             if (olay == null) return NotFound();
@@ -118,8 +122,8 @@ namespace EGM.API.Controllers
         }
 
         [HttpPut("{id}/bitir")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Bitir(int id)
+        [Authorize(Policy = "CityManagerOrAbove")]
+        public async Task<IActionResult> Bitir(Guid id)
         {
             var olay = await _olayService.BitirOlayAsync(id);
             if (olay == null) return NotFound();
@@ -127,8 +131,8 @@ namespace EGM.API.Controllers
         }
 
         [HttpPut("{id}/iptal")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Iptal(int id)
+        [Authorize(Policy = "CityManagerOrAbove")]
+        public async Task<IActionResult> Iptal(Guid id)
         {
             var olay = await _olayService.IptalEtOlayAsync(id);
             if (olay == null) return NotFound();

@@ -21,7 +21,7 @@ namespace EGM.API.Controllers
             => Ok((await _service.GetAllAsync()).Select(MapToResponse));
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var item = await _service.GetByIdAsync(id);
             return item == null ? NotFound() : Ok(MapToResponse(item));
@@ -40,7 +40,7 @@ namespace EGM.API.Controllers
             => Ok((await _service.GetOnayliSonuclarAsync()).Select(MapToResponse));
 
         [HttpGet("parti/{partiId}/toplam-oy")]
-        public async Task<IActionResult> GetToplamOy(int partiId)
+        public async Task<IActionResult> GetToplamOy(Guid partiId)
             => Ok(new { PartiId = partiId, ToplamOy = await _service.GetToplamOyByPartiAsync(partiId) });
 
         [HttpPost]
@@ -60,7 +60,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Update(int id, [FromBody] SecimSonucuCreateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] SecimSonucuCreateDto dto)
         {
             var updated = new SecimSonucu
             {
@@ -74,7 +74,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{Roles.Yonetici}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
             => await _service.DeleteAsync(id) ? NoContent() : NotFound();
 
         // ── Aday ─────────────────────────────────────────────────────────
@@ -89,7 +89,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("aday/{id}")]
         [Authorize(Roles = $"{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteAday(int id)
+        public async Task<IActionResult> DeleteAday(Guid id)
             => await _service.DeleteAdayAsync(id) ? NoContent() : NotFound();
 
         // ── Parti ─────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("parti/{id}")]
         [Authorize(Roles = $"{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteParti(int id)
+        public async Task<IActionResult> DeleteParti(Guid id)
             => await _service.DeletePartiAsync(id) ? NoContent() : NotFound();
 
         // ── Kaynak ───────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("kaynak/{id}")]
         [Authorize(Roles = $"{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteKaynak(int id)
+        public async Task<IActionResult> DeleteKaynak(Guid id)
             => await _service.DeleteKaynakAsync(id) ? NoContent() : NotFound();
 
         private static SecimSonucuResponseDto MapToResponse(SecimSonucu s) => new()

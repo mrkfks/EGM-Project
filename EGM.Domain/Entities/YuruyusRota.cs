@@ -2,10 +2,9 @@ using System;
 
 namespace EGM.Domain.Entities
 {
-    public class YuruyusRota
+    public class YuruyusRota : BaseEntity
     {
-        public int Id { get; set; }
-        public int OlayId { get; set; }
+        public Guid OlayId { get; set; }
         public Olay? Olay { get; set; }
 
         public string? NoktaAdi { get; set; } // örn: "Kızılay Meydanı", "Tandoğan"

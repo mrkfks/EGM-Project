@@ -1,17 +1,20 @@
 using System;
+using EGM.Domain.Attributes;
 
 namespace EGM.Domain.Entities
 {
-    public class Sehit
+    public class Sehit : BaseEntity
     {
-        public int Id { get; set; }
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public OperasyonelFaaliyet? OperasyonelFaaliyet { get; set; }
 
         public string? Ad { get; set; }
         public string? Soyad { get; set; }
-        public string? TcKimlikNo { get; set; } // encrypted
+
+        [Encrypted]
+        public string? TcKimlikNo { get; set; }
+
         public DateTime DogumTarihi { get; set; }
-        public string? Gorev { get; set; } // örn: polis, asker
+        public string? Gorev { get; set; }
     }
 }

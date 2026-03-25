@@ -31,13 +31,13 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<SecimSonucu>> GetAllAsync()
             => await _secimRepository.ListAllAsync();
 
-        public async Task<SecimSonucu?> GetByIdAsync(int id)
+        public async Task<SecimSonucu?> GetByIdAsync(Guid id)
             => await _secimRepository.GetByIdAsync(id);
 
         public async Task<SecimSonucu> CreateAsync(SecimSonucu sonuc)
             => await _secimRepository.AddAsync(sonuc);
 
-        public async Task<bool> UpdateAsync(int id, SecimSonucu updated)
+        public async Task<bool> UpdateAsync(Guid id, SecimSonucu updated)
         {
             var existing = await _secimRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -57,7 +57,7 @@ namespace EGM.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _secimRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -88,7 +88,7 @@ namespace EGM.Application.Services
         }
 
         // Partiye göre toplam oy sayısı
-        public async Task<int> GetToplamOyByPartiAsync(int partiId)
+        public async Task<int> GetToplamOyByPartiAsync(Guid partiId)
         {
             var all = await _secimRepository.ListAllAsync();
             return all.Where(s => s.PartiId == partiId).Sum(s => s.OySayisi);
@@ -99,7 +99,7 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<Aday>> GetAllAdayAsync()
             => await _adayRepository.ListAllAsync();
 
-        public async Task<Aday?> GetAdayByIdAsync(int id)
+        public async Task<Aday?> GetAdayByIdAsync(Guid id)
             => await _adayRepository.GetByIdAsync(id);
 
         public async Task<Aday> CreateAdayAsync(string adSoyad, string partiAdi)
@@ -108,7 +108,7 @@ namespace EGM.Application.Services
             return await _adayRepository.AddAsync(aday);
         }
 
-        public async Task<bool> DeleteAdayAsync(int id)
+        public async Task<bool> DeleteAdayAsync(Guid id)
         {
             var existing = await _adayRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -127,7 +127,7 @@ namespace EGM.Application.Services
             return await _partiRepository.AddAsync(parti);
         }
 
-        public async Task<bool> DeletePartiAsync(int id)
+        public async Task<bool> DeletePartiAsync(Guid id)
         {
             var existing = await _partiRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -146,7 +146,7 @@ namespace EGM.Application.Services
             return await _kaynakRepository.AddAsync(kaynak);
         }
 
-        public async Task<bool> DeleteKaynakAsync(int id)
+        public async Task<bool> DeleteKaynakAsync(Guid id)
         {
             var existing = await _kaynakRepository.GetByIdAsync(id);
             if (existing == null) return false;

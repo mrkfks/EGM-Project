@@ -20,11 +20,11 @@ namespace EGM.Application.Services
             => await _oluRepository.ListAllAsync();
 
         // ID ile getir
-        public async Task<Olu?> GetByIdAsync(int id)
+        public async Task<Olu?> GetByIdAsync(Guid id)
             => await _oluRepository.GetByIdAsync(id);
 
         // Belirli bir operasyonel faaliyete ait ölü kayıtları
-        public async Task<IReadOnlyList<Olu>> GetByOperasyonelFaaliyetAsync(int operasyonelFaaliyetId)
+        public async Task<IReadOnlyList<Olu>> GetByOperasyonelFaaliyetAsync(Guid operasyonelFaaliyetId)
         {
             var all = await _oluRepository.ListAllAsync();
             return all.Where(o => o.OperasyonelFaaliyetId == operasyonelFaaliyetId).ToList();
@@ -35,7 +35,7 @@ namespace EGM.Application.Services
             => await _oluRepository.AddAsync(olu);
 
         // Güncelle
-        public async Task<bool> UpdateAsync(int id, Olu updated)
+        public async Task<bool> UpdateAsync(Guid id, Olu updated)
         {
             var existing = await _oluRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -52,7 +52,7 @@ namespace EGM.Application.Services
         }
 
         // Sil
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _oluRepository.GetByIdAsync(id);
             if (existing == null) return false;

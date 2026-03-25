@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace EGM.Domain.Entities
 {
-    public class Organizator
+    public class Organizator : BaseEntity
     {
-        public int Id { get; set; }
         public string? Ad { get; set; }
         public DateTime KurulusTarihi { get; set; }
         public string? FaaliyetAlani { get; set; }

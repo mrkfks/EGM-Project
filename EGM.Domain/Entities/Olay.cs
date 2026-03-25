@@ -4,17 +4,15 @@ using EGM.Domain.Enums;
 
 namespace EGM.Domain.Entities
 {
-    public class Olay
+    public class Olay : BaseEntity
     {
-        public int Id { get; set; }
-
         public string? Baslik { get; set; }
         public string? OlayTuru { get; set; }
 
-        public int OrganizatorId { get; set; }
+        public Guid OrganizatorId { get; set; }
         public Organizator? Organizator { get; set; }
 
-        public int KonuId { get; set; }
+        public Guid KonuId { get; set; }
         public Konu? Konu { get; set; }
 
         public DateTime Tarih { get; set; }
@@ -35,11 +33,13 @@ namespace EGM.Domain.Entities
         public Hassasiyet Hassasiyet { get; set; }
         public double RiskPuani { get; set; }
 
+        /// <summary>Olayın gerçekleştiği ilin plaka kodu. CityId filtresi bu alan üzerinden çalışır.</summary>
+        public int? CityId { get; set; }
+
         public DateTime? GercekBaslangicTarihi { get; set; }
         public DateTime? GercekBitisTarihi { get; set; }
 
         public ICollection<YuruyusRota> YuruyusRotasi { get; set; } = new List<YuruyusRota>();
-
         public ICollection<OperasyonelFaaliyet> OperasyonelFaaliyetler { get; set; } = new List<OperasyonelFaaliyet>();
         public ICollection<SosyalMedyaOlay> SosyalMedyaOlaylar { get; set; } = new List<SosyalMedyaOlay>();
     }

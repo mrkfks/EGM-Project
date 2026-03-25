@@ -1,12 +1,22 @@
-﻿using EGM.Domain.Entities;
+﻿using EGM.Domain.Attributes;
+using EGM.Domain.Entities;
+using EGM.Domain.Interfaces;
+using EGM.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 
 namespace EGM.Infrastructure
 {
     public class EGMDbContext : DbContext
     {
-        public EGMDbContext(DbContextOptions<EGMDbContext> options) : base(options)
+        private readonly IEncryptionService _encryptionService;
+
+        public EGMDbContext(
+            DbContextOptions<EGMDbContext> options,
+            IEncryptionService encryptionService)
+            : base(options)
         {
+            _encryptionService = encryptionService;
         }
 
         // Kullanıcılar
@@ -41,9 +51,36 @@ namespace EGM.Infrastructure
         // Audit
         public DbSet<AuditLog> AuditLoglar { get; set; } = null!;
 
+        // Bildirimler
+        public DbSet<Notification> Bildirimler { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // ── Global soft-delete query filter ─────────────────────────
+            // BaseEntity'den türeyen tüm entity'lerde IsDeleted=true kayıtlar
+            // otomatik olarak sorgu dışında bırakılır.
+            modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Olay>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<OperasyonelFaaliyet>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<KatilimciGrup>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Supheli>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Sehit>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Olu>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SosyalMedyaOlay>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<YuruyusRota>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Organizator>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<KategoriOrganizator>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Konu>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SecimSonucu>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Aday>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Parti>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SecimKaynak>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<VIPZiyaret>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<GuvenlikPlani>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Ekip>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Notification>().HasQueryFilter(e => !e.IsDeleted);
 
             // ── User ────────────────────────────────────────────────────
             modelBuilder.Entity<User>()
@@ -154,9 +191,36 @@ namespace EGM.Infrastructure
                 .WithMany(o => o.Kategoriler);
 
             // ── AuditLog ────────────────────────────────────────────────
+            // AuditLog soft-delete filtresinden muaf tutulur; tüm kayıtlar görünür kalır.
+            modelBuilder.Entity<AuditLog>().HasQueryFilter(e => !e.IsDeleted);
+
             modelBuilder.Entity<AuditLog>()
                 .Property(a => a.Changes)
                 .HasColumnType("TEXT");
+
+            modelBuilder.Entity<AuditLog>()
+                .Property(a => a.Action)
+                .HasConversion<string>();
+
+            // ── [Encrypted] Value Converter ─────────────────────────────
+            // Tüm entity'lerde [Encrypted] niteliği taşıyan string? property'lere
+            // EncryptedValueConverter otomatik olarak uygulanır.
+            var converter = new EncryptedValueConverter(_encryptionService);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(string))
+                    {
+                        var memberInfo = property.PropertyInfo ?? (MemberInfo?)property.FieldInfo;
+                        if (memberInfo?.GetCustomAttribute<EncryptedAttribute>() is not null)
+                        {
+                            property.SetValueConverter(converter);
+                        }
+                    }
+                }
+            }
         }
     }
 }

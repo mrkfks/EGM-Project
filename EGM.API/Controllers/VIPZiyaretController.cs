@@ -22,7 +22,7 @@ namespace EGM.API.Controllers
             => Ok((await _service.GetAllAsync()).Select(MapToResponse));
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var item = await _service.GetByIdAsync(id);
             return item == null ? NotFound() : Ok(MapToResponse(item));
@@ -58,7 +58,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Update(int id, [FromBody] VIPZiyaretCreateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] VIPZiyaretCreateDto dto)
         {
             var updated = new VIPZiyaret
             {
@@ -73,7 +73,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
             => await _service.DeleteAsync(id) ? NoContent() : NotFound();
 
         // ── Güvenlik Planı ───────────────────────────────────────────────
@@ -88,12 +88,12 @@ namespace EGM.API.Controllers
 
         [HttpPut("guvenlik-plani/{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> UpdateGuvenlikPlani(int id, [FromBody] GuvenlikPlaniCreateDto dto)
+        public async Task<IActionResult> UpdateGuvenlikPlani(Guid id, [FromBody] GuvenlikPlaniCreateDto dto)
             => await _service.UpdateGuvenlikPlaniAsync(id, dto.Ad!, dto.Aciklama) ? NoContent() : NotFound();
 
         [HttpDelete("guvenlik-plani/{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteGuvenlikPlani(int id)
+        public async Task<IActionResult> DeleteGuvenlikPlani(Guid id)
             => await _service.DeleteGuvenlikPlaniAsync(id) ? NoContent() : NotFound();
 
         // ── Ekip ─────────────────────────────────────────────────────────
@@ -108,12 +108,12 @@ namespace EGM.API.Controllers
 
         [HttpPut("ekip/{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> UpdateEkip(int id, [FromBody] EkipCreateDto dto)
+        public async Task<IActionResult> UpdateEkip(Guid id, [FromBody] EkipCreateDto dto)
             => await _service.UpdateEkipAsync(id, dto.Ad!) ? NoContent() : NotFound();
 
         [HttpDelete("ekip/{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteEkip(int id)
+        public async Task<IActionResult> DeleteEkip(Guid id)
             => await _service.DeleteEkipAsync(id) ? NoContent() : NotFound();
 
         private static VIPZiyaretResponseDto MapToResponse(VIPZiyaret v) => new()

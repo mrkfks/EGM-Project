@@ -2,9 +2,8 @@ using System.Collections.Generic;
 
 namespace EGM.Domain.Entities
 {
-    public class Konu
+    public class Konu : BaseEntity
     {
-        public int Id { get; set; }
         public string? Ad { get; set; }
         public string? Aciklama { get; set; }
 

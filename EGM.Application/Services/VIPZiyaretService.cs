@@ -29,13 +29,13 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<VIPZiyaret>> GetAllAsync()
             => await _vipRepository.ListAllAsync();
 
-        public async Task<VIPZiyaret?> GetByIdAsync(int id)
+        public async Task<VIPZiyaret?> GetByIdAsync(Guid id)
             => await _vipRepository.GetByIdAsync(id);
 
         public async Task<VIPZiyaret> CreateAsync(VIPZiyaret ziyaret)
             => await _vipRepository.AddAsync(ziyaret);
 
-        public async Task<bool> UpdateAsync(int id, VIPZiyaret updated)
+        public async Task<bool> UpdateAsync(Guid id, VIPZiyaret updated)
         {
             var existing = await _vipRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -54,7 +54,7 @@ namespace EGM.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _vipRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -97,16 +97,16 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<GuvenlikPlani>> GetAllGuvenlikPlaniAsync()
             => await _guvenlikRepository.ListAllAsync();
 
-        public async Task<GuvenlikPlani?> GetGuvenlikPlaniByIdAsync(int id)
+        public async Task<GuvenlikPlani?> GetGuvenlikPlaniByIdAsync(Guid id)
             => await _guvenlikRepository.GetByIdAsync(id);
 
-        public async Task<GuvenlikPlani> CreateGuvenlikPlaniAsync(int vipZiyaretId, string ad, string? aciklama)
+        public async Task<GuvenlikPlani> CreateGuvenlikPlaniAsync(Guid vipZiyaretId, string ad, string? aciklama)
         {
             var plan = new GuvenlikPlani { VIPZiyaretId = vipZiyaretId, Ad = ad, Aciklama = aciklama };
             return await _guvenlikRepository.AddAsync(plan);
         }
 
-        public async Task<bool> UpdateGuvenlikPlaniAsync(int id, string ad, string? aciklama)
+        public async Task<bool> UpdateGuvenlikPlaniAsync(Guid id, string ad, string? aciklama)
         {
             var existing = await _guvenlikRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -117,7 +117,7 @@ namespace EGM.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteGuvenlikPlaniAsync(int id)
+        public async Task<bool> DeleteGuvenlikPlaniAsync(Guid id)
         {
             var existing = await _guvenlikRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -131,16 +131,16 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<Ekip>> GetAllEkipAsync()
             => await _ekipRepository.ListAllAsync();
 
-        public async Task<Ekip?> GetEkipByIdAsync(int id)
+        public async Task<Ekip?> GetEkipByIdAsync(Guid id)
             => await _ekipRepository.GetByIdAsync(id);
 
-        public async Task<Ekip> CreateEkipAsync(int vipZiyaretId, string ad)
+        public async Task<Ekip> CreateEkipAsync(Guid vipZiyaretId, string ad)
         {
             var ekip = new Ekip { VIPZiyaretId = vipZiyaretId, Ad = ad };
             return await _ekipRepository.AddAsync(ekip);
         }
 
-        public async Task<bool> UpdateEkipAsync(int id, string ad)
+        public async Task<bool> UpdateEkipAsync(Guid id, string ad)
         {
             var existing = await _ekipRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -150,7 +150,7 @@ namespace EGM.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteEkipAsync(int id)
+        public async Task<bool> DeleteEkipAsync(Guid id)
         {
             var existing = await _ekipRepository.GetByIdAsync(id);
             if (existing == null) return false;

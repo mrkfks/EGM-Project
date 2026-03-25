@@ -1,12 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace EGM.Domain.Entities
 {
-    public class OperasyonelFaaliyet
+    public class OperasyonelFaaliyet : BaseEntity
     {
-        public int Id { get; set; }
-        public int OlayId { get; set; }
+        public Guid OlayId { get; set; }
         public Olay? Olay { get; set; }
 
         public string? Aciklama { get; set; }

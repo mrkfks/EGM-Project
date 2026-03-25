@@ -1,12 +1,19 @@
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using EGM.Domain.Entities;
 
 namespace EGM.Domain.Interfaces
 {
-    public interface IRepository<T> where T : class
+    public interface IRepository<T> where T : BaseEntity
     {
-        Task<T?> GetByIdAsync(int id);
+        Task<T?> GetByIdAsync(Guid id);
         Task<IReadOnlyList<T>> ListAllAsync();
+
+        /// <summary>Verilen koşula uyan tüm kayıtları döner (soft-delete filtresi uygulanmış).</summary>
+        Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate);
+
         Task<T> AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);

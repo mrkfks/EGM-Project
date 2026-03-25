@@ -22,11 +22,11 @@ namespace EGM.Application.Services
             => await _sosyalMedyaRepository.ListAllAsync();
 
         // ID ile getir
-        public async Task<SosyalMedyaOlay?> GetByIdAsync(int id)
+        public async Task<SosyalMedyaOlay?> GetByIdAsync(Guid id)
             => await _sosyalMedyaRepository.GetByIdAsync(id);
 
         // Olaya göre filtrele
-        public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByOlayAsync(int olayId)
+        public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByOlayAsync(Guid olayId)
         {
             var all = await _sosyalMedyaRepository.ListAllAsync();
             return all.Where(s => s.OlayId == olayId).ToList();
@@ -67,7 +67,7 @@ namespace EGM.Application.Services
             => await _sosyalMedyaRepository.AddAsync(kayit);
 
         // Güncelle
-        public async Task<bool> UpdateAsync(int id, SosyalMedyaOlay updated)
+        public async Task<bool> UpdateAsync(Guid id, SosyalMedyaOlay updated)
         {
             var existing = await _sosyalMedyaRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -86,7 +86,7 @@ namespace EGM.Application.Services
         }
 
         // Sil
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _sosyalMedyaRepository.GetByIdAsync(id);
             if (existing == null) return false;

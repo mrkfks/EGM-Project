@@ -1,11 +1,11 @@
+using System;
 using System.Collections.Generic;
 using EGM.Domain.Enums;
 
 namespace EGM.Domain.Entities
 {
-    public class VIPZiyaret
+    public class VIPZiyaret : BaseEntity
     {
-        public int Id { get; set; }
         public string? ZiyaretEdenAdSoyad { get; set; }
         public string? Unvan { get; set; }
         public DateTime BaslangicTarihi { get; set; }
@@ -14,9 +14,9 @@ namespace EGM.Domain.Entities
         public string? Mekan { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
         public string? GuvenlikSeviyesi { get; set; }
+        public string? GozlemNoktalari { get; set; }
 
         public ICollection<GuvenlikPlani> GuvenlikPlanlari { get; set; } = new List<GuvenlikPlani>();
         public ICollection<Ekip> EkipAtamasi { get; set; } = new List<Ekip>();
-        public string? GozlemNoktalari { get; set; }
     }
 }

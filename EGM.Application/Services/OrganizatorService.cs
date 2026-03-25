@@ -27,13 +27,13 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<Organizator>> GetAllAsync()
             => await _organizatorRepository.ListAllAsync();
 
-        public async Task<Organizator?> GetByIdAsync(int id)
+        public async Task<Organizator?> GetByIdAsync(Guid id)
             => await _organizatorRepository.GetByIdAsync(id);
 
         public async Task<Organizator> CreateAsync(Organizator organizator)
             => await _organizatorRepository.AddAsync(organizator);
 
-        public async Task<bool> UpdateAsync(int id, Organizator updated)
+        public async Task<bool> UpdateAsync(Guid id, Organizator updated)
         {
             var existing = await _organizatorRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -47,7 +47,7 @@ namespace EGM.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _organizatorRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -68,7 +68,7 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<KategoriOrganizator>> GetAllKategoriAsync()
             => await _kategoriRepository.ListAllAsync();
 
-        public async Task<KategoriOrganizator?> GetKategoriByIdAsync(int id)
+        public async Task<KategoriOrganizator?> GetKategoriByIdAsync(Guid id)
             => await _kategoriRepository.GetByIdAsync(id);
 
         public async Task<KategoriOrganizator> CreateKategoriAsync(string ad)
@@ -77,7 +77,7 @@ namespace EGM.Application.Services
             return await _kategoriRepository.AddAsync(kategori);
         }
 
-        public async Task<bool> DeleteKategoriAsync(int id)
+        public async Task<bool> DeleteKategoriAsync(Guid id)
         {
             var existing = await _kategoriRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -91,7 +91,7 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<Konu>> GetAllKonuAsync()
             => await _konuRepository.ListAllAsync();
 
-        public async Task<Konu?> GetKonuByIdAsync(int id)
+        public async Task<Konu?> GetKonuByIdAsync(Guid id)
             => await _konuRepository.GetByIdAsync(id);
 
         public async Task<Konu> CreateKonuAsync(string ad, string? aciklama)
@@ -100,7 +100,7 @@ namespace EGM.Application.Services
             return await _konuRepository.AddAsync(konu);
         }
 
-        public async Task<bool> UpdateKonuAsync(int id, string ad, string? aciklama)
+        public async Task<bool> UpdateKonuAsync(Guid id, string ad, string? aciklama)
         {
             var existing = await _konuRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -111,7 +111,7 @@ namespace EGM.Application.Services
             return true;
         }
 
-        public async Task<bool> DeleteKonuAsync(int id)
+        public async Task<bool> DeleteKonuAsync(Guid id)
         {
             var existing = await _konuRepository.GetByIdAsync(id);
             if (existing == null) return false;

@@ -21,14 +21,14 @@ namespace EGM.API.Controllers
             => Ok((await _service.GetAllAsync()).Select(MapToResponse));
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var item = await _service.GetByIdAsync(id);
             return item == null ? NotFound() : Ok(MapToResponse(item));
         }
 
         [HttpGet("olay/{olayId}")]
-        public async Task<IActionResult> GetByOlay(int olayId)
+        public async Task<IActionResult> GetByOlay(Guid olayId)
             => Ok((await _service.GetByOlayAsync(olayId)).Select(MapToResponse));
 
         [HttpGet("platform/{platform}")]
@@ -64,7 +64,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Update(int id, [FromBody] SosyalMedyaOlayCreateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] SosyalMedyaOlayCreateDto dto)
         {
             var updated = new SosyalMedyaOlay
             {
@@ -78,7 +78,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
             => await _service.DeleteAsync(id) ? NoContent() : NotFound();
 
         private static SosyalMedyaOlayResponseDto MapToResponse(SosyalMedyaOlay s) => new()

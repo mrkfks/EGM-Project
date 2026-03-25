@@ -14,9 +14,12 @@ namespace EGM.Application.Helpers
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Sicil.ToString()),
-                new Claim("role", user.Role),
-                new Claim("gsm", user.GSM),
-                new Claim("email", user.Email)
+                new Claim(ClaimTypes.NameIdentifier,   user.Sicil.ToString()),
+                new Claim(ClaimTypes.Role,             user.Role),
+                new Claim("role",                      user.Role),
+                new Claim("gsm",                       user.GSM),
+                new Claim("email",                     user.Email),
+                new Claim("cityId",                    user.CityId?.ToString() ?? string.Empty)
             };
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));

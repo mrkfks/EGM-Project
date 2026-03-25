@@ -28,7 +28,7 @@ namespace EGM.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var item = await _service.GetByIdAsync(id);
             if (item == null) return NotFound();
@@ -36,7 +36,7 @@ namespace EGM.API.Controllers
         }
 
         [HttpGet("faaliyet/{faaliyetId}")]
-        public async Task<IActionResult> GetByFaaliyet(int faaliyetId)
+        public async Task<IActionResult> GetByFaaliyet(Guid faaliyetId)
         {
             var list = await _service.GetByOperasyonelFaaliyetAsync(faaliyetId);
             return Ok(list.Select(MapToResponse));
@@ -68,7 +68,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Update(int id, [FromBody] SupheliCreateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] SupheliCreateDto dto)
         {
             var updated = new Supheli
             {
@@ -85,7 +85,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}/gozaltiya-al")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> GozaltiyaAl(int id)
+        public async Task<IActionResult> GozaltiyaAl(Guid id)
         {
             var ok = await _service.GozaltiyaAlAsync(id);
             if (!ok) return NotFound();
@@ -94,7 +94,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}/serbest-birak")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> SerbetBirak(int id)
+        public async Task<IActionResult> SerbetBirak(Guid id)
         {
             var ok = await _service.SerbetBirakAsync(id);
             if (!ok) return NotFound();
@@ -103,7 +103,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var ok = await _service.DeleteAsync(id);
             if (!ok) return NotFound();

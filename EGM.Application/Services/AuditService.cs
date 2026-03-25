@@ -23,14 +23,14 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<AuditLog>> GetByEntityAsync(string entityName)
         {
             var all = await _auditRepository.ListAllAsync();
-            return all.Where(a => a.Entity == entityName).ToList();
+            return all.Where(a => a.EntityName == entityName).ToList();
         }
 
         // Belirli bir entity kaydına ait loglar
-        public async Task<IReadOnlyList<AuditLog>> GetByEntityIdAsync(string entityName, int entityId)
+        public async Task<IReadOnlyList<AuditLog>> GetByEntityIdAsync(string entityName, Guid entityId)
         {
             var all = await _auditRepository.ListAllAsync();
-            return all.Where(a => a.Entity == entityName && a.EntityId == entityId).ToList();
+            return all.Where(a => a.EntityName == entityName && a.EntityId == entityId).ToList();
         }
 
         // Belirli kullanıcının işlemleri
@@ -41,7 +41,7 @@ namespace EGM.Application.Services
         }
 
         // İşlem türüne göre (Create / Update / Delete)
-        public async Task<IReadOnlyList<AuditLog>> GetByActionAsync(string action)
+        public async Task<IReadOnlyList<AuditLog>> GetByActionAsync(EGM.Domain.Enums.AuditAction action)
         {
             var all = await _auditRepository.ListAllAsync();
             return all.Where(a => a.Action == action).ToList();
@@ -55,7 +55,7 @@ namespace EGM.Application.Services
         }
 
         // ID ile getir
-        public async Task<AuditLog?> GetByIdAsync(int id)
+        public async Task<AuditLog?> GetByIdAsync(Guid id)
             => await _auditRepository.GetByIdAsync(id);
     }
 }

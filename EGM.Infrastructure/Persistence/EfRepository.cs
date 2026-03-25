@@ -1,12 +1,16 @@
 using EGM.Domain.Interfaces;
 using EGM.Domain.Entities;
+using EGM.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace EGM.Infrastructure.Persistence
 {
-    public class EfRepository<T> : IRepository<T> where T : class
+    public class EfRepository<T> : IRepository<T> where T : BaseEntity
     {
         private readonly EGMDbContext _dbContext;
 
@@ -15,7 +19,7 @@ namespace EGM.Infrastructure.Persistence
             _dbContext = dbContext;
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(Guid id)
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
@@ -25,43 +29,49 @@ namespace EGM.Infrastructure.Persistence
             return await _dbContext.Set<T>().ToListAsync();
         }
 
+        public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate)
+        {
+            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
+        }
+
         public async Task<T> AddAsync(T entity)
         {
+            entity.CreatedAt = DateTime.UtcNow;
+            entity.UpdatedAt = DateTime.UtcNow;
             _dbContext.Set<T>().Add(entity);
             await _dbContext.SaveChangesAsync();
-
-            await AddAuditLog(entity, "Create");
-
+            await AddAuditLog(entity, AuditAction.Create);
             return entity;
         }
 
         public async Task UpdateAsync(T entity)
         {
+            entity.UpdatedAt = DateTime.UtcNow;
             _dbContext.Entry(entity).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
-
-            await AddAuditLog(entity, "Update");
+            await AddAuditLog(entity, AuditAction.Update);
         }
 
+        /// <summary>
+        /// Soft delete: kaydı fiziksel silmek yerine IsDeleted=true olarak işaretler.
+        /// </summary>
         public async Task DeleteAsync(T entity)
         {
-            _dbContext.Set<T>().Remove(entity);
+            entity.IsDeleted = true;
+            entity.UpdatedAt = DateTime.UtcNow;
+            _dbContext.Entry(entity).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
-
-            await AddAuditLog(entity, "Delete");
+            await AddAuditLog(entity, AuditAction.Delete);
         }
 
-        private async Task AddAuditLog(T entity, string action)
+        private async Task AddAuditLog(T entity, AuditAction action)
         {
-            var idProp = entity.GetType().GetProperty("Id");
-            var entityId = idProp != null ? (int)idProp.GetValue(entity)! : 0;
-
             var audit = new AuditLog
             {
-                Entity = typeof(T).Name,
-                EntityId = entityId,
+                EntityName = typeof(T).Name,
+                EntityId = entity.Id,
                 Action = action,
-                UserId = "system", // Burada gerçek kullanıcı kimliği alınmalı
+                UserId = "system",
                 Timestamp = DateTime.UtcNow,
                 Changes = System.Text.Json.JsonSerializer.Serialize(entity)
             };

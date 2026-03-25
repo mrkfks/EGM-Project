@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using EGM.Domain.Enums;
 
 namespace EGM.Application.DTOs
@@ -8,8 +8,8 @@ namespace EGM.Application.DTOs
     {
         public string? Baslik { get; set; }
         public string? OlayTuru { get; set; }
-        public int OrganizatorId { get; set; }
-        public int KonuId { get; set; }
+        public Guid OrganizatorId { get; set; }
+        public Guid KonuId { get; set; }
         public DateTime Tarih { get; set; }
         public TimeSpan? BaslangicSaati { get; set; }
         public TimeSpan? BitisSaati { get; set; }
@@ -22,15 +22,17 @@ namespace EGM.Application.DTOs
         public string? Aciklama { get; set; }
         public string? KaynakKurum { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
+        /// <summary>Başkanlık personeli bu alanı göndererek il belirtir. İl personeli için servis otomatik atar.</summary>
+        public int? CityId { get; set; }
     }
 
     public class OlayResponseDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string? Baslik { get; set; }
         public string? OlayTuru { get; set; }
-        public int OrganizatorId { get; set; }
-        public int KonuId { get; set; }
+        public Guid OrganizatorId { get; set; }
+        public Guid KonuId { get; set; }
         public DateTime Tarih { get; set; }
         public string? Il { get; set; }
         public string? Ilce { get; set; }
@@ -50,14 +52,14 @@ namespace EGM.Application.DTOs
     // ── OperasyonelFaaliyet ──────────────────────────────────────────────
     public class OperasyonelFaaliyetCreateDto
     {
-        public int OlayId { get; set; }
+        public Guid OlayId { get; set; }
         public string? Aciklama { get; set; }
     }
 
     public class OperasyonelFaaliyetResponseDto
     {
-        public int Id { get; set; }
-        public int OlayId { get; set; }
+        public Guid Id { get; set; }
+        public Guid OlayId { get; set; }
         public string? Aciklama { get; set; }
         public int ToplamGrupSayisi { get; set; }
         public int SupheliSayisi { get; set; }
@@ -72,10 +74,10 @@ namespace EGM.Application.DTOs
         public int KatilimciSayisi { get; set; }
     }
 
-    // ── Şüpheli ─────────────────────────────────────────────────────────
+    // ── Supheli ─────────────────────────────────────────────────────────
     public class SupheliCreateDto
     {
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public string? Ad { get; set; }
         public string? Soyad { get; set; }
         public string? TcKimlikNo { get; set; }
@@ -85,19 +87,19 @@ namespace EGM.Application.DTOs
 
     public class SupheliResponseDto
     {
-        public int Id { get; set; }
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid Id { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public string? Ad { get; set; }
         public string? Soyad { get; set; }
         public DateTime DogumTarihi { get; set; }
         public bool Gozaltinda { get; set; }
-        // TC Kimlik No kasıtlı olarak response'a dahil edilmedi (gizlilik)
+        // TC Kimlik No kasitli olarak response'a dahil edilmedi (gizlilik)
     }
 
-    // ── Şehit ───────────────────────────────────────────────────────────
+    // ── Sehit ───────────────────────────────────────────────────────────
     public class SehitCreateDto
     {
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public string? Ad { get; set; }
         public string? Soyad { get; set; }
         public string? TcKimlikNo { get; set; }
@@ -107,18 +109,18 @@ namespace EGM.Application.DTOs
 
     public class SehitResponseDto
     {
-        public int Id { get; set; }
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid Id { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public string? Ad { get; set; }
         public string? Soyad { get; set; }
         public DateTime DogumTarihi { get; set; }
         public string? Gorev { get; set; }
     }
 
-    // ── Ölü ─────────────────────────────────────────────────────────────
+    // ── Olu ─────────────────────────────────────────────────────────────
     public class OluCreateDto
     {
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public string? Ad { get; set; }
         public string? Soyad { get; set; }
         public string? TcKimlikNo { get; set; }
@@ -128,18 +130,18 @@ namespace EGM.Application.DTOs
 
     public class OluResponseDto
     {
-        public int Id { get; set; }
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid Id { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public string? Ad { get; set; }
         public string? Soyad { get; set; }
         public DateTime DogumTarihi { get; set; }
         public string? KatilimciDurumu { get; set; }
     }
 
-    // ── Sosyal Medya Olayı ───────────────────────────────────────────────
+    // ── Sosyal Medya Olayi ───────────────────────────────────────────────
     public class SosyalMedyaOlayCreateDto
     {
-        public int OlayId { get; set; }
+        public Guid OlayId { get; set; }
         public string? Platform { get; set; }
         public string? PaylasimLinki { get; set; }
         public DateTime PaylasimTarihi { get; set; }
@@ -151,8 +153,8 @@ namespace EGM.Application.DTOs
 
     public class SosyalMedyaOlayResponseDto
     {
-        public int Id { get; set; }
-        public int OlayId { get; set; }
+        public Guid Id { get; set; }
+        public Guid OlayId { get; set; }
         public string? Platform { get; set; }
         public string? PaylasimLinki { get; set; }
         public DateTime PaylasimTarihi { get; set; }
@@ -162,7 +164,7 @@ namespace EGM.Application.DTOs
         public double SosyalSignalSkoru { get; set; }
     }
 
-    // ── Organizatör ──────────────────────────────────────────────────────
+    // ── Organizator ──────────────────────────────────────────────────────
     public class OrganizatorCreateDto
     {
         public string? Ad { get; set; }
@@ -173,7 +175,7 @@ namespace EGM.Application.DTOs
 
     public class OrganizatorResponseDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string? Ad { get; set; }
         public DateTime KurulusTarihi { get; set; }
         public string? FaaliyetAlani { get; set; }
@@ -186,30 +188,30 @@ namespace EGM.Application.DTOs
         public string? Aciklama { get; set; }
     }
 
-    // ── Seçim ────────────────────────────────────────────────────────────
+    // ── Secim ────────────────────────────────────────────────────────────
     public class SecimSonucuCreateDto
     {
         public string? SecimTuru { get; set; }
         public DateTime Tarih { get; set; }
         public string? BolgeTipi { get; set; }
         public int BolgeId { get; set; }
-        public int AdayId { get; set; }
-        public int PartiId { get; set; }
+        public Guid AdayId { get; set; }
+        public Guid PartiId { get; set; }
         public int OySayisi { get; set; }
         public double OyOrani { get; set; }
-        public int KaynakId { get; set; }
+        public Guid KaynakId { get; set; }
         public bool KaynakOnayDurumu { get; set; }
     }
 
     public class SecimSonucuResponseDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string? SecimTuru { get; set; }
         public DateTime Tarih { get; set; }
         public string? BolgeTipi { get; set; }
         public int BolgeId { get; set; }
-        public int AdayId { get; set; }
-        public int PartiId { get; set; }
+        public Guid AdayId { get; set; }
+        public Guid PartiId { get; set; }
         public int OySayisi { get; set; }
         public double OyOrani { get; set; }
         public bool KaynakOnayDurumu { get; set; }
@@ -242,7 +244,7 @@ namespace EGM.Application.DTOs
 
     public class VIPZiyaretResponseDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public string? ZiyaretEdenAdSoyad { get; set; }
         public string? Unvan { get; set; }
         public DateTime BaslangicTarihi { get; set; }
@@ -256,18 +258,18 @@ namespace EGM.Application.DTOs
 
     public class GuvenlikPlaniCreateDto
     {
-        public int VIPZiyaretId { get; set; }
+        public Guid VIPZiyaretId { get; set; }
         public string? Ad { get; set; }
         public string? Aciklama { get; set; }
     }
 
     public class EkipCreateDto
     {
-        public int VIPZiyaretId { get; set; }
+        public Guid VIPZiyaretId { get; set; }
         public string? Ad { get; set; }
     }
 
-    // ── Yürüyüş Rotası ───────────────────────────────────────────────────
+    // ── Yuruyu Rotasi ───────────────────────────────────────────────────
     public class RotaNoktasiCreateDto
     {
         public string? NoktaAdi { get; set; }
@@ -276,14 +278,26 @@ namespace EGM.Application.DTOs
         public int SiraNo { get; set; }
     }
 
-    // ── Kullanıcı ────────────────────────────────────────────────────────
+    // ── Kullanici ────────────────────────────────────────────────────────
     public class UserResponseDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public int Sicil { get; set; }
         public string Role { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string GSM { get; set; } = string.Empty;
     }
-}
+    /// <summary>Rol atama işlemi için request body DTO'su.</summary>
+    public class RolAtamaDto
+    {
+        /// <summary>
+        /// Hedef kullanıcıya atanacak yeni rol.
+        /// Geçerli değerler: Izleyici, IlPersoneli, IlYoneticisi,
+        /// BaskanlikPersoneli, BaskanlikYoneticisi
+        /// </summary>
+        public string YeniRol { get; set; } = string.Empty;
+
+        /// <summary>Başkanlık Yöneticisi tarafından il personeli atanmasında il plaka kodu.</summary>
+        public int? CityId { get; set; }
+    }}

@@ -24,11 +24,11 @@ namespace EGM.Application.Services
             => await _faaliyetRepository.ListAllAsync();
 
         // ID ile getir
-        public async Task<OperasyonelFaaliyet?> GetByIdAsync(int id)
+        public async Task<OperasyonelFaaliyet?> GetByIdAsync(Guid id)
             => await _faaliyetRepository.GetByIdAsync(id);
 
         // Olaya göre faaliyetleri getir
-        public async Task<IReadOnlyList<OperasyonelFaaliyet>> GetByOlayAsync(int olayId)
+        public async Task<IReadOnlyList<OperasyonelFaaliyet>> GetByOlayAsync(Guid olayId)
         {
             var all = await _faaliyetRepository.ListAllAsync();
             return all.Where(f => f.OlayId == olayId).ToList();
@@ -39,7 +39,7 @@ namespace EGM.Application.Services
             => await _faaliyetRepository.AddAsync(faaliyet);
 
         // Güncelle
-        public async Task<bool> UpdateAsync(int id, OperasyonelFaaliyet updated)
+        public async Task<bool> UpdateAsync(Guid id, OperasyonelFaaliyet updated)
         {
             var existing = await _faaliyetRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -52,7 +52,7 @@ namespace EGM.Application.Services
         }
 
         // Sil
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _faaliyetRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -62,7 +62,7 @@ namespace EGM.Application.Services
         }
 
         // Katılımcı grubu ekle
-        public async Task<KatilimciGrup> AddKatilimciGrupAsync(int faaliyetId, string grupAdi, int katilimciSayisi)
+        public async Task<KatilimciGrup> AddKatilimciGrupAsync(Guid faaliyetId, string grupAdi, int katilimciSayisi)
         {
             var grup = new KatilimciGrup
             {
@@ -74,14 +74,14 @@ namespace EGM.Application.Services
         }
 
         // Faaliyete ait katılımcı gruplarını getir
-        public async Task<IReadOnlyList<KatilimciGrup>> GetGruplarAsync(int faaliyetId)
+        public async Task<IReadOnlyList<KatilimciGrup>> GetGruplarAsync(Guid faaliyetId)
         {
             var all = await _grupRepository.ListAllAsync();
             return all.Where(g => g.OperasyonelFaaliyetId == faaliyetId).ToList();
         }
 
         // Toplam katılımcı sayısını hesapla
-        public async Task<int> GetToplamKatilimciSayisiAsync(int faaliyetId)
+        public async Task<int> GetToplamKatilimciSayisiAsync(Guid faaliyetId)
         {
             var gruplar = await GetGruplarAsync(faaliyetId);
             return gruplar.Sum(g => g.GrupKatilimciSayisi ?? 0);

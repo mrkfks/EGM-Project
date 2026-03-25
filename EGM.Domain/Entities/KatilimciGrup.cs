@@ -2,10 +2,9 @@ using System;
 
 namespace EGM.Domain.Entities
 {
-    public class KatilimciGrup
+    public class KatilimciGrup : BaseEntity
     {
-        public int Id { get; set; }
-        public int OperasyonelFaaliyetId { get; set; }
+        public Guid OperasyonelFaaliyetId { get; set; }
         public OperasyonelFaaliyet? OperasyonelFaaliyet { get; set; }
 
         public string? GrupAdi { get; set; }

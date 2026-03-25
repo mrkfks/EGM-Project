@@ -1,15 +1,19 @@
+using System;
+using EGM.Domain.Enums;
+
 namespace EGM.Domain.Entities
 {
-    public class AuditLog
+    /// <summary>
+    /// Sistem üzerindeki tüm Create/Update/Delete işlemlerinin denetim kaydı.
+    /// AuditLog soft-delete'e tabi değildir; kayıtlar kalıcı saklanır.
+    /// </summary>
+    public class AuditLog : BaseEntity
     {
-        public int Id { get; set; }
-
-        public string Entity { get; set; } = string.Empty;   // Hangi entity üzerinde işlem yapıldı
-        public int EntityId { get; set; }                   // Entity’nin primary key değeri
-        public string Action { get; set; } = string.Empty;  // Create / Update / Delete
-        public string UserId { get; set; } = string.Empty;  // İşlemi yapan kullanıcı
-        public DateTime Timestamp { get; set; }             // İşlem zamanı
-
-        public string Changes { get; set; } = string.Empty; // JSON formatında değişiklikler
+        public string EntityName { get; set; } = string.Empty;
+        public Guid EntityId { get; set; }
+        public AuditAction Action { get; set; }
+        public string UserId { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public string Changes { get; set; } = string.Empty;
     }
 }

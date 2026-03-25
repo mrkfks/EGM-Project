@@ -27,7 +27,7 @@ namespace EGM.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var item = await _service.GetByIdAsync(id);
             if (item == null) return NotFound();
@@ -35,21 +35,21 @@ namespace EGM.API.Controllers
         }
 
         [HttpGet("olay/{olayId}")]
-        public async Task<IActionResult> GetByOlay(int olayId)
+        public async Task<IActionResult> GetByOlay(Guid olayId)
         {
             var list = await _service.GetByOlayAsync(olayId);
             return Ok(list.Select(MapToResponse));
         }
 
         [HttpGet("{id}/gruplar")]
-        public async Task<IActionResult> GetGruplar(int id)
+        public async Task<IActionResult> GetGruplar(Guid id)
         {
             var gruplar = await _service.GetGruplarAsync(id);
             return Ok(gruplar);
         }
 
         [HttpGet("{id}/toplam-katilimci")]
-        public async Task<IActionResult> GetToplamKatilimci(int id)
+        public async Task<IActionResult> GetToplamKatilimci(Guid id)
         {
             var sayi = await _service.GetToplamKatilimciSayisiAsync(id);
             return Ok(new { ToplamKatilimci = sayi });
@@ -70,7 +70,7 @@ namespace EGM.API.Controllers
 
         [HttpPost("{id}/grup")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> AddGrup(int id, [FromBody] KatilimciGrupCreateDto dto)
+        public async Task<IActionResult> AddGrup(Guid id, [FromBody] KatilimciGrupCreateDto dto)
         {
             var grup = await _service.AddKatilimciGrupAsync(id, dto.GrupAdi!, dto.KatilimciSayisi);
             return Ok(grup);
@@ -78,7 +78,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Update(int id, [FromBody] OperasyonelFaaliyetCreateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] OperasyonelFaaliyetCreateDto dto)
         {
             var updated = new OperasyonelFaaliyet { OlayId = dto.OlayId, Aciklama = dto.Aciklama };
             var ok = await _service.UpdateAsync(id, updated);
@@ -88,7 +88,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var ok = await _service.DeleteAsync(id);
             if (!ok) return NotFound();

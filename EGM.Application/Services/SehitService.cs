@@ -20,11 +20,11 @@ namespace EGM.Application.Services
             => await _sehitRepository.ListAllAsync();
 
         // ID ile getir
-        public async Task<Sehit?> GetByIdAsync(int id)
+        public async Task<Sehit?> GetByIdAsync(Guid id)
             => await _sehitRepository.GetByIdAsync(id);
 
         // Belirli bir operasyonel faaliyete ait şehitler
-        public async Task<IReadOnlyList<Sehit>> GetByOperasyonelFaaliyetAsync(int operasyonelFaaliyetId)
+        public async Task<IReadOnlyList<Sehit>> GetByOperasyonelFaaliyetAsync(Guid operasyonelFaaliyetId)
         {
             var all = await _sehitRepository.ListAllAsync();
             return all.Where(s => s.OperasyonelFaaliyetId == operasyonelFaaliyetId).ToList();
@@ -42,7 +42,7 @@ namespace EGM.Application.Services
             => await _sehitRepository.AddAsync(sehit);
 
         // Güncelle
-        public async Task<bool> UpdateAsync(int id, Sehit updated)
+        public async Task<bool> UpdateAsync(Guid id, Sehit updated)
         {
             var existing = await _sehitRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -59,7 +59,7 @@ namespace EGM.Application.Services
         }
 
         // Sil
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _sehitRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -69,7 +69,7 @@ namespace EGM.Application.Services
         }
 
         // Faaliyetteki toplam şehit sayısı
-        public async Task<int> GetSayiByFaaliyetAsync(int operasyonelFaaliyetId)
+        public async Task<int> GetSayiByFaaliyetAsync(Guid operasyonelFaaliyetId)
         {
             var list = await GetByOperasyonelFaaliyetAsync(operasyonelFaaliyetId);
             return list.Count;

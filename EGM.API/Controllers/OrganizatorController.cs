@@ -21,7 +21,7 @@ namespace EGM.API.Controllers
             => Ok((await _service.GetAllAsync()).Select(MapToResponse));
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var item = await _service.GetByIdAsync(id);
             return item == null ? NotFound() : Ok(MapToResponse(item));
@@ -46,7 +46,7 @@ namespace EGM.API.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Update(int id, [FromBody] OrganizatorCreateDto dto)
+        public async Task<IActionResult> Update(Guid id, [FromBody] OrganizatorCreateDto dto)
         {
             var updated = new Organizator
             {
@@ -58,7 +58,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
             => await _service.DeleteAsync(id) ? NoContent() : NotFound();
 
         // ── Kategori ─────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ namespace EGM.API.Controllers
 
         [HttpDelete("kategori/{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteKategori(int id)
+        public async Task<IActionResult> DeleteKategori(Guid id)
             => await _service.DeleteKategoriAsync(id) ? NoContent() : NotFound();
 
         // ── Konu ─────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ namespace EGM.API.Controllers
             => Ok(await _service.GetAllKonuAsync());
 
         [HttpGet("konu/{id}")]
-        public async Task<IActionResult> GetKonuById(int id)
+        public async Task<IActionResult> GetKonuById(Guid id)
         {
             var item = await _service.GetKonuByIdAsync(id);
             return item == null ? NotFound() : Ok(item);
@@ -95,12 +95,12 @@ namespace EGM.API.Controllers
 
         [HttpPut("konu/{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> UpdateKonu(int id, [FromBody] KonuCreateDto dto)
+        public async Task<IActionResult> UpdateKonu(Guid id, [FromBody] KonuCreateDto dto)
             => await _service.UpdateKonuAsync(id, dto.Ad!, dto.Aciklama) ? NoContent() : NotFound();
 
         [HttpDelete("konu/{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteKonu(int id)
+        public async Task<IActionResult> DeleteKonu(Guid id)
             => await _service.DeleteKonuAsync(id) ? NoContent() : NotFound();
 
         private static OrganizatorResponseDto MapToResponse(Organizator o) => new()

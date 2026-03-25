@@ -15,10 +15,12 @@ namespace EGM.Infrastructure.Migrations
                 name: "Adaylar",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     AdSoyad = table.Column<string>(type: "TEXT", nullable: true),
-                    PartiAdi = table.Column<string>(type: "TEXT", nullable: true)
+                    PartiAdi = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,14 +31,16 @@ namespace EGM.Infrastructure.Migrations
                 name: "AuditLoglar",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Entity = table.Column<string>(type: "TEXT", nullable: false),
-                    EntityId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    EntityName = table.Column<string>(type: "TEXT", nullable: false),
+                    EntityId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Action = table.Column<string>(type: "TEXT", nullable: false),
                     UserId = table.Column<string>(type: "TEXT", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Changes = table.Column<string>(type: "TEXT", nullable: false)
+                    Changes = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,9 +51,11 @@ namespace EGM.Infrastructure.Migrations
                 name: "KategoriOrganizatorler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Ad = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Ad = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -60,10 +66,12 @@ namespace EGM.Infrastructure.Migrations
                 name: "Konular",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Ad = table.Column<string>(type: "TEXT", nullable: true),
-                    Aciklama = table.Column<string>(type: "TEXT", nullable: true)
+                    Aciklama = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -74,12 +82,14 @@ namespace EGM.Infrastructure.Migrations
                 name: "Organizatorler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Ad = table.Column<string>(type: "TEXT", nullable: true),
                     KurulusTarihi = table.Column<DateTime>(type: "TEXT", nullable: false),
                     FaaliyetAlani = table.Column<string>(type: "TEXT", nullable: true),
-                    Iletisim = table.Column<string>(type: "TEXT", nullable: true)
+                    Iletisim = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -90,9 +100,11 @@ namespace EGM.Infrastructure.Migrations
                 name: "Partiler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Ad = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Ad = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -103,9 +115,11 @@ namespace EGM.Infrastructure.Migrations
                 name: "SecimKaynaklar",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    KaynakAdi = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    KaynakAdi = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -116,14 +130,16 @@ namespace EGM.Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Sicil = table.Column<int>(type: "INTEGER", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: false),
                     Role = table.Column<string>(type: "TEXT", nullable: false),
                     FullName = table.Column<string>(type: "TEXT", nullable: false),
                     Email = table.Column<string>(type: "TEXT", nullable: false),
-                    GSM = table.Column<string>(type: "TEXT", nullable: false)
+                    GSM = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -134,8 +150,7 @@ namespace EGM.Infrastructure.Migrations
                 name: "VIPZiyaretler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     ZiyaretEdenAdSoyad = table.Column<string>(type: "TEXT", nullable: true),
                     Unvan = table.Column<string>(type: "TEXT", nullable: true),
                     BaslangicTarihi = table.Column<DateTime>(type: "TEXT", nullable: false),
@@ -144,7 +159,10 @@ namespace EGM.Infrastructure.Migrations
                     Mekan = table.Column<string>(type: "TEXT", nullable: true),
                     Hassasiyet = table.Column<int>(type: "INTEGER", nullable: false),
                     GuvenlikSeviyesi = table.Column<string>(type: "TEXT", nullable: true),
-                    GozlemNoktalari = table.Column<string>(type: "TEXT", nullable: true)
+                    GozlemNoktalari = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -155,8 +173,8 @@ namespace EGM.Infrastructure.Migrations
                 name: "KategoriOrganizatorOrganizator",
                 columns: table => new
                 {
-                    KategorilerId = table.Column<int>(type: "INTEGER", nullable: false),
-                    OrganizatorlerId = table.Column<int>(type: "INTEGER", nullable: false)
+                    KategorilerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OrganizatorlerId = table.Column<Guid>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -179,12 +197,11 @@ namespace EGM.Infrastructure.Migrations
                 name: "Olaylar",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Baslik = table.Column<string>(type: "TEXT", nullable: true),
                     OlayTuru = table.Column<string>(type: "TEXT", nullable: true),
-                    OrganizatorId = table.Column<int>(type: "INTEGER", nullable: false),
-                    KonuId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrganizatorId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    KonuId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Tarih = table.Column<DateTime>(type: "TEXT", nullable: false),
                     BaslangicSaati = table.Column<TimeSpan>(type: "TEXT", nullable: true),
                     BitisSaati = table.Column<TimeSpan>(type: "TEXT", nullable: true),
@@ -200,7 +217,10 @@ namespace EGM.Infrastructure.Migrations
                     Hassasiyet = table.Column<int>(type: "INTEGER", nullable: false),
                     RiskPuani = table.Column<double>(type: "REAL", nullable: false),
                     GercekBaslangicTarihi = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    GercekBitisTarihi = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    GercekBitisTarihi = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -223,18 +243,20 @@ namespace EGM.Infrastructure.Migrations
                 name: "SecimSonuclari",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     SecimTuru = table.Column<string>(type: "TEXT", nullable: true),
                     Tarih = table.Column<DateTime>(type: "TEXT", nullable: false),
                     BolgeTipi = table.Column<string>(type: "TEXT", nullable: true),
                     BolgeId = table.Column<int>(type: "INTEGER", nullable: false),
-                    AdayId = table.Column<int>(type: "INTEGER", nullable: false),
-                    PartiId = table.Column<int>(type: "INTEGER", nullable: false),
+                    AdayId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PartiId = table.Column<Guid>(type: "TEXT", nullable: false),
                     OySayisi = table.Column<int>(type: "INTEGER", nullable: false),
                     OyOrani = table.Column<double>(type: "REAL", nullable: false),
-                    KaynakId = table.Column<int>(type: "INTEGER", nullable: false),
-                    KaynakOnayDurumu = table.Column<bool>(type: "INTEGER", nullable: false)
+                    KaynakId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    KaynakOnayDurumu = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -263,10 +285,12 @@ namespace EGM.Infrastructure.Migrations
                 name: "Ekipler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Ad = table.Column<string>(type: "TEXT", nullable: true),
-                    VIPZiyaretId = table.Column<int>(type: "INTEGER", nullable: true)
+                    VIPZiyaretId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -275,18 +299,21 @@ namespace EGM.Infrastructure.Migrations
                         name: "FK_Ekipler_VIPZiyaretler_VIPZiyaretId",
                         column: x => x.VIPZiyaretId,
                         principalTable: "VIPZiyaretler",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "GuvenlikPlanlari",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Ad = table.Column<string>(type: "TEXT", nullable: true),
                     Aciklama = table.Column<string>(type: "TEXT", nullable: true),
-                    VIPZiyaretId = table.Column<int>(type: "INTEGER", nullable: true)
+                    VIPZiyaretId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -295,17 +322,20 @@ namespace EGM.Infrastructure.Migrations
                         name: "FK_GuvenlikPlanlari_VIPZiyaretler_VIPZiyaretId",
                         column: x => x.VIPZiyaretId,
                         principalTable: "VIPZiyaretler",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
                 name: "OperasyonelFaaliyetler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OlayId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Aciklama = table.Column<string>(type: "TEXT", nullable: true)
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OlayId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Aciklama = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -322,16 +352,18 @@ namespace EGM.Infrastructure.Migrations
                 name: "SosyalMedyaOlaylar",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OlayId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OlayId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Platform = table.Column<string>(type: "TEXT", nullable: true),
                     PaylasimLinki = table.Column<string>(type: "TEXT", nullable: true),
                     PaylasimTarihi = table.Column<DateTime>(type: "TEXT", nullable: false),
                     IcerikOzeti = table.Column<string>(type: "TEXT", nullable: true),
                     IlgiliKisiKurum = table.Column<string>(type: "TEXT", nullable: true),
                     Hassasiyet = table.Column<int>(type: "INTEGER", nullable: false),
-                    SosyalSignalSkoru = table.Column<double>(type: "REAL", nullable: false)
+                    SosyalSignalSkoru = table.Column<double>(type: "REAL", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -348,13 +380,15 @@ namespace EGM.Infrastructure.Migrations
                 name: "YuruyusRotasi",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OlayId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OlayId = table.Column<Guid>(type: "TEXT", nullable: false),
                     NoktaAdi = table.Column<string>(type: "TEXT", nullable: true),
                     Latitude = table.Column<double>(type: "REAL", nullable: false),
                     Longitude = table.Column<double>(type: "REAL", nullable: false),
-                    SiraNo = table.Column<int>(type: "INTEGER", nullable: false)
+                    SiraNo = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -371,11 +405,13 @@ namespace EGM.Infrastructure.Migrations
                 name: "KatilimciGruplar",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OperasyonelFaaliyetId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OperasyonelFaaliyetId = table.Column<Guid>(type: "TEXT", nullable: false),
                     GrupAdi = table.Column<string>(type: "TEXT", nullable: true),
-                    GrupKatilimciSayisi = table.Column<int>(type: "INTEGER", nullable: true)
+                    GrupKatilimciSayisi = table.Column<int>(type: "INTEGER", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -392,14 +428,16 @@ namespace EGM.Infrastructure.Migrations
                 name: "Oluler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OperasyonelFaaliyetId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OperasyonelFaaliyetId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Ad = table.Column<string>(type: "TEXT", nullable: true),
                     Soyad = table.Column<string>(type: "TEXT", nullable: true),
-                    TcKimlikNo = table.Column<string>(type: "TEXT", nullable: true),
+                    TcKimlikNo = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     DogumTarihi = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    KatilimciDurumu = table.Column<string>(type: "TEXT", nullable: true)
+                    KatilimciDurumu = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -416,14 +454,16 @@ namespace EGM.Infrastructure.Migrations
                 name: "Sehitler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OperasyonelFaaliyetId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OperasyonelFaaliyetId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Ad = table.Column<string>(type: "TEXT", nullable: true),
                     Soyad = table.Column<string>(type: "TEXT", nullable: true),
-                    TcKimlikNo = table.Column<string>(type: "TEXT", nullable: true),
+                    TcKimlikNo = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     DogumTarihi = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Gorev = table.Column<string>(type: "TEXT", nullable: true)
+                    Gorev = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -440,14 +480,16 @@ namespace EGM.Infrastructure.Migrations
                 name: "Supheliler",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    OperasyonelFaaliyetId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    OperasyonelFaaliyetId = table.Column<Guid>(type: "TEXT", nullable: false),
                     Ad = table.Column<string>(type: "TEXT", nullable: true),
                     Soyad = table.Column<string>(type: "TEXT", nullable: true),
                     TcKimlikNo = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     DogumTarihi = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Gozaltinda = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Gozaltinda = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -529,6 +571,18 @@ namespace EGM.Infrastructure.Migrations
                 name: "IX_Supheliler_OperasyonelFaaliyetId",
                 table: "Supheliler",
                 column: "OperasyonelFaaliyetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Sicil",
+                table: "Users",
+                column: "Sicil",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_YuruyusRotasi_OlayId",

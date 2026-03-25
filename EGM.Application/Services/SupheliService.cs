@@ -20,11 +20,11 @@ namespace EGM.Application.Services
             => await _supheliRepository.ListAllAsync();
 
         // ID ile getir
-        public async Task<Supheli?> GetByIdAsync(int id)
+        public async Task<Supheli?> GetByIdAsync(Guid id)
             => await _supheliRepository.GetByIdAsync(id);
 
         // Operasyonel faaliyete göre filtrele
-        public async Task<IReadOnlyList<Supheli>> GetByOperasyonelFaaliyetAsync(int operasyonelFaaliyetId)
+        public async Task<IReadOnlyList<Supheli>> GetByOperasyonelFaaliyetAsync(Guid operasyonelFaaliyetId)
         {
             var all = await _supheliRepository.ListAllAsync();
             return all.Where(s => s.OperasyonelFaaliyetId == operasyonelFaaliyetId).ToList();
@@ -38,7 +38,7 @@ namespace EGM.Application.Services
         }
 
         // Faaliyetteki gözaltı sayısı
-        public async Task<int> GetGozaltiSayisiByFaaliyetAsync(int operasyonelFaaliyetId)
+        public async Task<int> GetGozaltiSayisiByFaaliyetAsync(Guid operasyonelFaaliyetId)
         {
             var list = await GetByOperasyonelFaaliyetAsync(operasyonelFaaliyetId);
             return list.Count(s => s.Gozaltinda);
@@ -49,7 +49,7 @@ namespace EGM.Application.Services
             => await _supheliRepository.AddAsync(supheli);
 
         // Güncelle
-        public async Task<bool> UpdateAsync(int id, Supheli updated)
+        public async Task<bool> UpdateAsync(Guid id, Supheli updated)
         {
             var existing = await _supheliRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -66,7 +66,7 @@ namespace EGM.Application.Services
         }
 
         // Gözaltı durumunu değiştir
-        public async Task<bool> ToggleGozaltiAsync(int id)
+        public async Task<bool> ToggleGozaltiAsync(Guid id)
         {
             var existing = await _supheliRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -77,7 +77,7 @@ namespace EGM.Application.Services
         }
 
         // Serbest bırak
-        public async Task<bool> SerbetBirakAsync(int id)
+        public async Task<bool> SerbetBirakAsync(Guid id)
         {
             var existing = await _supheliRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -88,7 +88,7 @@ namespace EGM.Application.Services
         }
 
         // Gözaltına al
-        public async Task<bool> GozaltiyaAlAsync(int id)
+        public async Task<bool> GozaltiyaAlAsync(Guid id)
         {
             var existing = await _supheliRepository.GetByIdAsync(id);
             if (existing == null) return false;
@@ -99,7 +99,7 @@ namespace EGM.Application.Services
         }
 
         // Sil
-        public async Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(Guid id)
         {
             var existing = await _supheliRepository.GetByIdAsync(id);
             if (existing == null) return false;

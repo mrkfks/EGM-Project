@@ -1,11 +1,11 @@
 using System;
+using EGM.Domain.Enums;
 
 namespace EGM.Domain.Entities
 {
-    public class SosyalMedyaOlay
+    public class SosyalMedyaOlay : BaseEntity
     {
-        public int Id { get; set; }
-        public int OlayId { get; set; }
+        public Guid OlayId { get; set; }
         public Olay? Olay { get; set; }
 
         public string? Platform { get; set; }
@@ -14,7 +14,7 @@ namespace EGM.Domain.Entities
         public string? IcerikOzeti { get; set; }
         public string? IlgiliKisiKurum { get; set; }
 
-        public EGM.Domain.Enums.Hassasiyet Hassasiyet { get; set; }
+        public Hassasiyet Hassasiyet { get; set; }
         public double SosyalSignalSkoru { get; set; }
     }
 }
