@@ -68,30 +68,21 @@ namespace EGM.Application.Services
 
         // Seçim türüne göre filtrele (yerel, genel vb.)
         public async Task<IReadOnlyList<SecimSonucu>> GetBySecimTuruAsync(string tur)
-        {
-            var all = await _secimRepository.ListAllAsync();
-            return all.Where(s => s.SecimTuru == tur).ToList();
-        }
+            => await _secimRepository.FindAsync(s => s.SecimTuru == tur);
 
         // Bölgeye göre sonuçları getir
         public async Task<IReadOnlyList<SecimSonucu>> GetByBolgeAsync(string bolgeTipi, int bolgeId)
-        {
-            var all = await _secimRepository.ListAllAsync();
-            return all.Where(s => s.BolgeTipi == bolgeTipi && s.BolgeId == bolgeId).ToList();
-        }
+            => await _secimRepository.FindAsync(s => s.BolgeTipi == bolgeTipi && s.BolgeId == bolgeId);
 
         // Onaylanmış kaynakların sonuçları
         public async Task<IReadOnlyList<SecimSonucu>> GetOnayliSonuclarAsync()
-        {
-            var all = await _secimRepository.ListAllAsync();
-            return all.Where(s => s.KaynakOnayDurumu).ToList();
-        }
+            => await _secimRepository.FindAsync(s => s.KaynakOnayDurumu);
 
         // Partiye göre toplam oy sayısı
         public async Task<int> GetToplamOyByPartiAsync(Guid partiId)
         {
-            var all = await _secimRepository.ListAllAsync();
-            return all.Where(s => s.PartiId == partiId).Sum(s => s.OySayisi);
+            var sonuclar = await _secimRepository.FindAsync(s => s.PartiId == partiId);
+            return sonuclar.Sum(s => s.OySayisi);
         }
 
         // ── Aday CRUD ───────────────────────────────────────────────────

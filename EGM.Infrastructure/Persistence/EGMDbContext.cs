@@ -91,6 +91,40 @@ namespace EGM.Infrastructure
                 .HasIndex(u => u.Email)
                 .IsUnique();
 
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Role);
+
+            // ── Olay ────────────────────────────────────────────────────
+            modelBuilder.Entity<Olay>()
+                .HasIndex(o => o.CityId);
+
+            modelBuilder.Entity<Olay>()
+                .HasIndex(o => o.Tarih);
+
+            modelBuilder.Entity<Olay>()
+                .HasIndex(o => o.Durum);
+
+            modelBuilder.Entity<Olay>()
+                .HasIndex(o => o.CreatedByUserId);
+
+            // ── OperasyonelFaaliyet ──────────────────────────────────────
+            modelBuilder.Entity<OperasyonelFaaliyet>()
+                .HasIndex(f => f.OlayId);
+
+            // ── SosyalMedyaOlay ──────────────────────────────────────────
+            modelBuilder.Entity<SosyalMedyaOlay>()
+                .HasIndex(s => s.OlayId);
+
+            // ── AuditLog ─────────────────────────────────────────────────
+            modelBuilder.Entity<AuditLog>()
+                .HasIndex(a => a.UserId);
+
+            modelBuilder.Entity<AuditLog>()
+                .HasIndex(a => a.Timestamp);
+
+            modelBuilder.Entity<AuditLog>()
+                .HasIndex(a => new { a.EntityName, a.EntityId });
+
             // ── Supheli ─────────────────────────────────────────────────
             modelBuilder.Entity<Supheli>()
                 .Property(s => s.TcKimlikNo)

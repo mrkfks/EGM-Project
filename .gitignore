@@ -1,0 +1,31 @@
+## Build outputs
+bin/
+obj/
+
+## .NET
+*.user
+*.suo
+.vs/
+*.ncrunch*
+
+## SQLite database (sensitive data)
+*.db
+*.db-shm
+*.db-wal
+
+## Sensitive configuration (contains secrets - use env variables in production)
+appsettings.Development.json
+appsettings.Production.json
+
+## Logs
+logs/
+*.log
+
+## Angular
+EGM.Frontend/node_modules/
+EGM.Frontend/dist/
+EGM.Frontend/.angular/
+
+## OS
+.DS_Store
+Thumbs.db

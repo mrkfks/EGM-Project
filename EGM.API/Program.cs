@@ -1,4 +1,5 @@
 using EGM.Application.Services;
+using EGM.API.Middleware;
 using EGM.Domain.Constants;
 using EGM.Domain.Interfaces;
 using EGM.Infrastructure;
@@ -8,16 +9,26 @@ using EGM.Infrastructure.Repositories;
 using EGM.Infrastructure.Security;
 using EGM.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.IO.Compression;
 using System.Text;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // JWT anahtarını al ve kontrol et
 var key = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(key))
-    throw new InvalidOperationException("JWT key is not configured.");
+    throw new InvalidOperationException("JWT key yapılandırılmamış. Ortam değişkeni: Jwt__Key");
+
+// Şifreleme anahtarlarını kontrol et
+var encKey = builder.Configuration["Encryption:Key"];
+var encIv  = builder.Configuration["Encryption:IV"];
+if (string.IsNullOrEmpty(encKey) || string.IsNullOrEmpty(encIv))
+    throw new InvalidOperationException("Şifreleme anahtarları yapılandırılmamış. Ortam değişkenleri: Encryption__Key, Encryption__IV");
 
 var issuer   = builder.Configuration["Jwt:Issuer"];
 var audience = builder.Configuration["Jwt:Audience"];
@@ -106,7 +117,8 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
 // ── Kullanıcı Deposu ─────────────────────────────────────────────────────
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-
+// ── Olay Deposu (eager loading) ───────────────────────────────────────
+builder.Services.AddScoped<IOlayRepository, OlayRepository>();
 // ── Infrastructure Servisleri ─────────────────────────────────────────────
 builder.Services.AddScoped<JwtTokenService>();builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 // ── Application Servisleri ───────────────────────────────────────────────
@@ -126,7 +138,48 @@ builder.Services.AddScoped<VIPZiyaretService>();
 // ── Bildirim Servisi ─────────────────────────────────────────────────────
 builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();
 
+// ── Rate Limiting ────────────────────────────────────────────────────────
+builder.Services.AddRateLimiter(options =>
+{
+    // Login endpoint: 15 dakikada en fazla 5 deneme
+    options.AddFixedWindowLimiter("login", opt =>
+    {
+        opt.PermitLimit = 5;
+        opt.Window = TimeSpan.FromMinutes(15);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+});
+
 // ── Controllers ve Swagger ───────────────────────────────────────────────
+// ── CORS ─────────────────────────────────────────────────────────────────
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? ["http://localhost:4200"];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials());
+});
+
+// ── Health Checks ────────────────────────────────────────────────────────
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<EGMDbContext>();
+
+// ── Response Compression ────────────────────────────────────────────────
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<GzipCompressionProvider>();
+});
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+    options.Level = CompressionLevel.Optimal);
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -140,10 +193,25 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseResponseCompression();
 app.UseHttpsRedirection();
+app.UseHsts();
+app.UseCors("AllowFrontend");
+app.UseMiddleware<ExceptionMiddleware>();
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapHealthChecks("/health").AllowAnonymous();
+
+// ── Başlangıçta DB bağlantısını doğrula ─────────────────────────────────
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<EGMDbContext>();
+    if (!await db.Database.CanConnectAsync())
+        throw new InvalidOperationException("Veritabanına bağlanılamadı. Bağlantı dizesini kontrol edin.");
+}
+
 app.Run();
 

@@ -4,17 +4,17 @@ namespace EGM.Domain.Interfaces
 {
     public interface IUserRepository
     {
-        User? GetBySicil(int sicil);
-        IEnumerable<User> GetByRole(string role);
-        IEnumerable<User> GetByFullName(string fullName);
-        User? GetByEmail(string email);
-        User? GetByGsm(string gsm);
+        Task<User?> GetBySicilAsync(int sicil);
+        Task<IEnumerable<User>> GetByRoleAsync(string role);
+        Task<IEnumerable<User>> GetByFullNameAsync(string fullName);
+        Task<User?> GetByEmailAsync(string email);
+        Task<User?> GetByGsmAsync(string gsm);
 
-        void Add(User user);
-        void Update(User user);
-        void Delete(int sicil);
+        Task AddAsync(User user);
+        Task UpdateAsync(User user);
+        Task DeleteAsync(int sicil);
 
-        IEnumerable<User> GetAll();
+        Task<IEnumerable<User>> GetAllAsync();
     }
 }
 

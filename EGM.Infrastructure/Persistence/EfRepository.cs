@@ -1,6 +1,5 @@
 using EGM.Domain.Interfaces;
 using EGM.Domain.Entities;
-using EGM.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -34,13 +33,29 @@ namespace EGM.Infrastructure.Persistence
             return await _dbContext.Set<T>().Where(predicate).ToListAsync();
         }
 
+        public async Task<(IReadOnlyList<T> Items, int TotalCount)> PageAsync(
+            Expression<Func<T, bool>>? predicate, int page, int pageSize)
+        {
+            var query = _dbContext.Set<T>().AsQueryable();
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            var total = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(e => e.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, total);
+        }
+
         public async Task<T> AddAsync(T entity)
         {
             entity.CreatedAt = DateTime.UtcNow;
             entity.UpdatedAt = DateTime.UtcNow;
             _dbContext.Set<T>().Add(entity);
             await _dbContext.SaveChangesAsync();
-            await AddAuditLog(entity, AuditAction.Create);
             return entity;
         }
 
@@ -49,7 +64,6 @@ namespace EGM.Infrastructure.Persistence
             entity.UpdatedAt = DateTime.UtcNow;
             _dbContext.Entry(entity).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync();
-            await AddAuditLog(entity, AuditAction.Update);
         }
 
         /// <summary>
@@ -60,23 +74,6 @@ namespace EGM.Infrastructure.Persistence
             entity.IsDeleted = true;
             entity.UpdatedAt = DateTime.UtcNow;
             _dbContext.Entry(entity).State = EntityState.Modified;
-            await _dbContext.SaveChangesAsync();
-            await AddAuditLog(entity, AuditAction.Delete);
-        }
-
-        private async Task AddAuditLog(T entity, AuditAction action)
-        {
-            var audit = new AuditLog
-            {
-                EntityName = typeof(T).Name,
-                EntityId = entity.Id,
-                Action = action,
-                UserId = "system",
-                Timestamp = DateTime.UtcNow,
-                Changes = System.Text.Json.JsonSerializer.Serialize(entity)
-            };
-
-            _dbContext.AuditLoglar.Add(audit);
             await _dbContext.SaveChangesAsync();
         }
     }

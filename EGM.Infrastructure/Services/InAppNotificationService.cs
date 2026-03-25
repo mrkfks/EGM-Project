@@ -14,15 +14,18 @@ namespace EGM.Infrastructure.Services
         // RiskPuani > 0 → şehir yöneticileri; RiskPuani >= 20 → merkez yöneticileri de
         private const double CriticalRiskThreshold = 20.0;
 
-        private readonly EGMDbContext             _context;
+        private readonly EGMDbContext                 _context;
         private readonly IHubContext<NotificationHub> _hub;
+        private readonly ICurrentUserService          _currentUser;
 
         public InAppNotificationService(
             EGMDbContext context,
-            IHubContext<NotificationHub> hub)
+            IHubContext<NotificationHub> hub,
+            ICurrentUserService currentUser)
         {
-            _context = context;
-            _hub     = hub;
+            _context     = context;
+            _hub         = hub;
+            _currentUser = currentUser;
         }
 
         // ─── Olay Risk Bildirimi ─────────────────────────────────────────
@@ -45,23 +48,25 @@ namespace EGM.Infrastructure.Services
             var type = NotificationType.Risk;
 
             // ── Hedef kullanıcıları bul ───────────────────────────────
-            var ilYoneticileri = await _context.Users
-                .Where(u => u.Role == Roles.IlYoneticisi && !u.IsDeleted)
+            // İl personeli + il yöneticileri (şehir bazlı)
+            var ilKullanicilari = await _context.Users
+                .Where(u => (u.Role == Roles.IlPersoneli || u.Role == Roles.IlYoneticisi) && !u.IsDeleted)
                 .Where(u => !olay.CityId.HasValue || u.CityId == olay.CityId)
                 .ToListAsync();
 
-            var notifications = ilYoneticileri
+            var notifications = ilKullanicilari
                 .Select(u => BuildNotification(u.Sicil.ToString(), title, message, olay.RiskPuani, type))
                 .ToList();
 
+            // Kritik olaylar → tüm başkanlık personeline de gönder
             if (isCritical)
             {
-                var hqManagers = await _context.Users
-                    .Where(u => u.Role == Roles.BaskanlikYoneticisi && !u.IsDeleted)
+                var hqKullanicilari = await _context.Users
+                    .Where(u => (u.Role == Roles.BaskanlikPersoneli || u.Role == Roles.BaskanlikYoneticisi) && !u.IsDeleted)
                     .ToListAsync();
 
                 notifications.AddRange(
-                    hqManagers.Select(u => BuildNotification(u.Sicil.ToString(), title, message, olay.RiskPuani, type)));
+                    hqKullanicilari.Select(u => BuildNotification(u.Sicil.ToString(), title, message, olay.RiskPuani, type)));
             }
 
             if (notifications.Count == 0) return;
@@ -69,42 +74,49 @@ namespace EGM.Infrastructure.Services
             // ── Bildirimleri kaydet ────────────────────────────────────
             await _context.Bildirimler.AddRangeAsync(notifications);
 
+            // Tetikleyen kullanıcı kimliğini ve hedef grupları audit log'a yaz
+            var triggeredBy = _currentUser.IsAuthenticated ? _currentUser.UserId : "system";
+            var targetGroups = olay.CityId.HasValue
+                ? $"city_{olay.CityId}" + (isCritical ? ", hq" : string.Empty)
+                : isCritical ? "hq" : "broadcast";
+
             var auditLogs = notifications.Select(n => new AuditLog
             {
                 EntityName = nameof(Notification),
                 EntityId   = n.Id,
                 Action     = AuditAction.Create,
-                UserId     = "system",
+                UserId     = triggeredBy,
                 Timestamp  = DateTime.UtcNow,
-                Changes    = "In-App Notification Dispatched"
+                Changes    = $"Bildirim gönderildi → Gruplar: [{targetGroups}] | Risk: {olay.RiskPuani:F1} | Hassasiyet: {olay.Hassasiyet}"
             }).ToList();
 
             await _context.AuditLoglar.AddRangeAsync(auditLogs);
             await _context.SaveChangesAsync();
 
             // ── SignalR üzerinden gönder ───────────────────────────────
+            // Zengin payload: harita güncellemesi için koordinat + hassasiyet dahil
             var payload = new
             {
                 title,
                 message,
-                riskPuani = olay.RiskPuani,
-                type = type.ToString(),
-                olayId = olay.Id
+                riskPuani  = olay.RiskPuani,
+                hassasiyet = (int)olay.Hassasiyet,
+                type       = type.ToString(),
+                olayId     = olay.Id,
+                latitude   = olay.Latitude,
+                longitude  = olay.Longitude,
+                cityId     = olay.CityId
             };
 
             if (olay.CityId.HasValue)
-            {
                 await _hub.Clients
-                    .Group(NotificationGroupNames.CityManagers(olay.CityId.Value))
+                    .Group(NotificationGroupNames.City(olay.CityId.Value))
                     .SendAsync("ReceiveNotification", payload);
-            }
 
             if (isCritical)
-            {
                 await _hub.Clients
-                    .Group(NotificationGroupNames.HQManagers)
+                    .Group(NotificationGroupNames.HQ)
                     .SendAsync("ReceiveNotification", payload);
-            }
         }
 
         // ─── Okundu İşaretle ─────────────────────────────────────────────
@@ -120,6 +132,19 @@ namespace EGM.Infrastructure.Services
         }
 
         // ─── Kullanıcı Bildirimleri ───────────────────────────────────────
+                public async Task MarkAllAsReadAsync(string userId)
+                {
+                    var unread = await _context.Bildirimler
+                        .Where(n => n.UserId == userId && !n.IsRead && !n.IsDeleted)
+                        .ToListAsync();
+
+                    if (unread.Count == 0) return;
+
+                    foreach (var n in unread) n.IsRead = true;
+                    await _context.SaveChangesAsync();
+                }
+
+                // ─── Kullanıcı Bildirimleri ───────────────────────────────────────
         public async Task<IReadOnlyList<Notification>> GetUserNotificationsAsync(string userId)
         {
             return await _context.Bildirimler

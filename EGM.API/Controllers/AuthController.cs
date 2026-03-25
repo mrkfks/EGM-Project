@@ -4,29 +4,38 @@ using EGM.Application.Services;
 using EGM.Domain.Constants;
 using EGM.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EGM.API.Controllers
 {
     [ApiController]
-    [Route("Api/[controller]")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly UserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(UserService userService, IConfiguration configuration)
+        public AuthController(UserService userService, IConfiguration configuration, ILogger<AuthController> logger)
         {
             _userService   = userService;
             _configuration = configuration;
+            _logger        = logger;
         }
 
         [HttpPost("login")]
-        public IActionResult Login(LoginRequest request)
+        [EnableRateLimiting("login")]
+        public async Task<IActionResult> Login(LoginRequest request)
         {
-            var user = _userService.ValidateUser(request.Sicil, request.Password);
+            var user = await _userService.ValidateUserAsync(request.Sicil, request.Password);
             if (user == null)
+            {
+                _logger.LogWarning("Başarısız giriş denemesi. Sicil: {Sicil}, IP: {IP}",
+                    request.Sicil, HttpContext.Connection.RemoteIpAddress);
                 return Unauthorized("Geçersiz sicil veya şifre.");
+            }
 
+            _logger.LogInformation("Başarılı giriş. Sicil: {Sicil}, Rol: {Role}", user.Sicil, user.Role);
             var token = JwtHelper.GenerateToken(
                 user,
                 _configuration["Jwt:Key"]!,
@@ -41,21 +50,22 @@ namespace EGM.API.Controllers
         /// Rol ve CityId atama işlemi için /api/user/{sicil}/rol-ata kullanılmalıdır.
         /// </summary>
         [HttpPost("register")]
-        public IActionResult Register(RegisterRequest request)
+        public async Task<IActionResult> Register(RegisterRequest request)
         {
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             var user = new User
             {
                 Sicil        = request.Sicil,
                 PasswordHash = hashedPassword,
-                Role         = Roles.Izleyici,  // Yeni giren herkes İzleyici olarak başlar
+                Role         = Roles.Izleyici,
                 GSM          = request.GSM,
                 FullName     = request.FullName,
                 Email        = request.Email,
-                CityId       = null             // CityId daha sonra rol atamasıyla belirlenir
+                CityId       = null
             };
 
-            _userService.RegisterUser(user);
+            await _userService.RegisterUserAsync(user);
+            _logger.LogInformation("Yeni kullanıcı kaydedildi. Sicil: {Sicil}", user.Sicil);
             return Ok("Kullanıcı başarıyla kaydedildi. Rol ataması için bir yöneticiye başvurunuz.");
         }
     }

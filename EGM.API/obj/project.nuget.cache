@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "LKqO1wi1jxM=",
+  "dgSpecHash": "4jskPTDdnHg=",
   "success": true,
   "projectFilePath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.API\\EGM.API.csproj",
   "expectedPackageFiles": [
@@ -25,6 +25,7 @@
     "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.entityframeworkcore.sqlite.core\\10.0.3\\microsoft.entityframeworkcore.sqlite.core.10.0.3.nupkg.sha512",
     "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.extensions.apidescription.server\\10.0.0\\microsoft.extensions.apidescription.server.10.0.0.nupkg.sha512",
     "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.extensions.dependencymodel\\10.0.3\\microsoft.extensions.dependencymodel.10.0.3.nupkg.sha512",
+    "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.extensions.diagnostics.healthchecks.entityframeworkcore\\10.0.3\\microsoft.extensions.diagnostics.healthchecks.entityframeworkcore.10.0.3.nupkg.sha512",
     "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.identitymodel.abstractions\\8.16.0\\microsoft.identitymodel.abstractions.8.16.0.nupkg.sha512",
     "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.identitymodel.jsonwebtokens\\8.16.0\\microsoft.identitymodel.jsonwebtokens.8.16.0.nupkg.sha512",
     "C:\\Users\\mrkfk\\.nuget\\packages\\microsoft.identitymodel.logging\\8.16.0\\microsoft.identitymodel.logging.8.16.0.nupkg.sha512",

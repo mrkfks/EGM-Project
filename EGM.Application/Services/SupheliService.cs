@@ -25,17 +25,11 @@ namespace EGM.Application.Services
 
         // Operasyonel faaliyete göre filtrele
         public async Task<IReadOnlyList<Supheli>> GetByOperasyonelFaaliyetAsync(Guid operasyonelFaaliyetId)
-        {
-            var all = await _supheliRepository.ListAllAsync();
-            return all.Where(s => s.OperasyonelFaaliyetId == operasyonelFaaliyetId).ToList();
-        }
+            => await _supheliRepository.FindAsync(s => s.OperasyonelFaaliyetId == operasyonelFaaliyetId);
 
         // Gözaltındaki şüphelileri getir
         public async Task<IReadOnlyList<Supheli>> GetGozaltindakileriAsync()
-        {
-            var all = await _supheliRepository.ListAllAsync();
-            return all.Where(s => s.Gozaltinda).ToList();
-        }
+            => await _supheliRepository.FindAsync(s => s.Gozaltinda);
 
         // Faaliyetteki gözaltı sayısı
         public async Task<int> GetGozaltiSayisiByFaaliyetAsync(Guid operasyonelFaaliyetId)

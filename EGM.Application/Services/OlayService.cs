@@ -1,47 +1,68 @@
 
+using EGM.Application.DTOs;
 using EGM.Domain.Constants;
 using EGM.Domain.Entities;
 using EGM.Domain.Enums;
 using EGM.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace EGM.Application.Services
 {
     public class OlayService
     {
-        private readonly IRepository<Olay> _olayRepository;
+        private readonly IOlayRepository _olayRepository;
         private readonly IRepository<YuruyusRota> _rotaRepository;
         private readonly ICurrentUserService _currentUser;
         private readonly IInAppNotificationService _notificationService;
+        private readonly ILogger<OlayService> _logger;
 
         public OlayService(
-            IRepository<Olay> olayRepository,
+            IOlayRepository olayRepository,
             IRepository<YuruyusRota> rotaRepository,
             ICurrentUserService currentUser,
-            IInAppNotificationService notificationService)
+            IInAppNotificationService notificationService,
+            ILogger<OlayService> logger)
         {
             _olayRepository      = olayRepository;
             _rotaRepository      = rotaRepository;
             _currentUser         = currentUser;
             _notificationService = notificationService;
+            _logger              = logger;
         }
 
         // ── Listeleme ────────────────────────────────────────────────────
         /// <summary>
+        /// Sayfalanmış ve filtrelenmiş olay listesi.
         /// İl Personeli / İl Yöneticisi → yalnızca kendi illerinin olaylarını görür.
         /// Başkanlık rolleri → tüm olayları görür.
         /// </summary>
-        public async Task<IReadOnlyList<Olay>> GetAllAsync()
+        public async Task<PagedResult<Olay>> GetAllAsync(
+            int page          = 1,
+            int pageSize      = 20,
+            OlayDurum? durum  = null,
+            DateTime? tarihBaslangic = null,
+            DateTime? tarihBitis     = null)
         {
+            int? cityId = null;
             if (Roles.IsCityScoped(_currentUser.Role) && _currentUser.CityId.HasValue)
-                return await _olayRepository.FindAsync(o => o.CityId == _currentUser.CityId);
+                cityId = _currentUser.CityId.Value;
 
-            return await _olayRepository.ListAllAsync();
+            var (items, total) = await _olayRepository.GetFilteredPagedAsync(
+                durum, tarihBaslangic, tarihBitis, cityId, page, pageSize);
+
+            return new PagedResult<Olay>
+            {
+                Items      = items,
+                TotalCount = total,
+                Page       = page,
+                PageSize   = pageSize
+            };
         }
 
         // ── ID ile getir ─────────────────────────────────────────────────
         public async Task<Olay?> GetByIdAsync(Guid id)
         {
-            var olay = await _olayRepository.GetByIdAsync(id);
+            var olay = await _olayRepository.GetByIdWithDetailsAsync(id);
             if (olay == null) return null;
 
             // İl kısıtlı kullanıcı sadece kendi ilinin olayını görebilir
@@ -65,7 +86,17 @@ namespace EGM.Application.Services
                 olay.CityId = _currentUser.CityId;
 
             var created = await _olayRepository.AddAsync(olay);
-            await _notificationService.NotifyOlayRiskAsync(created);
+
+            // Bildirim gönderimi başarısız olursa kayıt etkilenmez; sadece loglanır
+            try
+            {
+                await _notificationService.NotifyOlayRiskAsync(created);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Olay risk bildirimi gönderilemedi. OlayId: {OlayId}", created.Id);
+            }
+
             return created;
         }
         /// <summary>
@@ -109,7 +140,14 @@ namespace EGM.Application.Services
 
             await _olayRepository.UpdateAsync(existing);
             var isSelfCorrection = isStaffRole && existing.CreatedByUserId == _currentUser.UserId;
-            await _notificationService.NotifyOlayRiskAsync(existing, isSelfCorrection: isSelfCorrection);
+            try
+            {
+                await _notificationService.NotifyOlayRiskAsync(existing, isSelfCorrection: isSelfCorrection);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Olay güncelleme bildirimi gönderilemedi. OlayId: {OlayId}", existing.Id);
+            }
             return (true, null);
         }
 

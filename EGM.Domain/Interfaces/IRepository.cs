@@ -14,6 +14,10 @@ namespace EGM.Domain.Interfaces
         /// <summary>Verilen koşula uyan tüm kayıtları döner (soft-delete filtresi uygulanmış).</summary>
         Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate);
 
+        /// <summary>Sayfalanmış sorgu: toplam sayı + istenilen dilim döner.</summary>
+        Task<(IReadOnlyList<T> Items, int TotalCount)> PageAsync(
+            Expression<Func<T, bool>>? predicate, int page, int pageSize);
+
         Task<T> AddAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(T entity);

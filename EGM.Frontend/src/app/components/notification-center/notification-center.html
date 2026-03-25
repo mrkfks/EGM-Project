@@ -1,0 +1,81 @@
+<!-- ── Bell Button ─────────────────────────────────────────────────────────── -->
+<div class="nc-wrapper">
+  <button class="nc-bell" (click)="togglePanel()" aria-label="Bildirimler">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+    </svg>
+    <span class="nc-badge" *ngIf="(notifSvc.unreadCount$ | async) as count">
+      {{ count > 99 ? '99+' : count }}
+    </span>
+  </button>
+
+  <!-- Overlay: panel dışına tıklayınca kapatır -->
+  <div class="nc-overlay" *ngIf="panelOpen" (click)="closePanel()"></div>
+
+  <!-- Dropdown panel -->
+  <div class="nc-panel" *ngIf="panelOpen">
+    <div class="nc-panel-header">
+      <span class="nc-panel-title">Bildirimler</span>
+      <div class="nc-panel-actions">
+        <button class="nc-action-btn" (click)="onMarkAllRead()">Tümünü Okundu İşaretle</button>
+        <button class="nc-close-btn" (click)="closePanel()">✕</button>
+      </div>
+    </div>
+
+    <div class="nc-list">
+      <ng-container *ngIf="notifSvc.notifications$ | async as items">
+        <div *ngIf="items.length === 0" class="nc-empty">Henüz bildirim yok.</div>
+
+        <div
+          *ngFor="let item of items"
+          class="nc-item"
+          [class.nc-item--unread]="!item.isRead"
+          [style.border-left-color]="hassasiyetColor(item.hassasiyet)"
+        >
+          <div class="nc-item-header">
+            <span class="nc-item-title">{{ item.title }}</span>
+            <span class="nc-item-time">{{ timeAgo(item.timestamp) }} önce</span>
+          </div>
+          <p class="nc-item-msg">{{ item.message }}</p>
+          <div class="nc-item-footer">
+            <div class="nc-risk-bar-wrap">
+              <div class="nc-risk-bar"
+                   [style.width.%]="item.riskNorm * 100"
+                   [style.background-color]="hassasiyetColor(item.hassasiyet)">
+              </div>
+            </div>
+            <span class="nc-hass-badge" [style.background-color]="hassasiyetColor(item.hassasiyet)">
+              {{ hassasiyetLabel(item.hassasiyet) }}
+            </span>
+            <button *ngIf="!item.isRead" class="nc-read-btn"
+                    (click)="onMarkAsRead(item, $event)" title="Okundu işaretle">✓</button>
+            <span *ngIf="item.isRead" class="nc-read-dot">✓</span>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- ── Toast container (sabit konum) ──────────────────────────────────────── -->
+<div class="nc-toast-container">
+  <div
+    *ngFor="let t of toasts"
+    class="nc-toast"
+    [class.nc-toast--closing]="t.closing"
+    [style.border-left-color]="hassasiyetColor(t.item.hassasiyet)"
+  >
+    <div class="nc-toast-header">
+      <span class="nc-toast-title">{{ t.item.title }}</span>
+      <button class="nc-toast-close" (click)="dismissToast(t.id)">✕</button>
+    </div>
+    <p class="nc-toast-msg">{{ t.item.message }}</p>
+    <div class="nc-toast-meta">
+      <span class="nc-hass-badge" [style.background-color]="hassasiyetColor(t.item.hassasiyet)">
+        {{ hassasiyetLabel(t.item.hassasiyet) }}
+      </span>
+      <span class="nc-toast-risk">Risk: {{ (t.item.riskNorm * 100) | number:'1.0-0' }}%</span>
+    </div>
+  </div>
+</div>

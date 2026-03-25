@@ -25,10 +25,7 @@ namespace EGM.Application.Services
 
         // Belirli bir operasyonel faaliyete ait ölü kayıtları
         public async Task<IReadOnlyList<Olu>> GetByOperasyonelFaaliyetAsync(Guid operasyonelFaaliyetId)
-        {
-            var all = await _oluRepository.ListAllAsync();
-            return all.Where(o => o.OperasyonelFaaliyetId == operasyonelFaaliyetId).ToList();
-        }
+            => await _oluRepository.FindAsync(o => o.OperasyonelFaaliyetId == operasyonelFaaliyetId);
 
         // Yeni ölü kaydı ekle
         public async Task<Olu> CreateAsync(Olu olu)
@@ -63,9 +60,6 @@ namespace EGM.Application.Services
 
         // Katılımcı durumuna göre filtrele (sivil, gösterici vb.)
         public async Task<IReadOnlyList<Olu>> GetByKatilimciDurumuAsync(string durum)
-        {
-            var all = await _oluRepository.ListAllAsync();
-            return all.Where(o => o.KatilimciDurumu == durum).ToList();
-        }
+            => await _oluRepository.FindAsync(o => o.KatilimciDurumu == durum);
     }
 }

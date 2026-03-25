@@ -25,17 +25,11 @@ namespace EGM.Application.Services
 
         // Belirli bir operasyonel faaliyete ait şehitler
         public async Task<IReadOnlyList<Sehit>> GetByOperasyonelFaaliyetAsync(Guid operasyonelFaaliyetId)
-        {
-            var all = await _sehitRepository.ListAllAsync();
-            return all.Where(s => s.OperasyonelFaaliyetId == operasyonelFaaliyetId).ToList();
-        }
+            => await _sehitRepository.FindAsync(s => s.OperasyonelFaaliyetId == operasyonelFaaliyetId);
 
         // Göreve göre filtrele (polis, asker vb.)
         public async Task<IReadOnlyList<Sehit>> GetByGorevAsync(string gorev)
-        {
-            var all = await _sehitRepository.ListAllAsync();
-            return all.Where(s => s.Gorev == gorev).ToList();
-        }
+            => await _sehitRepository.FindAsync(s => s.Gorev == gorev);
 
         // Yeni şehit kaydı ekle
         public async Task<Sehit> CreateAsync(Sehit sehit)

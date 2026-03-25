@@ -19,6 +19,10 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "leaflet.heat",
+              "leaflet.markercluster"
+            ],
             "assets": [
               {
                 "glob": "**/*",
@@ -26,14 +30,6 @@
               }
             ],
             "styles": ["node_modules/bootstrap/dist/css/bootstrap.min.css", "src/styles.css"],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "security": {
-              "allowedHosts": []
-            },
-            "ssr": {
-              "entry": "src/server.ts"
-            },
             "polyfills": ["@angular/localize/init"]
           },
           "configurations": {

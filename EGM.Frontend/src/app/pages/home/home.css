@@ -1,0 +1,493 @@
+/* ─── EGM Home — Stratejik Harita Dashboard ──────────────────────────────── */
+
+/* Kapsayıcı */
+.home-page {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* Leaflet harita teli */
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #0c1a2e;
+}
+
+/* ─── Cam-morfi panel tabanı ──────────────────────────────────────────────── */
+.egm-panel-base {
+  background: rgba(6, 20, 40, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(15, 111, 163, 0.35);
+  border-radius: 10px;
+  color: #cfe6f5;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Filtre paneli (sağ üst) ─────────────────────────────────────────────── */
+.egm-filter-panel {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 220px;
+  padding: 14px 16px;
+  background: rgba(6, 20, 40, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(15, 111, 163, 0.4);
+  border-radius: 10px;
+  color: #cfe6f5;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.55);
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.egm-filter-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7ec8e3;
+}
+
+.egm-badge {
+  margin-left: auto;
+  background: #0f6fa3;
+  color: #fff;
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.egm-filter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.egm-filter-row label {
+  font-size: 0.72rem;
+  color: #7ec8e3;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.egm-filter-row select {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(15, 111, 163, 0.45);
+  border-radius: 6px;
+  color: #e8f4fd;
+  padding: 5px 8px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.egm-filter-row select:focus {
+  outline: none;
+  border-color: #0f6fa3;
+}
+
+.egm-apply-btn {
+  background: linear-gradient(135deg, #0f6fa3, #0a4f7a);
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  padding: 7px 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  letter-spacing: 0.03em;
+  margin-top: 2px;
+}
+
+.egm-apply-btn:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.egm-apply-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ─── Katman seçici (sol alt) ─────────────────────────────────────────────── */
+.egm-layer-selector {
+  position: absolute;
+  bottom: 36px;
+  left: 12px;
+  z-index: 800;
+  display: flex;
+  gap: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+}
+
+.egm-layer-selector button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(6, 20, 40, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #aac8e0;
+  border: 1px solid rgba(15, 111, 163, 0.35);
+  border-right: none;
+  padding: 7px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  white-space: nowrap;
+}
+
+.egm-layer-selector button:last-child {
+  border-right: 1px solid rgba(15, 111, 163, 0.35);
+}
+
+.egm-layer-selector button.active,
+.egm-layer-selector button:hover {
+  background: rgba(15, 111, 163, 0.7);
+  color: #fff;
+}
+
+/* ─── Lejant (sağ alt) ────────────────────────────────────────────────────── */
+.egm-legend {
+  position: absolute;
+  bottom: 36px;
+  right: 12px;
+  z-index: 800;
+  width: 140px;
+  padding: 12px 14px;
+  background: rgba(6, 20, 40, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(15, 111, 163, 0.4);
+  border-radius: 10px;
+  color: #cfe6f5;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
+  font-size: 0.75rem;
+}
+
+.egm-legend-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #7ec8e3;
+  margin-bottom: 5px;
+}
+
+.egm-legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.egm-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.egm-legend-dot {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+}
+
+.egm-legend-circle {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  border: 2px solid #7ec8e3;
+  flex-shrink: 0;
+}
+
+.egm-legend-pin {
+  display: inline-block;
+  width: 9px;
+  height: 13px;
+  background: #7ec8e3;
+  clip-path: polygon(50% 0%, 100% 35%, 80% 80%, 50% 100%, 20% 80%, 0% 35%);
+  flex-shrink: 0;
+  margin-left: 1px;
+}
+
+.egm-legend-divider {
+  height: 1px;
+  background: rgba(15, 111, 163, 0.3);
+  margin: 6px 0;
+}
+
+.egm-legend-scope {
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(15, 111, 163, 0.25);
+  color: #7ec8e3;
+  font-size: 0.68rem;
+}
+
+/* ─── Bildirim banner'ı (üst merkez) ─────────────────────────────────────── */
+.egm-notif-banner {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 300px;
+  max-width: 480px;
+  padding: 12px 16px;
+  background: rgba(9, 30, 55, 0.96);
+  border: 1px solid rgba(231, 76, 60, 0.55);
+  border-left: 4px solid #e74c3c;
+  border-radius: 10px;
+  color: #f7f9fb;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.7);
+  transition: top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+  opacity: 0;
+}
+
+.egm-notif-banner.visible {
+  top: 16px;
+  opacity: 1;
+}
+
+.egm-notif-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  animation: notif-ring 0.8s ease;
+}
+
+.egm-notif-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.egm-notif-content strong {
+  display: block;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.egm-notif-content span {
+  display: block;
+  font-size: 0.75rem;
+  color: #a8c8e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Hata çubuğu ────────────────────────────────────────────────────────── */
+.egm-error-bar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  background: rgba(231, 76, 60, 0.9);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.82rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Yükleme göstergesi ─────────────────────────────────────────────────── */
+.egm-loader {
+  position: absolute;
+  bottom: 88px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(6, 20, 40, 0.92);
+  border: 1px solid rgba(15, 111, 163, 0.4);
+  border-radius: 30px;
+  color: #7ec8e3;
+  font-size: 0.78rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.egm-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(15, 111, 163, 0.35);
+  border-top-color: #0f6fa3;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+/* ─── Ortak "kapat" düğmesi ──────────────────────────────────────────────── */
+.egm-close-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 2px 4px;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.egm-close-btn:hover { color: #fff; }
+
+/* ─── Harita marker stilleri ─────────────────────────────────────────────── */
+
+/* Pin ikonu (gerçekleşen etkinlikler) */
+.egm-pin {
+  width: 18px;
+  height: 26px;
+  background: var(--pc, #e74c3c);
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+  transition: transform 0.15s;
+}
+
+.egm-pin:hover { transform: rotate(-45deg) scale(1.15); }
+
+/* Leaflet popup özelleştirmesi */
+.egm-leaflet-popup .leaflet-popup-content-wrapper {
+  background: rgba(7, 22, 42, 0.97);
+  border: 1px solid rgba(15, 111, 163, 0.45);
+  border-radius: 10px;
+  color: #d4e9f7;
+  padding: 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.65);
+}
+
+.egm-leaflet-popup .leaflet-popup-tip-container { display: none; }
+
+.egm-pop {
+  font-size: 0.8rem;
+  min-width: 220px;
+}
+
+.egm-pop-head {
+  padding: 10px 14px 8px;
+  border-bottom: 1px solid rgba(15, 111, 163, 0.25);
+}
+
+.egm-pop-head b {
+  display: block;
+  font-size: 0.87rem;
+  color: #e8f4fd;
+  margin-bottom: 2px;
+}
+
+.egm-pop-head small {
+  color: #7ec8e3;
+  font-size: 0.72rem;
+}
+
+.egm-pop-body {
+  padding: 8px 14px 12px;
+  display: grid;
+  row-gap: 4px;
+}
+
+.pr {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.pr > span:first-child {
+  color: #7ec8e3;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+/* ─── Pulse animasyonu (SignalR) ──────────────────────────────────────────── */
+@keyframes egm-pulse {
+  0%   { stroke-width: 2px; stroke-opacity: 1; }
+  50%  { stroke-width: 14px; stroke-opacity: 0.25; }
+  100% { stroke-width: 2px; stroke-opacity: 1; }
+}
+
+.egm-pulse {
+  animation: egm-pulse 0.9s ease-out 3;
+}
+
+/* ─── Spinner & bildirim ─────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes notif-ring {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(12deg); }
+  75% { transform: rotate(-12deg); }
+}
+
+/* ─── Leaflet SVG hover geçişi ───────────────────────────────────────────── */
+.leaflet-container svg .leaflet-interactive {
+  transition: fill 120ms ease, fill-opacity 120ms ease, stroke-width 120ms ease;
+  vector-effect: non-scaling-stroke;
+}
+
+.leaflet-container svg .leaflet-interactive.hovered {
+  fill: #1a6fa3 !important;
+  fill-opacity: 0.72 !important;
+  stroke-width: 2.2px !important;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .egm-filter-panel {
+    top: 8px;
+    right: 8px;
+    width: 190px;
+    padding: 10px 12px;
+  }
+
+  .egm-layer-selector {
+    bottom: 28px;
+    left: 8px;
+  }
+
+  .egm-legend {
+    bottom: 28px;
+    right: 8px;
+    width: 120px;
+  }
+}
+
+@media (max-width: 540px) {
+  .egm-filter-panel { width: 165px; font-size: 0.72rem; }
+  .egm-notif-banner { min-width: unset; width: calc(100vw - 24px); }
+}

@@ -42,6 +42,10 @@ public static class Roles
         return ai > ti && ai >= 0;
     }
 
+    /// <summary>Verilen rolün geçerli bir sistem rolü olup olmadığını döner.</summary>
+    public static bool IsValidRole(string role)
+        => Hierarchy.Contains(role);
+
     /// <summary>Verilen rolün İl düzeyinde (şehir kısıtlı) olup olmadığını döner.</summary>
     public static bool IsCityScoped(string role)
         => role == IlPersoneli || role == IlYoneticisi;

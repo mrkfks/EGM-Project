@@ -29,10 +29,7 @@ namespace EGM.Application.Services
 
         // Olaya göre faaliyetleri getir
         public async Task<IReadOnlyList<OperasyonelFaaliyet>> GetByOlayAsync(Guid olayId)
-        {
-            var all = await _faaliyetRepository.ListAllAsync();
-            return all.Where(f => f.OlayId == olayId).ToList();
-        }
+            => await _faaliyetRepository.FindAsync(f => f.OlayId == olayId);
 
         // Yeni faaliyet oluştur
         public async Task<OperasyonelFaaliyet> CreateAsync(OperasyonelFaaliyet faaliyet)
@@ -75,10 +72,7 @@ namespace EGM.Application.Services
 
         // Faaliyete ait katılımcı gruplarını getir
         public async Task<IReadOnlyList<KatilimciGrup>> GetGruplarAsync(Guid faaliyetId)
-        {
-            var all = await _grupRepository.ListAllAsync();
-            return all.Where(g => g.OperasyonelFaaliyetId == faaliyetId).ToList();
-        }
+            => await _grupRepository.FindAsync(g => g.OperasyonelFaaliyetId == faaliyetId);
 
         // Toplam katılımcı sayısını hesapla
         public async Task<int> GetToplamKatilimciSayisiAsync(Guid faaliyetId)

@@ -90,6 +90,12 @@ namespace EGM.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Timestamp");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("EntityName", "EntityId");
+
                     b.ToTable("AuditLoglar");
                 });
 
@@ -381,9 +387,17 @@ namespace EGM.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CityId");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Durum");
+
                     b.HasIndex("KonuId");
 
                     b.HasIndex("OrganizatorId");
+
+                    b.HasIndex("Tarih");
 
                     b.ToTable("Olaylar");
                 });
@@ -804,6 +818,8 @@ namespace EGM.Infrastructure.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("Role");
 
                     b.HasIndex("Sicil")
                         .IsUnique();

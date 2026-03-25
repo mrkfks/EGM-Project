@@ -1,6 +1,7 @@
 using EGM.Application.DTOs;
 using EGM.Application.Services;
 using EGM.Domain.Entities;
+using EGM.Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,12 +19,64 @@ namespace EGM.API.Controllers
             _olayService = olayService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
+        /// <summary>
+        /// Kayıt yapılmadan önce risk puanı ön izlemesi hesaplar.
+        /// Max puan: 55 (Katılımcı 10 + Hassasiyet 20 + Yürüyüş 15 + Sosyal 10).
+        /// </summary>
+        [HttpPost("risk-preview")]
+        public IActionResult RiskPreview([FromBody] RiskPreviewRequestDto dto)
         {
-            var olaylar = await _olayService.GetAllAsync();
-            var result = olaylar.Select(o => MapToResponse(o));
-            return Ok(result);
+            double raw = 0;
+            if (dto.KatilimciSayisi.HasValue && dto.KatilimciSayisi.Value > 1000) raw += 10;
+            raw += dto.Hassasiyet switch
+            {
+                Hassasiyet.Kritik  => 20,
+                Hassasiyet.Yuksek => 12,
+                Hassasiyet.Orta   => 5,
+                _                 => 0
+            };
+            if (dto.OlayTuru == "Yürüyüş") raw += 15;
+            if (dto.SosyalSignalSkoru > 70)   raw += 10;
+
+            const double max = 55.0;
+            var normalized = Math.Round(raw / max, 3);
+            var seviye = normalized switch
+            {
+                >= 0.8 => "Kritik",
+                >= 0.6 => "Yüksek",
+                >= 0.4 => "Orta",
+                _      => "Düşük"
+            };
+            return Ok(new RiskPreviewResponseDto
+            {
+                RiskPuaniRaw        = raw,
+                RiskPuaniNormalized = normalized,
+                Seviye              = seviye
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll(
+            [FromQuery] int sayfa = 1,
+            [FromQuery] int sayfaBoyutu = 20,
+            [FromQuery] OlayDurum? durum = null,
+            [FromQuery] DateTime? tarihBaslangic = null,
+            [FromQuery] DateTime? tarihBitis = null)
+        {
+            if (sayfa < 1) sayfa = 1;
+            if (sayfaBoyutu < 1 || sayfaBoyutu > 500) sayfaBoyutu = 20;
+
+            var paged = await _olayService.GetAllAsync(sayfa, sayfaBoyutu, durum, tarihBaslangic, tarihBitis);
+            return Ok(new
+            {
+                paged.TotalCount,
+                paged.Page,
+                paged.PageSize,
+                paged.TotalPages,
+                paged.HasNextPage,
+                paged.HasPreviousPage,
+                Items = paged.Items.Select(o => MapToResponse(o))
+            });
         }
 
         [HttpGet("{id}")]
@@ -159,7 +212,9 @@ namespace EGM.API.Controllers
             Hassasiyet = o.Hassasiyet,
             RiskPuani = o.RiskPuani,
             GercekBaslangicTarihi = o.GercekBaslangicTarihi,
-            GercekBitisTarihi = o.GercekBitisTarihi
+            GercekBitisTarihi = o.GercekBitisTarihi,
+            CreatedByUserId = o.CreatedByUserId,
+            CityId = o.CityId
         };
     }
 }

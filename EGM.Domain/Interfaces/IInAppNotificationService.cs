@@ -15,6 +15,7 @@ namespace EGM.Domain.Interfaces
         Task MarkAsReadAsync(Guid notificationId, string userId);
 
         /// <summary>Kullanıcıya ait okunmamış / tüm bildirimleri döner.</summary>
+        Task MarkAllAsReadAsync(string userId);
         Task<IReadOnlyList<Notification>> GetUserNotificationsAsync(string userId);
     }
 }

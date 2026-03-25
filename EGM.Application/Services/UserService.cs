@@ -1,44 +1,53 @@
 using EGM.Domain.Entities;
 using EGM.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace EGM.Application.Services
 {
     public class UserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly ILogger<UserService> _logger;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, ILogger<UserService> logger)
         {
             _userRepository = userRepository;
+            _logger = logger;
         }
 
-        public User? ValidateUser(int sicil, string password)
+        public async Task<User?> ValidateUserAsync(int sicil, string password)
         {
-            var user = _userRepository.GetBySicil(sicil);
-            if (user == null) return null;
+            var user = await _userRepository.GetBySicilAsync(sicil);
+            if (user == null)
+            {
+                _logger.LogWarning("Sicil bulunamadı: {Sicil}", sicil);
+                return null;
+            }
 
-            //Hash Doğrulama
             bool isValid = BCrypt.Net.BCrypt.Verify(password, user.PasswordHash);
+            if (!isValid)
+                _logger.LogWarning("Hatalı şifre girişi. Sicil: {Sicil}", sicil);
             return isValid ? user : null;
         }
-        public void RegisterUser(User user)
+
+        public async Task RegisterUserAsync(User user)
         {
-            var existing = _userRepository.GetBySicil(user.Sicil);
+            var existing = await _userRepository.GetBySicilAsync(user.Sicil);
             if (existing != null)
+            {
+                _logger.LogWarning("Tekrar kayıt denemesi. Sicil: {Sicil}", user.Sicil);
                 throw new InvalidOperationException("Bu sicil numarası zaten mevcut!");
-            _userRepository.Add(user);
+            }
+            await _userRepository.AddAsync(user);
         }
-        public void UpdateUser(User user)
-        {
-            _userRepository.Update(user);
-        }
-        public void DeleteUser(int sicil)
-        {
-            _userRepository.Delete(sicil);
-        }
-        public IEnumerable<User> GetAllUsers()
-        {
-            return _userRepository.GetAll();
-        }
+
+        public async Task UpdateUserAsync(User user)
+            => await _userRepository.UpdateAsync(user);
+
+        public async Task DeleteUserAsync(int sicil)
+            => await _userRepository.DeleteAsync(sicil);
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+            => await _userRepository.GetAllAsync();
     }
 }

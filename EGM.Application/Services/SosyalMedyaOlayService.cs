@@ -27,40 +27,23 @@ namespace EGM.Application.Services
 
         // Olaya göre filtrele
         public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByOlayAsync(Guid olayId)
-        {
-            var all = await _sosyalMedyaRepository.ListAllAsync();
-            return all.Where(s => s.OlayId == olayId).ToList();
-        }
+            => await _sosyalMedyaRepository.FindAsync(s => s.OlayId == olayId);
 
         // Platforma göre filtrele (Twitter, Facebook vb.)
         public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByPlatformAsync(string platform)
-        {
-            var all = await _sosyalMedyaRepository.ListAllAsync();
-            return all.Where(s => s.Platform == platform).ToList();
-        }
+            => await _sosyalMedyaRepository.FindAsync(s => s.Platform == platform);
 
         // Hassasiyete göre filtrele
         public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByHassasiyetAsync(Hassasiyet hassasiyet)
-        {
-            var all = await _sosyalMedyaRepository.ListAllAsync();
-            return all.Where(s => s.Hassasiyet == hassasiyet).ToList();
-        }
+            => await _sosyalMedyaRepository.FindAsync(s => s.Hassasiyet == hassasiyet);
 
         // Yüksek signal skoruna sahip paylaşımlar (eşik değer üstü)
         public async Task<IReadOnlyList<SosyalMedyaOlay>> GetHighSignalAsync(double minSkor)
-        {
-            var all = await _sosyalMedyaRepository.ListAllAsync();
-            return all.Where(s => s.SosyalSignalSkoru >= minSkor)
-                      .OrderByDescending(s => s.SosyalSignalSkoru)
-                      .ToList();
-        }
+            => await _sosyalMedyaRepository.FindAsync(s => s.SosyalSignalSkoru >= minSkor);
 
         // Tarih aralığına göre filtrele
         public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByTarihAraligiAsync(DateTime baslangic, DateTime bitis)
-        {
-            var all = await _sosyalMedyaRepository.ListAllAsync();
-            return all.Where(s => s.PaylasimTarihi >= baslangic && s.PaylasimTarihi <= bitis).ToList();
-        }
+            => await _sosyalMedyaRepository.FindAsync(s => s.PaylasimTarihi >= baslangic && s.PaylasimTarihi <= bitis);
 
         // Yeni kayıt ekle
         public async Task<SosyalMedyaOlay> CreateAsync(SosyalMedyaOlay kayit)

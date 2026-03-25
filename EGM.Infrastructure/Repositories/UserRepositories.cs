@@ -12,58 +12,45 @@ namespace EGM.Infrastructure.Repositories
         {
             _context = context;
         }
-    
-        public User? GetBySicil(int sicil)
-        {
-            return _context.Users.FirstOrDefault(u => u.Sicil == sicil);
-        }
 
-        public IEnumerable<User> GetByRole(string role)
-        {
-            return _context.Users.Where(u => u.Role == role).ToList();
-        }
-        public IEnumerable<User>GetByFullName(string fullName)
-        {
-            return _context.Users.Where(u => u.FullName == fullName);
-        }
+        public async Task<User?> GetBySicilAsync(int sicil)
+            => await _context.Users.FirstOrDefaultAsync(u => u.Sicil == sicil);
 
-        public User? GetByEmail(string email)
-        {
-            return _context.Users.FirstOrDefault(u => u.Email == email);
-        }
+        public async Task<IEnumerable<User>> GetByRoleAsync(string role)
+            => await _context.Users.Where(u => u.Role == role).ToListAsync();
 
-        public User? GetByGsm(string gsm)
-        {
-            return _context.Users.FirstOrDefault(u => u.GSM == gsm);
-        }
+        public async Task<IEnumerable<User>> GetByFullNameAsync(string fullName)
+            => await _context.Users.Where(u => u.FullName == fullName).ToListAsync();
 
-        public void Add(User user)
+        public async Task<User?> GetByEmailAsync(string email)
+            => await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+        public async Task<User?> GetByGsmAsync(string gsm)
+            => await _context.Users.FirstOrDefaultAsync(u => u.GSM == gsm);
+
+        public async Task AddAsync(User user)
         {
             _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void Update(User user)
+        public async Task UpdateAsync(User user)
         {
             _context.Users.Update(user);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void Delete(int sicil)
+        public async Task DeleteAsync(int sicil)
         {
-            var user = GetBySicil(sicil);
+            var user = await GetBySicilAsync(sicil);
             if (user != null)
             {
                 _context.Users.Remove(user);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
         }
 
-
-
-        public IEnumerable<User> GetAll()
-        {
-            return _context.Users.ToList();
-        }
+        public async Task<IEnumerable<User>> GetAllAsync()
+            => await _context.Users.ToListAsync();
     }
 }

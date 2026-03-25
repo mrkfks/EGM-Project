@@ -29,7 +29,7 @@ namespace EGM.Application.Helpers
                 issuer,
                 issuer,
                 claims,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(token);
 

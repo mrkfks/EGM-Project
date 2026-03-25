@@ -30,9 +30,9 @@ namespace EGM.API.Controllers
 
         [HttpGet]
         [Authorize(Policy = "CityManagerOrAbove")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var users = _userService.GetAllUsers().Select(u => new UserResponseDto
+            var users = (await _userService.GetAllUsersAsync()).Select(u => new UserResponseDto
             {
                 Id = u.Id, Sicil = u.Sicil, Role = u.Role,
                 FullName = u.FullName, Email = u.Email, GSM = u.GSM
@@ -42,9 +42,9 @@ namespace EGM.API.Controllers
 
         [HttpDelete("{sicil}")]
         [Authorize(Policy = "HQManagerOnly")]
-        public IActionResult Delete(int sicil)
+        public async Task<IActionResult> Delete(int sicil)
         {
-            _userService.DeleteUser(sicil);
+            await _userService.DeleteUserAsync(sicil);
             return Ok("Kullanıcı silindi.");
         }
 
@@ -55,25 +55,10 @@ namespace EGM.API.Controllers
         /// </summary>
         [HttpPost("{sicil}/rol-ata")]
         [Authorize(Policy = "CityManagerOrAbove")]
-        public IActionResult RolAta(int sicil, [FromBody] RolAtamaDto dto)
+        public async Task<IActionResult> RolAta(int sicil, [FromBody] RolAtamaDto dto)
         {
-            try
-            {
-                _roleAssignmentService.AssignRole(sicil, dto.YeniRol, dto.CityId);
-                return Ok(new { Mesaj = $"Sicil {sicil} kullanıcısına '{dto.YeniRol}' rolü atandı." });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Forbid();
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { Hata = ex.Message });
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound(new { Hata = "Kullanıcı bulunamadı." });
-            }
+            await _roleAssignmentService.AssignRoleAsync(sicil, dto.YeniRol, dto.CityId);
+            return Ok(new { Mesaj = $"Sicil {sicil} kullanıcısına '{dto.YeniRol}' rolü atandı." });
         }
     }
 }

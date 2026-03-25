@@ -30,9 +30,13 @@ namespace EGM.Application.Services
         /// <param name="cityIdOverride">
         /// Yalnızca Başkanlık Yöneticisi kullanır: hedef kullanıcıya atanacak il.
         /// </param>
-        public void AssignRole(int targetSicil, string newRole, int? cityIdOverride = null)
+        public async Task AssignRoleAsync(int targetSicil, string newRole, int? cityIdOverride = null)
         {
             var assignerRole = _currentUser.Role;
+
+            // Geçersiz rol değeri erken yakala
+            if (!Roles.IsValidRole(newRole))
+                throw new InvalidOperationException($"'{newRole}' geçerli bir sistem rolü değildir.");
 
             // Yalnızca İl Yöneticisi ve Başkanlık Yöneticisi rol atayabilir
             if (assignerRole != Roles.IlYoneticisi && assignerRole != Roles.BaskanlikYoneticisi)
@@ -43,7 +47,7 @@ namespace EGM.Application.Services
                 throw new UnauthorizedAccessException(
                     $"'{assignerRole}' rolü '{newRole}' rolünü atayamaz; hiyerarşi ihlali.");
 
-            var target = _userRepository.GetBySicil(targetSicil)
+            var target = await _userRepository.GetBySicilAsync(targetSicil)
                 ?? throw new KeyNotFoundException($"Sicil {targetSicil} bulunamadı.");
 
             // İl Yöneticisi kısıtlamaları ─────────────────────────────────
@@ -75,7 +79,7 @@ namespace EGM.Application.Services
                     target.CityId = cityIdOverride;
             }
 
-            _userRepository.Update(target);
+            await _userRepository.UpdateAsync(target);
         }
     }
 }

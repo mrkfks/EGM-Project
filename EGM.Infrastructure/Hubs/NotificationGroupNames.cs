@@ -2,10 +2,14 @@ namespace EGM.Infrastructure.Hubs
 {
     public static class NotificationGroupNames
     {
-        /// <summary>İl Yöneticileri için şehir bazlı grup adı.</summary>
-        public static string CityManagers(int cityId) => $"city_{cityId}_managers";
+        /// <summary>Bir şehrin tüm personeli (IlPersoneli + IlYoneticisi) için grup adı.</summary>
+        public static string City(int cityId) => $"city_{cityId}";
 
-        /// <summary>Başkanlık Yöneticileri için merkezi grup adı.</summary>
-        public const string HQManagers = "hq_managers";
+        /// <summary>Tüm başkanlık personeli (BaskanlikPersoneli + BaskanlikYoneticisi) için grup adı.</summary>
+        public const string HQ = "hq";
+
+        // Geriye-dönük uyumluluk — eski adlar
+        public static string CityManagers(int cityId) => City(cityId);
+        public const string HQManagers = HQ;
     }
 }
