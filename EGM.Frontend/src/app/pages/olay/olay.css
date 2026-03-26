@@ -4,6 +4,13 @@
 
 /* ── Temel değişkenler ─────────────────────────────────────────────── */
 :host {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   --bg-page:    #060e1e;
   --bg-panel:   #0a1628;
   --bg-card:    rgba(6,20,40,0.88);
@@ -28,11 +35,13 @@
 
 /* ── Sayfa temel katmanı ──────────────────────────────────────────── */
 .olay-page {
-  min-height: 100vh;
+  min-height: 100%;
   background: var(--bg-page);
   color: var(--text-prim);
   font-family: 'Segoe UI', system-ui, sans-serif;
   padding: 0 0 40px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 /* ── Sayfa başlığı ────────────────────────────────────────────────── */
@@ -45,10 +54,9 @@
   padding: 14px 24px;
   background: rgba(10,22,40,0.95);
   border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(10px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: relative;
+  top: auto;
+  z-index: auto;
 }
 .header-left {
   display: flex;
@@ -136,12 +144,16 @@
   margin: 16px 24px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
   position: relative;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Yükleme overlay */
 .loading-overlay {
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -149,6 +161,7 @@
   padding: 60px;
   background: var(--bg-card);
   color: var(--text-sec);
+  z-index: 2050;
 }
 .spinner {
   width: 28px; height: 28px;
@@ -162,6 +175,7 @@
 /* Veri tablosu */
 .data-table {
   width: 100%;
+  min-width: 860px;
   border-collapse: collapse;
   font-size: 0.83rem;
 }
@@ -254,6 +268,7 @@
 .btn-finish   { background: rgba(15,111,163,0.2); color: #5bc0f5; }
 .btn-cancel   { background: rgba(192,57,43,0.2);  color: #e88; }
 .btn-edit     { background: rgba(243,156,18,0.15); color: #f1c40f; }
+.btn-delete   { background: rgba(192,57,43,0.2);  color: #e74c3c; }
 .no-perm { font-size: 0.8rem; cursor: default; opacity: 0.5; margin: 1px; }
 .empty-row { text-align: center; padding: 40px; color: var(--text-mute); }
 
@@ -345,7 +360,7 @@
   align-items: flex-start;
   justify-content: center;
   padding: 32px 16px;
-  z-index: 500;
+  z-index: 2100;
   overflow-y: auto;
 }
 .modal-panel {
@@ -535,8 +550,9 @@
 @media (max-width: 768px) {
   .page-header { padding: 10px 14px; }
   .toolbar     { padding: 8px 14px; }
-  .table-wrapper { margin: 10px 14px; }
+  .table-wrapper { margin: 10px 8px; }
   .pagination  { padding: 10px 14px; }
+  .alert       { margin: 8px 8px; }
 
   .form-grid { grid-template-columns: 1fr; }
   .form-field.span-2 { grid-column: 1; }
@@ -545,16 +561,23 @@
   .modal-panel   { max-width: 100%; border-radius: 10px; }
   .olay-form     { padding: 12px 14px 16px; }
 
-  /* Tablo yatay kaydırma */
-  .data-table { font-size: 0.75rem; }
+  /* Küçük ekranda daha az önemli sütunları gizle */
+  .col-katilimci,
+  .col-risk { display: none; }
+
+  .data-table { font-size: 0.75rem; min-width: 540px; }
   .data-table th, .data-table td { padding: 7px 8px; }
-  .risk-mini-bar { width: 50px; }
   .header-left h1 { font-size: 0.95rem; }
 }
 
 @media (max-width: 480px) {
+  .table-wrapper { margin: 8px 4px; }
   .form-section { padding: 10px 10px 8px; }
   .form-section legend { font-size: 0.7rem; }
   .btn-primary, .btn-ghost { font-size: 0.78rem; padding: 7px 12px; }
-  .role-badge, .city-badge { display: none; }
+
+  /* Çok küçük ekranda ek sütun gizle */
+  .col-mekan { display: none; }
+
+  .data-table { min-width: 380px; }
 }

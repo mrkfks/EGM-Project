@@ -1,88 +1,54 @@
 @import "leaflet/dist/leaflet.css";
 
-/* ── Tam boy uygulama layout (flexbox) ───────────────── */
-html, body, app-root {
+/* ── Base ────────────────────────────────────────── */
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-.app-layout {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.app-body {
-  display: flex;
-  flex: 1 1 auto;
-  min-height: 0;          /* flex overflow için zorunlu */
-  overflow: hidden;
-}
-
-/* ── Sidebar ─────────────────────────────────────────── */
-app-navbar,
-app-sidebar {
-  z-index: 1000;
-  display: contents;
-}
-
-.egm-sidebar {
-  flex: 0 0 190px;
-  max-width: 190px;
-  overflow-y: auto;
-}
-
-/* ── İçerik alanı (harita kapsayıcısı) ──────────────── */
-.main-content {
-  position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-}
-
-/* Angular component host — main-content'i tam kapla */
-app-home {
+app-root {
   display: block;
-  position: absolute;
-  inset: 0;
-}
-
-.home-page {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-/* Harita kapsayıcısı: üst elementi tamamen doldur */
-#map {
-  position: absolute;
-  inset: 0;
-  width: 100%;
   height: 100%;
 }
 
-/* Deniz rengi */
-.leaflet-container {
-  background: #a8d8ef;
+/* Routed page host elements fill the entire .main-content box.
+   Must be global — component encapsulation blocks this in app.css */
+.main-content > *:not(router-outlet) {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
-/* ── Küçük ekran optimizasyonları ────────────────────── */
-@media (max-width: 768px) {
-  .egm-sidebar { display: none; }
-  app-navbar { display: block; }
+/* ── Login sayfası: navbar ve sidebar gizle, main-content sıfırla ── */
+body.login-page app-navbar,
+body.login-page app-sidebar {
+  display: none !important;
+}
+body.login-page .main-content {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  overflow: visible !important;
+  width: 100%;
+  height: 100%;
+}
+body.login-page .main-content > *:not(router-outlet) {
+  height: auto;
+  overflow: visible;
+}
 
-  .leaflet-container svg .leaflet-interactive {
-    stroke-width: 1px !important;
-    transition: fill 100ms ease, fill-opacity 100ms ease, stroke-width 100ms ease;
-  }
-  .leaflet-container svg .leaflet-interactive.hovered {
-    stroke-width: 1.8px !important;
-  }
-  .leaflet-tooltip { font-size: 12px; padding: 2px 6px; }
+/* ── Responsive ──────────────────────────────────── */
+@media (max-width: 900px) {
+  .main-content { left: 0 !important; }
 }
 
 /* Scroll kapatma */
@@ -100,7 +66,6 @@ body.no-scroll { overflow: hidden; }
   stroke-width: 2.4px !important;
 }
 
-/* Leaflet attribution küçültme */
 .leaflet-control-attribution {
   font-size: 9px !important;
   opacity: 0.6;

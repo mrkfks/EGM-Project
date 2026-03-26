@@ -20,6 +20,7 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "allowedCommonJsDependencies": [
+              "leaflet",
               "leaflet.heat",
               "leaflet.markercluster"
             ],

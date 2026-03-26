@@ -9,7 +9,7 @@ namespace EGM.Application.Helpers
 {
     public static class JwtHelper
     {
-        public static string GenerateToken(User user, string key, string issuer)
+        public static string GenerateToken(User user, string key, string issuer, string audience)
         {
             var claims = new[]
             {
@@ -17,6 +17,7 @@ namespace EGM.Application.Helpers
                 new Claim(ClaimTypes.NameIdentifier,   user.Sicil.ToString()),
                 new Claim(ClaimTypes.Role,             user.Role),
                 new Claim("role",                      user.Role),
+                new Claim("fullName",                  user.FullName ?? string.Empty),
                 new Claim("gsm",                       user.GSM),
                 new Claim("email",                     user.Email),
                 new Claim("cityId",                    user.CityId?.ToString() ?? string.Empty)
@@ -27,9 +28,9 @@ namespace EGM.Application.Helpers
 
             var token = new JwtSecurityToken(
                 issuer,
-                issuer,
+                audience,
                 claims,
-                expires: DateTime.UtcNow.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(8),
                 signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(token);
 

@@ -6,24 +6,12 @@
   <!-- ── Üst başlık ──────────────────────────────────────────────────── -->
   <header class="page-header">
     <div class="header-left">
-      <button class="btn-icon" title="Ana Sayfa" (click)="navigate('/home')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 9.5L12 3l9 6.5V21H3V9.5z"/><path d="M9 21V12h6v9"/>
-        </svg>
-      </button>
       <h1>Olay Yönetim Merkezi</h1>
     </div>
     <div class="header-right">
-      <span class="role-badge" *ngIf="tokenRole">{{ tokenRole }}</span>
-      <span class="city-badge" *ngIf="tokenCityId">
-        İl: {{ IL_LISTESI | slice:tokenCityId-1:tokenCityId | slice:0:1 }}
-        {{ IL_LISTESI[tokenCityId - 1]?.ad ?? tokenCityId }}
-      </span>
       <button class="btn-primary" *ngIf="canCreateOrEdit()" (click)="openCreate()">
         + Yeni Olay
       </button>
-      <button class="btn-ghost" (click)="logout()">Çıkış</button>
     </div>
   </header>
 
@@ -53,12 +41,12 @@
         <tr>
           <th>Başlık</th>
           <th>Tür</th>
-          <th>İl / İlçe</th>
+          <th class="col-mekan">İl / İlçe</th>
           <th>Tarih</th>
-          <th>Katılımcı</th>
+          <th class="col-katilimci">Katılımcı</th>
           <th>Hassasiyet</th>
           <th>Durum</th>
-          <th>Risk</th>
+          <th class="col-risk">Risk</th>
           <th>İşlem</th>
         </tr>
       </thead>
@@ -68,12 +56,12 @@
             <span class="olay-baslik">{{ row.baslik ?? '—' }}</span>
           </td>
           <td>{{ row.olayTuru ?? '—' }}</td>
-          <td>
+          <td class="col-mekan">
             <span class="il-text">{{ row.il ?? '—' }}</span>
             <span class="ilce-text" *ngIf="row.ilce"> / {{ row.ilce }}</span>
           </td>
           <td>{{ formatTarih(row.tarih) }}</td>
-          <td class="td-center">{{ row.katilimciSayisi ?? '—' }}</td>
+          <td class="td-center col-katilimci">{{ row.katilimciSayisi ?? '—' }}</td>
           <td>
             <span class="hassasiyet-dot"
                   [style.background]="hassasiyetColor(row.hassasiyet)"
@@ -85,7 +73,7 @@
               {{ durumLabel(row.durum) }}
             </span>
           </td>
-          <td>
+          <td class="col-risk">
             <div class="risk-mini-bar">
               <div class="risk-mini-fill"
                    [style.width.%]="(row.riskPuani / 55) * 100"
@@ -109,6 +97,11 @@
             <span class="no-perm"
                   *ngIf="!canEdit(row) && canCreateOrEdit()"
                   title="Bu kaydı düzenleme yetkiniz yok.">🔒</span>
+            <!-- Silme: yalnızca Başkanlık Yöneticisi -->
+            <button class="btn-xs btn-delete"
+                    *ngIf="canDelete()"
+                    (click)="delete(row.id)"
+                    title="Kaydı Sil">🗑</button>
           </td>
         </tr>
         <tr *ngIf="rows.length === 0">

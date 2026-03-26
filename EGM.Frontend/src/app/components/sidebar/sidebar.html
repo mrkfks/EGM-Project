@@ -1,17 +1,88 @@
-<aside *ngIf="show" class="egm-sidebar d-flex flex-column flex-shrink-0 p-3 bg-navy text-white">
-  <!-- Menü Linkleri -->
-  <ul class="nav nav-pills flex-column mb-auto">
-    <li class="nav-item">
-      <a routerLink="/home" class="nav-link text-white active">Anasayfa</a>
-    </li>
-    <li>
-      <a routerLink="/olay" class="nav-link text-white">Olaylar</a>
-    </li>
-    <li>
-      <a routerLink="/settings" class="nav-link text-white">İstatistikler</a>
-    </li>
-    <li>
-      <a routerLink="/contact" class="nav-link text-white">VIP</a>
-    </li>
-  </ul>
+<aside class="egm-sidebar" *ngIf="show">
+
+  <!-- ── Marka / Logo ─────────────────────────── -->
+  <div class="sb-brand">
+    <img src="logo.png" alt="EGM" class="sb-logo" onerror="this.style.display='none'">
+    <div class="sb-brand-text">
+      <span class="sb-brand-name">EGM</span>
+      <span class="sb-brand-sub">Yönetim Sistemi</span>
+    </div>
+  </div>
+
+  <!-- ── Nav Grupları ─────────────────────────── -->
+  <nav class="sb-nav">
+    <ng-container *ngFor="let group of visibleGroups()">
+      <div class="sb-group-label">{{ group.title }}</div>
+      <ul class="sb-list">
+        <li *ngFor="let item of group.items">
+          <a class="sb-link" [routerLink]="item.route" [class.active]="isActive(item.route)">
+            <!-- MAP -->
+            <svg *ngIf="item.icon==='map'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/>
+              <line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
+            </svg>
+            <!-- ALERT / EVENT -->
+            <svg *ngIf="item.icon==='alert'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <!-- ACTIVITY / OPERATIONAL -->
+            <svg *ngIf="item.icon==='activity'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            <!-- SHARE / SOCIAL MEDIA -->
+            <svg *ngIf="item.icon==='share'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+            <!-- SEARCH-PERSON / SUPHELI -->
+            <svg *ngIf="item.icon==='search-person'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="7" r="4"/><path d="M3 21v-1a8 8 0 0 1 11.32-7.27"/>
+              <circle cx="19" cy="19" r="3"/><line x1="21.5" y1="21.5" x2="23" y2="23"/>
+            </svg>
+            <!-- ORG / ORGANIZATOR -->
+            <svg *ngIf="item.icon==='org'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="15" width="6" height="5" rx="1"/><rect x="9" y="15" width="6" height="5" rx="1"/>
+              <rect x="16" y="15" width="6" height="5" rx="1"/>
+              <rect x="7" y="4" width="10" height="5" rx="1"/>
+              <line x1="5" y1="15" x2="5" y2="9"/><line x1="19" y1="15" x2="19" y2="9"/>
+              <line x1="12" y1="15" x2="12" y2="9"/><line x1="5" y1="9" x2="19" y2="9"/>
+            </svg>
+            <!-- VOTE / SECIM -->
+            <svg *ngIf="item.icon==='vote'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            <!-- MEDAL / SEHIT -->
+            <svg *ngIf="item.icon==='medal'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="15" r="6"/>
+              <polyline points="8.56 2.75 4.5 4.5 4.5 8.56"/>
+              <polyline points="19.5 4.5 15.44 2.75 15.44 8.56"/>
+              <path d="M4.5 8.56A9 9 0 0 0 12 9a9 9 0 0 0 7.5-.44"/>
+            </svg>
+            <!-- CROSS / OLU -->
+            <svg *ngIf="item.icon==='cross'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="2" x2="12" y2="22"/><line x1="5" y1="7" x2="19" y2="7"/>
+            </svg>
+            <!-- STAR / VIP -->
+            <svg *ngIf="item.icon==='star'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+            <!-- USERS / KULLANICI -->
+            <svg *ngIf="item.icon==='users'" class="sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            <span class="sb-label">{{ item.label }}</span>
+          </a>
+        </li>
+      </ul>
+    </ng-container>
+  </nav>
+
+  <div class="sb-spacer"></div>
+  <div class="sb-footer">
+    <span class="sb-version">v1.0 &bull; EGM &copy; 2026</span>
+  </div>
+
 </aside>

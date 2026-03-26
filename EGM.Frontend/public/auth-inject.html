@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Oturum başlatılıyor...</title>
+  <style>
+    body { font-family: Arial, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #1a2744; color: #fff; }
+    .box { text-align: center; }
+    .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.2); border-top-color: #fff; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="spinner"></div>
+    <p>Oturum açılıyor, lütfen bekleyin...</p>
+  </div>
+  <script>
+    (async function () {
+      try {
+        const resp = await fetch('http://localhost:5117/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sicil: 425394, password: 'S5s5mr.kfks' })
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        if (!data.token) throw new Error('Token bulunamadı');
+        localStorage.setItem('token', data.token);
+        window.location.href = '/';
+      } catch (e) {
+        document.querySelector('p').textContent = 'Hata: ' + e.message;
+        document.querySelector('.spinner').style.display = 'none';
+      }
+    })();
+  </script>
+</body>
+</html>

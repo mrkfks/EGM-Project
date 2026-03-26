@@ -1,4 +1,5 @@
 ﻿import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { environment } from '../../../environments/environment';
 import {
   Component, Inject, PLATFORM_ID,
   AfterViewInit, OnDestroy, OnInit
@@ -66,8 +67,7 @@ export interface HubNotification {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './home.html',
-  styleUrl: './home.css',
-  host: { style: 'display:block; position:absolute; inset:0;' }
+  styleUrl: './home.css'
 })
 export class Home implements OnInit, AfterViewInit, OnDestroy {
 
@@ -109,7 +109,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   readonly hassColors = HASSASIYET_COLORS;
   readonly hassLabels = HASSASIYET_LABELS;
   readonly hassKeys   = [0, 1, 2, 3];
-  readonly apiBase    = 'http://localhost:5000';
+  readonly apiBase    = environment.apiUrl;
 
   constructor(
     private http: HttpClient,
@@ -128,7 +128,13 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
   async ngAfterViewInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
-    await this.initMap();
+    try {
+      await this.initMap();
+    } catch (err) {
+      console.error('[EGM] initMap() failed', err);
+      this.errorMsg = 'Harita başlatılamadı. Lütfen sayfayı yenileyin.';
+      return;
+    }
     await this.loadTurkeyGeoJSON();
     await this.loadOlaylar();
     this.notifSvc.connect();
@@ -163,7 +169,12 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   // ── Harita başlatma ────────────────────────────────────────────────────
 
   private async initMap(): Promise<void> {
-    const L = await import('leaflet');
+    console.log('[EGM] initMap() called');
+    const leafletModule = await import('leaflet');
+    // CJS modüller esbuild ile sarmalandığında gerçek namespace "default" altında gelir.
+    // Her iki durumu (ESM doğrudan / CJS-wrapped) karşılayan güvenli erişim:
+    const L = ((leafletModule as any).default ?? leafletModule) as typeof LeafletType;
+    console.log('[EGM] leaflet namespace resolved, L.map type:', typeof L.map);
     this.L = L;
 
     L.Icon.Default.mergeOptions({
@@ -194,6 +205,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     );
     this.streetTile.addTo(this.map);
     this.markersGroup = L.featureGroup().addTo(this.map);
+    console.log('[EGM] Leaflet map initialized');
 
     const container = this.map.getContainer();
     this.resizeObserver = new ResizeObserver(() => {
@@ -268,7 +280,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
         this.isLoading = false;
         this.renderMarkers();
       },
-      error: () => {
+      error: (err) => {
+        console.error('[EGM] loadOlaylar error', err);
         this.errorMsg  = 'Olay verileri yüklenemedi.';
         this.isLoading = false;
       }

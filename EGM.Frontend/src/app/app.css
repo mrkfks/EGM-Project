@@ -1,19 +1,32 @@
-:root{
-	--egm-navbar-height: 64px;
-	--egm-sidebar-width: 200px;
-	--egm-bg: #061a2a; /* daha koyu arka plan */
-	--egm-accent: #0f6fa3;
-	--egm-muted: #cfe6f5;
-	--egm-text: #ffffff;
+:root {
+  --egm-navbar-height: 58px;
+  --egm-sidebar-width: 220px;
+  --egm-bg: #061a2a;
+  --egm-accent: #0f6fa3;
+  --egm-muted: #cfe6f5;
+  --egm-text: #ffffff;
+  --egm-content-bg: #f0f4f8;
 }
 
-.main-content{
-	margin-top: var(--egm-navbar-height);
-	margin-left: var(--egm-sidebar-width);
-	padding: 1.25rem;
-	min-height: calc(100vh - var(--egm-navbar-height));
+/* Content area: exactly fills remaining viewport beside sidebar and below navbar */
+.main-content {
+  position: fixed;
+  top: var(--egm-navbar-height);
+  left: var(--egm-sidebar-width);
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  background: var(--egm-content-bg, #f0f4f8);
 }
 
-@media (max-width:900px){
-	.main-content{margin-left:0}
+/* router-outlet is a zero-size Angular marker — hide it from layout */
+.main-content > router-outlet {
+  display: none;
+}
+
+/* The routed page component fills the entire content box.
+   NOTE: fill rules are in global styles.css — encapsulation cannot reach host elements here */
+
+@media (max-width: 900px) {
+  .main-content { left: 0; }
 }

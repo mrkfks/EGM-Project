@@ -1,0 +1,321 @@
+/* ═══════════════════════════════════════════════════
+   LOGIN PAGE — Modern Kurumsal Tasarım
+   ═══════════════════════════════════════════════════ */
+
+.login-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ── SOL PANEL: Marka / Kimlik ───────────────────── */
+.login-brand {
+  position: relative;
+  flex: 0 0 42%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(155deg, #061a2a 0%, #0a2f4a 55%, #0f4d78 100%);
+  overflow: hidden;
+  padding: 2.5rem;
+}
+
+.brand-pattern {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(15, 111, 163, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(6, 26, 42, 0.4) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Diyagonal dekoratif çizgiler */
+.login-brand::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  border: 40px solid rgba(255,255,255,0.04);
+  pointer-events: none;
+}
+.login-brand::after {
+  content: '';
+  position: absolute;
+  bottom: -80px; left: -80px;
+  width: 360px; height: 360px;
+  border-radius: 50%;
+  border: 50px solid rgba(255,255,255,0.03);
+  pointer-events: none;
+}
+
+.brand-content {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  color: #fff;
+  max-width: 340px;
+}
+
+.brand-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.4));
+  margin-bottom: 1.25rem;
+}
+
+.brand-title {
+  font-size: 2.6rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: #fff;
+  margin: 0 0 0.3rem;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
+
+.brand-subtitle {
+  font-size: 0.95rem;
+  color: #c5dee8;
+  line-height: 1.55;
+  margin: 0;
+  font-weight: 400;
+}
+
+.brand-divider {
+  width: 48px;
+  height: 3px;
+  background: linear-gradient(90deg, #1a9bd1, #0f6fa3);
+  border-radius: 2px;
+  margin: 1.4rem auto;
+}
+
+.brand-note {
+  font-size: 0.75rem;
+  color: rgba(197, 222, 232, 0.65);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── SAĞ PANEL: Form ─────────────────────────────── */
+.login-form-panel {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f4f8;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.login-form-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(6, 26, 42, 0.10), 0 2px 8px rgba(6,26,42,0.06);
+  padding: 2.5rem 2.25rem 2rem;
+}
+
+/* ── Form header ─────────────────────────────────── */
+.login-form-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #061a2a 0%, #0f6fa3 100%);
+  border-radius: 14px;
+  color: #fff;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 14px rgba(15,111,163,0.35);
+}
+
+.login-title {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #0d1f2d;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.01em;
+}
+
+.login-desc {
+  font-size: 0.82rem;
+  color: #6b7d8f;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Form alanları ───────────────────────────────── */
+.lf-group {
+  margin-bottom: 1.15rem;
+}
+
+.lf-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.lf-input-wrap {
+  position: relative;
+}
+
+.lf-input {
+  width: 100%;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.9rem;
+  color: #0d1f2d;
+  background: #f7fafc;
+  border: 1.5px solid #d0dae3;
+  border-radius: 9px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
+}
+
+.lf-input:focus {
+  border-color: #0f6fa3;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(15,111,163,0.12);
+}
+
+.lf-input--pw {
+  padding-right: 2.8rem;
+}
+
+.lf-input--error {
+  border-color: #e53935 !important;
+  background: #fff5f5 !important;
+}
+
+.lf-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(229,57,53,0.12) !important;
+}
+
+.lf-pwd-toggle {
+  position: absolute;
+  right: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #7f8c9a;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+.lf-pwd-toggle:hover { color: #0f6fa3; }
+
+.lf-error {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: #e53935;
+  font-weight: 500;
+}
+
+/* ── Hata kutusu ─────────────────────────────────── */
+.lf-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff3f3;
+  border: 1px solid #fbbcbc;
+  border-radius: 8px;
+  color: #c62828;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1.1rem;
+}
+
+/* ── Giriş butonu ────────────────────────────────── */
+.lf-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.72rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: linear-gradient(135deg, #0a2f4a 0%, #0f6fa3 100%);
+  border: none;
+  border-radius: 9px;
+  cursor: pointer;
+  transition: opacity 0.18s, transform 0.12s, box-shadow 0.18s;
+  box-shadow: 0 4px 14px rgba(15,111,163,0.35);
+  min-height: 44px;
+  margin-top: 0.5rem;
+}
+
+.lf-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  box-shadow: 0 6px 20px rgba(15,111,163,0.45);
+  transform: translateY(-1px);
+}
+
+.lf-btn:active:not(:disabled) { transform: translateY(0); }
+
+.lf-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Yükleniyor spinner */
+.lf-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: lf-spin 0.7s linear infinite;
+}
+@keyframes lf-spin { to { transform: rotate(360deg); } }
+
+/* ── Alt not ─────────────────────────────────────── */
+.login-footer-note {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #aabbc8;
+  margin: 1.4rem 0 0;
+}
+
+/* ── Responsive: mobil ───────────────────────────── */
+@media (max-width: 768px) {
+  .login-wrapper { flex-direction: column; }
+
+  .login-brand {
+    flex: 0 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .brand-logo  { width: 72px; height: 72px; }
+  .brand-title { font-size: 2rem; }
+
+  .login-form-panel { padding: 1.5rem 1rem; background: #fff; }
+  .login-form-card  {
+    box-shadow: none;
+    padding: 1.5rem 1rem;
+    max-width: 100%;
+  }
+}

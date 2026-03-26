@@ -4,9 +4,10 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, A
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subscription, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 // ── Sabitler ────────────────────────────────────────────────────────────────
-const API = 'http://localhost:5000/api';
+const API = environment.apiUrl + '/api';
 
 export const HASSASIYET = [
   { value: 0, label: 'Düşük',  color: '#27ae60', shadow: '0 0 12px rgba(39,174,96,0.45)' },
@@ -492,7 +493,18 @@ export class Olay implements OnInit, OnDestroy {
       error: () => { this.tableError = `${msg} sırasında hata oluştu.`; }
     });
   }
+  // ── Silme ──────────────────────────────────────────────────────────
+  delete(id: string): void {
+    if (!confirm('Bu kaydı kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) return;
+    this.http.delete(`${API}/olay/${id}`).subscribe({
+      next: () => { this.loadRows(); },
+      error: () => { this.tableError = 'Silme işlemi sırasında bir hata oluştu.'; }
+    });
+  }
 
+  canDelete(): boolean {
+    return this.tokenRole === 'BaskanlikYoneticisi';
+  }
   // ── Yardımcı metodlar ─────────────────────────────────────────────────
   hassasiyetLabel(v: number): string { return HASSASIYET.find(h => h.value === v)?.label ?? '-'; }
   hassasiyetColor(v: number): string { return HASSASIYET.find(h => h.value === v)?.color ?? '#aaa'; }

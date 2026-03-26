@@ -39,7 +39,8 @@ namespace EGM.API.Controllers
             var token = JwtHelper.GenerateToken(
                 user,
                 _configuration["Jwt:Key"]!,
-                _configuration["Jwt:Issuer"]!
+                _configuration["Jwt:Issuer"]!,
+                _configuration["Jwt:Audience"]!
             );
 
             return Ok(new { Token = token });

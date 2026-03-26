@@ -1,9 +1,10 @@
-/* ─── EGM Home — Stratejik Harita Dashboard ──────────────────────────────── */
+/* ─── EGM Home — Stratejik Harita Dashboard ───────────────────────────────────── */
 
-/* Kapsayıcı */
+/* .main-content artık position:fixed olduğundan, home-page onu tamamen kaplar */
 .home-page {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 

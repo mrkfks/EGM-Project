@@ -3,6 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Subject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface NotifItem {
   id?: string;
@@ -20,7 +21,7 @@ export interface NotifItem {
   isRead: boolean;
 }
 
-const API       = 'http://localhost:5000';
+const API       = environment.apiUrl;
 const MAX_NOTIF = 50;
 
 @Injectable({ providedIn: 'root' })

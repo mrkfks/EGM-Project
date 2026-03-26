@@ -1,22 +1,95 @@
-<div class="container-fluid vh-100 bg-navy">
-  <div class="row h-100 justify-content-center align-items-center">
-    <div class="col-12 col-sm-10 col-md-8 col-lg-4">
-      <div class="card shadow-sm">
-        <div class="card-body p-4">
-          <h4 class="card-title mb-3 text-center">Giriş</h4>
-          <form>
-            <div class="mb-3">
-              <label for="sicil" class="form-label">Sicil</label>
-              <input id="sicil" type="text" class="form-control" />
-            </div>
-            <div class="mb-3">
-              <label for="parola" class="form-label">Parola</label>
-              <input id="parola" type="password" class="form-control" />
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
-          </form>
+<div class="login-wrapper">
+
+  <!-- SOL panel: kurumsal kimlik -->
+  <div class="login-brand">
+    <div class="brand-content">
+      <img src="egm-logo.png" alt="EGM Logo" class="brand-logo" />
+      <h1 class="brand-title">EGM</h1>
+      <p class="brand-subtitle">Emniyet Genel Müdürlüğü<br>Güvenlik Yönetim Sistemi</p>
+      <div class="brand-divider"></div>
+      <p class="brand-note">Bu sistem yalnızca yetkili personel tarafından kullanılabilir.<br>Tüm erişimler kayıt altına alınmaktadır.</p>
+    </div>
+    <div class="brand-pattern"></div>
+  </div>
+
+  <!-- SAĞ panel: giriş formu -->
+  <div class="login-form-panel">
+    <div class="login-form-card">
+
+      <div class="login-form-header">
+        <div class="login-icon-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
         </div>
+        <h2 class="login-title">Sisteme Giriş</h2>
+        <p class="login-desc">Lütfen sicil numaranız ve parolanızla giriş yapın.</p>
       </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
+
+        <!-- Sicil -->
+        <div class="lf-group">
+          <label class="lf-label" for="sicil">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="5"/>
+              <path d="M3 21v-2a9 9 0 0 1 18 0v2"/></svg>
+            Sicil No
+          </label>
+          <input id="sicil" formControlName="sicil" type="text" class="lf-input"
+                 [class.lf-input--error]="sicilCtrl.invalid && sicilCtrl.touched"
+                 placeholder="Sicil numaranızı girin" autocomplete="username" />
+          <span *ngIf="sicilCtrl.invalid && sicilCtrl.touched" class="lf-error">Sicil numarası zorunludur.</span>
+        </div>
+
+        <!-- Parola -->
+        <div class="lf-group">
+          <label class="lf-label" for="parola">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2.5">
+              <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            Parola
+          </label>
+          <div class="lf-input-wrap">
+            <input id="parola" formControlName="password" [type]="showPwd ? 'text' : 'password'"
+                   class="lf-input lf-input--pw"
+                   [class.lf-input--error]="passwordCtrl.invalid && passwordCtrl.touched"
+                   placeholder="Parolanızı girin" autocomplete="current-password" />
+            <button type="button" class="lf-pwd-toggle" (click)="showPwd = !showPwd" tabindex="-1" aria-label="Parolayı göster/gizle">
+              <svg *ngIf="!showPwd" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <svg *ngIf="showPwd" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            </button>
+          </div>
+          <span *ngIf="passwordCtrl.invalid && passwordCtrl.touched" class="lf-error">Parola zorunludur.</span>
+        </div>
+
+        <!-- Hata mesajı -->
+        <div *ngIf="errorMsg" class="lf-alert">
+          <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          {{ errorMsg }}
+        </div>
+
+        <button type="submit" class="lf-btn" [disabled]="loading">
+          <span *ngIf="!loading">Giriş Yap</span>
+          <span *ngIf="loading" class="lf-spinner"></span>
+        </button>
+
+      </form>
+
+      <p class="login-footer-note">v1.0 &nbsp;·&nbsp; EGM &copy; {{ currentYear }}</p>
     </div>
   </div>
+
 </div>
