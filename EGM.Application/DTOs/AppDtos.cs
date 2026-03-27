@@ -60,11 +60,20 @@ namespace EGM.Application.DTOs
         [Range(0, int.MaxValue, ErrorMessage = "Katılımcı sayısı negatif olamaz.")]
         public int? KatilimciSayisi { get; set; }
 
+        [Range(0, int.MaxValue)]
+        public int? GozaltiSayisi { get; set; }
+
+        [Range(0, int.MaxValue)]
+        public int? SehitOluSayisi { get; set; }
+
         [StringLength(1000)]
         public string? Aciklama { get; set; }
 
         [StringLength(250)]
         public string? KaynakKurum { get; set; }
+
+        [StringLength(100)]
+        public string? EvrakNumarasi { get; set; }
 
         public Hassasiyet Hassasiyet { get; set; }
         /// <summary>Başkanlık personeli bu alanı göndererek il belirtir. İl personeli için servis otomatik atar.</summary>
@@ -77,16 +86,23 @@ namespace EGM.Application.DTOs
         public string? Baslik { get; set; }
         public string? OlayTuru { get; set; }
         public Guid OrganizatorId { get; set; }
+        public string? OrganizatorAd { get; set; }
         public Guid KonuId { get; set; }
+        public string? KonuAd { get; set; }
         public DateTime Tarih { get; set; }
+        public TimeSpan? BaslangicSaati { get; set; }
+        public TimeSpan? BitisSaati { get; set; }
         public string? Il { get; set; }
         public string? Ilce { get; set; }
         public string? Mekan { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
         public int? KatilimciSayisi { get; set; }
+        public int? GozaltiSayisi { get; set; }
+        public int? SehitOluSayisi { get; set; }
         public string? Aciklama { get; set; }
         public string? KaynakKurum { get; set; }
+        public string? EvrakNumarasi { get; set; }
         public OlayDurum Durum { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
         public double RiskPuani { get; set; }
@@ -254,15 +270,13 @@ namespace EGM.Application.DTOs
     // ── Sosyal Medya Olayi ───────────────────────────────────────────────
     public class SosyalMedyaOlayCreateDto
     {
-        [Required]
-        public Guid OlayId { get; set; }
+        public Guid? OlayId { get; set; }
 
         [Required(ErrorMessage = "Platform zorunludur.")]
         [StringLength(100)]
         public string? Platform { get; set; }
 
         [Required(ErrorMessage = "Paylaşım linki zorunludur.")]
-        [Url(ErrorMessage = "Geçerli bir URL giriniz.")]
         [StringLength(2000)]
         public string? PaylasimLinki { get; set; }
 
@@ -275,6 +289,8 @@ namespace EGM.Application.DTOs
         [StringLength(250)]
         public string? IlgiliKisiKurum { get; set; }
 
+        public string? EkranGoruntusu { get; set; }
+
         public Hassasiyet Hassasiyet { get; set; }
 
         [Range(0.0, 100.0, ErrorMessage = "Sosyal sinyal skoru 0-100 arasında olmalıdır.")]
@@ -284,12 +300,13 @@ namespace EGM.Application.DTOs
     public class SosyalMedyaOlayResponseDto
     {
         public Guid Id { get; set; }
-        public Guid OlayId { get; set; }
+        public Guid? OlayId { get; set; }
         public string? Platform { get; set; }
         public string? PaylasimLinki { get; set; }
         public DateTime PaylasimTarihi { get; set; }
         public string? IcerikOzeti { get; set; }
         public string? IlgiliKisiKurum { get; set; }
+        public string? EkranGoruntusu { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
         public double SosyalSignalSkoru { get; set; }
     }
@@ -309,6 +326,14 @@ namespace EGM.Application.DTOs
 
         [StringLength(500)]
         public string? Iletisim { get; set; }
+
+        [StringLength(100)]
+        public string? Tur { get; set; }
+
+        [StringLength(2000)]
+        public string? Aciklama { get; set; }
+
+        public Guid? UstKurulusId { get; set; }
     }
 
     public class OrganizatorResponseDto
@@ -318,19 +343,94 @@ namespace EGM.Application.DTOs
         public DateTime KurulusTarihi { get; set; }
         public string? FaaliyetAlani { get; set; }
         public string? Iletisim { get; set; }
+        public string? Tur { get; set; }
+        public string? Aciklama { get; set; }
+        public Guid? UstKurulusId { get; set; }
+        public string? UstKurulusAd { get; set; }
+        public int AltKurulusSayisi { get; set; }
     }
 
+    // ── Konu ─────────────────────────────────────────────────────────────
     public class KonuCreateDto
     {
-        [Required(ErrorMessage = "Konu adı zorunludur.")]
+        [Required(ErrorMessage = "Konu ad\u0131 zorunludur.")]
         [StringLength(250)]
         public string? Ad { get; set; }
 
-        [StringLength(1000)]
+        [StringLength(2000)]
         public string? Aciklama { get; set; }
+
+        [StringLength(100)]
+        public string? Tur { get; set; }
+
+        public Guid? UstKonuId { get; set; }
+    }
+
+    public class KonuResponseDto
+    {
+        public Guid Id { get; set; }
+        public string? Ad { get; set; }
+        public string? Aciklama { get; set; }
+        public string? Tur { get; set; }
+        public Guid? UstKonuId { get; set; }
+        public string? UstKonuAd { get; set; }
+        public int AltKonuSayisi { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 
     // ── Secim ────────────────────────────────────────────────────────────
+    public class SandikOlayCreateDto
+    {
+        [Required(ErrorMessage = "Musahit adi zorunludur.")]
+        [MinLength(3, ErrorMessage = "Musahit adi en az 3 karakter olmalidir.")]
+        [StringLength(250)]
+        public string? MusahitAdi { get; set; }
+
+        [Required(ErrorMessage = "Il zorunludur.")]
+        [StringLength(100)]
+        public string? Il { get; set; }
+
+        [Required(ErrorMessage = "Ilce zorunludur.")]
+        [StringLength(100)]
+        public string? Ilce { get; set; }
+
+        [StringLength(100)]
+        public string? Mahalle { get; set; }
+
+        [Range(1, 99999, ErrorMessage = "Gecerli bir sandik numarasi giriniz.")]
+        public int SandikNo { get; set; }
+
+        [Required(ErrorMessage = "Olay kategorisi zorunludur.")]
+        [StringLength(100)]
+        public string? OlayKategorisi { get; set; }
+
+        public TimeSpan OlaySaati { get; set; }
+
+        [Required(ErrorMessage = "Aciklama zorunludur.")]
+        [StringLength(2000)]
+        public string? Aciklama { get; set; }
+
+        public string? KanitDosyasi { get; set; }
+
+        public DateTime Tarih { get; set; }
+    }
+
+    public class SandikOlayResponseDto
+    {
+        public Guid Id { get; set; }
+        public string? MusahitAdi { get; set; }
+        public string? Il { get; set; }
+        public string? Ilce { get; set; }
+        public string? Mahalle { get; set; }
+        public int SandikNo { get; set; }
+        public string? OlayKategorisi { get; set; }
+        public TimeSpan OlaySaati { get; set; }
+        public string? Aciklama { get; set; }
+        public string? KanitDosyasi { get; set; }
+        public DateTime Tarih { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+
     public class SecimSonucuCreateDto
     {
         [Required(ErrorMessage = "Seçim türü zorunludur.")]
@@ -428,6 +528,8 @@ namespace EGM.Application.DTOs
         [StringLength(2000)]
         public string? GozlemNoktalari { get; set; }
 
+        public ZiyaretDurumu ZiyaretDurumu { get; set; } = ZiyaretDurumu.Planlandi;
+
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             if (BitisTarihi <= BaslangicTarihi)
@@ -449,6 +551,7 @@ namespace EGM.Application.DTOs
         public Hassasiyet Hassasiyet { get; set; }
         public string? GuvenlikSeviyesi { get; set; }
         public string? GozlemNoktalari { get; set; }
+        public ZiyaretDurumu ZiyaretDurumu { get; set; }
     }
 
     public class GuvenlikPlaniCreateDto

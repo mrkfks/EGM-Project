@@ -332,3 +332,4 @@ c:\Users\mrkfk\Desktop\EGM-Project\EGM.API\obj\Debug\net10.0\EGM.API.genruntimec
 c:\Users\mrkfk\Desktop\EGM-Project\EGM.API\obj\Debug\net10.0\ref\EGM.API.dll
 C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\bin\Debug\net10.0\appsettings.Development.json
 C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\bin\Debug\net10.0\Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore.dll
+C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\bin\Debug\net10.0\package-lock.json

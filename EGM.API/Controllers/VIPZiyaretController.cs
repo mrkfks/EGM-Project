@@ -50,7 +50,8 @@ namespace EGM.API.Controllers
                 BaslangicTarihi = dto.BaslangicTarihi, BitisTarihi = dto.BitisTarihi,
                 Il = dto.Il, Mekan = dto.Mekan,
                 Hassasiyet = dto.Hassasiyet, GuvenlikSeviyesi = dto.GuvenlikSeviyesi,
-                GozlemNoktalari = dto.GozlemNoktalari
+                GozlemNoktalari = dto.GozlemNoktalari,
+                ZiyaretDurumu = dto.ZiyaretDurumu
             };
             var created = await _service.CreateAsync(entity);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, MapToResponse(created));
@@ -66,7 +67,8 @@ namespace EGM.API.Controllers
                 BaslangicTarihi = dto.BaslangicTarihi, BitisTarihi = dto.BitisTarihi,
                 Il = dto.Il, Mekan = dto.Mekan,
                 Hassasiyet = dto.Hassasiyet, GuvenlikSeviyesi = dto.GuvenlikSeviyesi,
-                GozlemNoktalari = dto.GozlemNoktalari
+                GozlemNoktalari = dto.GozlemNoktalari,
+                ZiyaretDurumu = dto.ZiyaretDurumu
             };
             return await _service.UpdateAsync(id, updated) ? NoContent() : NotFound();
         }
@@ -122,7 +124,7 @@ namespace EGM.API.Controllers
             BaslangicTarihi = v.BaslangicTarihi, BitisTarihi = v.BitisTarihi,
             Il = v.Il, Mekan = v.Mekan,
             Hassasiyet = v.Hassasiyet, GuvenlikSeviyesi = v.GuvenlikSeviyesi,
-            GozlemNoktalari = v.GozlemNoktalari
+            GozlemNoktalari = v.GozlemNoktalari, ZiyaretDurumu = v.ZiyaretDurumu
         };
     }
 }

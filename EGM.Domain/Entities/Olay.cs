@@ -26,8 +26,11 @@ namespace EGM.Domain.Entities
         public double? Longitude { get; set; }
 
         public int? KatilimciSayisi { get; set; }
+        public int? GozaltiSayisi { get; set; }
+        public int? SehitOluSayisi { get; set; }
         public string? Aciklama { get; set; }
         public string? KaynakKurum { get; set; }
+        public string? EvrakNumarasi { get; set; }
 
         public OlayDurum Durum { get; set; }
         public Hassasiyet Hassasiyet { get; set; }

@@ -1,9 +1,8 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Subscription, Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 // ── Sabitler ────────────────────────────────────────────────────────────────
@@ -57,6 +56,8 @@ export interface OlayRow {
   baslik?: string;
   olayTuru?: string;
   tarih: string;
+  baslangicSaati?: string;
+  bitisSaati?: string;
   il?: string;
   ilce?: string;
   mekan?: string;
@@ -64,9 +65,14 @@ export interface OlayRow {
   durum: number;
   riskPuani: number;
   katilimciSayisi?: number;
+  gozaltiSayisi?: number;
+  sehitOluSayisi?: number;
+  evrakNumarasi?: string;
   aciklama?: string;
   createdByUserId: string;
   cityId?: number;
+  organizatorAd?: string;
+  konuAd?: string;
 }
 
 export interface OrganizatorOption {
@@ -79,70 +85,52 @@ export interface KonuOption {
   ad: string;
 }
 
-export interface RiskPreview {
-  riskPuaniRaw: number;
-  riskPuaniNormalized: number;
-  seviye: string;
-}
-
 // ── Bileşen ────────────────────────────────────────────────────────────────
 @Component({
   selector: 'app-olay',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './olay.html',
   styleUrl: './olay.css',
 })
-export class Olay implements OnInit, OnDestroy {
+export class Olay implements OnInit {
 
   // ── Tablo durumu
-  rows: OlayRow[] = [];
-  totalCount   = 0;
-  currentPage  = 1;
-  pageSize     = 20;
-  filterDurum  = '';
-  isLoading    = false;
+  rows: OlayRow[]        = [];
+  allRows: OlayRow[]     = [];
+  filteredRows: OlayRow[] = [];
+  totalCount             = 0;
+  currentPage            = 1;
+  pageSize               = 50;
+  isLoading              = false;
   tableError: string | null = null;
 
-  // ── Form durumu
-  showForm    = false;
-  editId: string | null = null;
-  formError: string | null = null;
-  formSuccess: string | null = null;
-  isSaving    = false;
-
-  // ── Risk önizleme
-  riskPreview: RiskPreview | null = null;
-  isHighRisk   = false;
-  private riskSubject = new Subject<void>();
-  private riskSub?: Subscription;
-
-  // ── Hassasiyet teması
-  currentHassasiyetColor  = '#27ae60';
-  currentHassasiyetShadow = '0 0 12px rgba(39,174,96,0.45)';
+  // ── Filtreler
+  filterDurum            = '';
+  filterIl               = '';
+  filterKonuId           = '';
+  filterOrganizatorId    = '';
+  filterDatetimeBaslangic = '';
+  filterDatetimeBitis     = '';
+  filterGozalti           = '';
+  filterSehitOlu          = '';
 
   // ── Lookup listeleri
   organizatorler: OrganizatorOption[] = [];
-  konular: KonuOption[] = [];
+  konular: KonuOption[]               = [];
 
   // ── Token/JWT bilgileri
-  tokenUserId: string | null = null;
   tokenRole:   string | null = null;
   tokenCityId: number | null = null;
   readonly isBrowser: boolean;
 
   // ── Sabitler (template erişimi)
-  readonly HASSASIYET   = HASSASIYET;
-  readonly DURUM        = DURUM;
-  readonly OLAY_TURLERI = OLAY_TURLERI;
-  readonly IL_LISTESI   = IL_LISTESI;
-
-  // ── Form grubu
-  form!: FormGroup;
+  readonly HASSASIYET = HASSASIYET;
+  readonly DURUM      = DURUM;
+  readonly IL_LISTESI = IL_LISTESI;
 
   constructor(
     private http: HttpClient,
-    private fb: FormBuilder,
     private router: Router,
     @Inject(PLATFORM_ID) platformId: object
   ) {
@@ -151,18 +139,8 @@ export class Olay implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.decodeToken();
-    this.buildForm();
     this.loadLookups();
     this.loadRows();
-
-    // Risk önizleme debounce
-    this.riskSub = this.riskSubject.pipe(debounceTime(600), distinctUntilChanged()).subscribe(() => {
-      this.triggerRiskPreview();
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.riskSub?.unsubscribe();
   }
 
   // ── JWT decode ────────────────────────────────────────────────────────
@@ -173,137 +151,22 @@ export class Olay implements OnInit, OnDestroy {
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return;
-      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-      this.tokenUserId = payload['sub'] ?? payload['nameid'] ?? null;
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(Array.prototype.map.call(atob(base64), (c: string) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(json);
       this.tokenRole   = payload['role'] ?? null;
       const cid = payload['cityId'];
       this.tokenCityId = cid && cid !== '' ? parseInt(cid, 10) : null;
     } catch { /* sessiz başarısızlık */ }
   }
 
-  // ── Form oluşturma ────────────────────────────────────────────────────
-  private buildForm(): void {
-    this.form = this.fb.group({
-      baslik:           ['', [Validators.required, Validators.maxLength(250)]],
-      olayTuru:         ['', Validators.required],
-      organizatorId:    ['', Validators.required],
-      konuId:           ['', Validators.required],
-      tarih:            ['', Validators.required],
-      baslangicSaati:   [''],
-      bitisSaati:       [''],
-      il:               ['', Validators.required],
-      ilce:             ['', Validators.maxLength(100)],
-      mekan:            ['', Validators.maxLength(250)],
-      latitude:         [null, [Validators.min(-90), Validators.max(90)]],
-      longitude:        [null, [Validators.min(-180), Validators.max(180)]],
-      katilimciSayisi:  [null, Validators.min(0)],
-      aciklama:         ['', Validators.maxLength(1000)],
-      kaynakKurum:      ['', Validators.maxLength(250)],
-      hassasiyet:       [0, Validators.required],
-      cityId:           [this.tokenCityId],
-      sosyalSignalSkoru:[0, [Validators.min(0), Validators.max(100)]],
-      // Seçim Güvenliği – koşullu
-      sandikNo:         [''],
-      okulAdi:          [''],
-      secimIlce:        [''],
-      mudahaleDurumu:   [false],
-      // VIP Ziyaret – koşullu
-      guzergah:         [''],
-      guvenlikSeviyesi: [''],
-    });
-
-    // İl kısıtlaması: şehir kısıtlı kullanıcı için il alanını kilitle
-    if (this.isCityScoped && this.tokenCityId) {
-      const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
-      this.form.get('il')!.setValue(ilAdi);
-      this.form.get('il')!.disable();
-      this.form.get('cityId')!.setValue(this.tokenCityId);
-      this.form.get('cityId')!.disable();
-    }
-
-    // Hassasiyet değiştiğinde tema ve risk güncelle
-    this.form.get('hassasiyet')!.valueChanges.subscribe(v => this.onHassasiyetChange(+v));
-    // Risk tetikleyici alanlar
-    ['katilimciSayisi', 'hassasiyet', 'olayTuru', 'sosyalSignalSkoru'].forEach(f =>
-      this.form.get(f)!.valueChanges.subscribe(() => this.riskSubject.next())
-    );
-    // Olay türü → koşullu alanlar
-    this.form.get('olayTuru')!.valueChanges.subscribe(v => this.onOlayTuruChange(v));
-  }
-
   // ── Getter kısayolları ────────────────────────────────────────────────
-  get f(): { [key: string]: AbstractControl } { return this.form.controls; }
   get isCityScoped(): boolean {
     return ['IlPersoneli', 'IlYoneticisi'].includes(this.tokenRole ?? '');
   }
-  get isSecimGuvenligi(): boolean { return this.form.get('olayTuru')?.value === 'Seçim Güvenliği'; }
-  get isVIPZiyaret():     boolean { return this.form.get('olayTuru')?.value === 'VIP Ziyaret'; }
   get totalPages(): number { return Math.ceil(this.totalCount / this.pageSize) || 1; }
-
-  // ── Koşullu alan yönetimi ─────────────────────────────────────────────
-  private onOlayTuruChange(tur: string): void {
-    const secimFields = ['sandikNo', 'okulAdi', 'secimIlce'];
-    const vipFields   = ['guzergah', 'guvenlikSeviyesi'];
-
-    if (tur === 'Seçim Güvenliği') {
-      secimFields.forEach(f => {
-        this.form.get(f)!.setValidators([Validators.required]);
-        this.form.get(f)!.updateValueAndValidity();
-      });
-      this.form.get('mudahaleDurumu')!.setValidators([Validators.required]);
-      vipFields.forEach(f => { this.form.get(f)!.clearValidators(); this.form.get(f)!.updateValueAndValidity(); });
-    } else if (tur === 'VIP Ziyaret') {
-      vipFields.forEach(f => {
-        this.form.get(f)!.setValidators([Validators.required]);
-        this.form.get(f)!.updateValueAndValidity();
-      });
-      secimFields.forEach(f => { this.form.get(f)!.clearValidators(); this.form.get(f)!.updateValueAndValidity(); });
-      this.form.get('mudahaleDurumu')!.clearValidators();
-    } else {
-      [...secimFields, ...vipFields, 'mudahaleDurumu'].forEach(f => {
-        this.form.get(f)!.clearValidators();
-        this.form.get(f)!.updateValueAndValidity();
-      });
-    }
-  }
-
-  // ── Hassasiyet teması ─────────────────────────────────────────────────
-  private onHassasiyetChange(val: number): void {
-    const h = HASSASIYET.find(x => x.value === val) ?? HASSASIYET[0];
-    this.currentHassasiyetColor  = h.color;
-    this.currentHassasiyetShadow = h.shadow;
-  }
-
-  // ── Risk önizleme ─────────────────────────────────────────────────────
-  private triggerRiskPreview(): void {
-    if (!this.isBrowser) return;
-    const v = this.form.getRawValue();
-    this.http.post<RiskPreview>(`${API}/olay/risk-preview`, {
-      katilimciSayisi:   v.katilimciSayisi ?? null,
-      hassasiyet:        +v.hassasiyet,
-      olayTuru:          v.olayTuru ?? '',
-      sosyalSignalSkoru: +v.sosyalSignalSkoru
-    }).subscribe({
-      next: res => {
-        this.riskPreview = res;
-        this.isHighRisk  = res.riskPuaniNormalized >= 0.8;
-      },
-      error: () => { /* risk önizleme başarısız olursa sessizce geç */ }
-    });
-  }
-
-  riskBarWidth(): string {
-    if (!this.riskPreview) return '0%';
-    return `${Math.round(this.riskPreview.riskPuaniNormalized * 100)}%`;
-  }
-
-  riskBarColor(): string {
-    const v = this.riskPreview?.riskPuaniNormalized ?? 0;
-    if (v >= 0.8) return '#e74c3c';
-    if (v >= 0.6) return '#f39c12';
-    if (v >= 0.4) return '#f1c40f';
-    return '#27ae60';
-  }
 
   // ── Lookup yükleme ────────────────────────────────────────────────────
   private loadLookups(): void {
@@ -321,16 +184,22 @@ export class Olay implements OnInit, OnDestroy {
   loadRows(): void {
     this.isLoading  = true;
     this.tableError = null;
-    let url = `${API}/olay?sayfa=${this.currentPage}&sayfaBoyutu=${this.pageSize}`;
-    if (this.filterDurum !== '') url += `&durum=${this.filterDurum}`;
+    let url = `${API}/olay?sayfa=1&sayfaBoyutu=${this.pageSize}`;
+    if (this.filterDurum !== '') url += `&durum=${encodeURIComponent(this.filterDurum)}`;
+    if (this.filterIl    !== '') url += `&il=${encodeURIComponent(this.filterIl)}`;
+    if (this.filterKonuId !== '')         url += `&konuId=${encodeURIComponent(this.filterKonuId)}`;
+    if (this.filterOrganizatorId !== '')  url += `&organizatorId=${encodeURIComponent(this.filterOrganizatorId)}`;
+    if (this.filterDatetimeBaslangic !== '') url += `&tarihBaslangic=${encodeURIComponent(this.filterDatetimeBaslangic)}`;
+    if (this.filterDatetimeBitis !== '')     url += `&tarihBitis=${encodeURIComponent(this.filterDatetimeBitis)}`;
     this.http.get<any>(url).subscribe({
       next: res => {
-        this.totalCount = res.totalCount ?? 0;
-        this.rows = (res.items ?? []).map((o: any): OlayRow => ({
+        this.allRows = (res.items ?? []).map((o: any): OlayRow => ({
           id:              o.id,
           baslik:          o.baslik,
           olayTuru:        o.olayTuru,
           tarih:           o.tarih,
+          baslangicSaati:  o.baslangicSaati ?? '',
+          bitisSaati:      o.bitisSaati ?? '',
           il:              o.il,
           ilce:            o.ilce,
           mekan:           o.mekan,
@@ -338,10 +207,16 @@ export class Olay implements OnInit, OnDestroy {
           durum:           o.durum,
           riskPuani:       o.riskPuani,
           katilimciSayisi: o.katilimciSayisi,
+          gozaltiSayisi:   o.gozaltiSayisi,
+          sehitOluSayisi:  o.sehitOluSayisi,
+          evrakNumarasi:   o.evrakNumarasi,
           aciklama:        o.aciklama,
           createdByUserId: o.createdByUserId ?? '',
           cityId:          o.cityId,
+          organizatorAd:   o.organizatorAd ?? '',
+          konuAd:          o.konuAd ?? '',
         }));
+        this.applyClientFilters();
         this.isLoading = false;
       },
       error: () => {
@@ -351,160 +226,65 @@ export class Olay implements OnInit, OnDestroy {
     });
   }
 
-  // ── Sayfalama ─────────────────────────────────────────────────────────
-  navigatePage(page: number): void {
-    if (page < 1 || page > this.totalPages) return;
-    this.currentPage = page;
-    this.loadRows();
+  // ── İstemci tarafı filtreleme ─────────────────────────────────────────
+  private applyClientFilters(): void {
+    let filtered = [...this.allRows];
+    if (this.filterGozalti === 'var')  filtered = filtered.filter(r => (r.gozaltiSayisi ?? 0) > 0);
+    if (this.filterGozalti === 'yok')  filtered = filtered.filter(r => (r.gozaltiSayisi ?? 0) === 0);
+    if (this.filterSehitOlu === 'var') filtered = filtered.filter(r => (r.sehitOluSayisi ?? 0) > 0);
+    if (this.filterSehitOlu === 'yok') filtered = filtered.filter(r => (r.sehitOluSayisi ?? 0) === 0);
+    this.filteredRows = filtered;
+    this.totalCount   = filtered.length;
+    const start       = (this.currentPage - 1) * this.pageSize;
+    this.rows         = filtered.slice(start, start + this.pageSize);
   }
 
-  onFilterDurumChange(): void {
+  // ── Özet istatistikler ────────────────────────────────────────────────
+  private static readonly EYLEM_TURLERI    = ['Terör Olayı', 'Silahlı Çatışma', 'Provokasyon', 'Gösteri', 'Yürüyüş'];
+  private static readonly ETKINLIK_TURLERI = ['Miting', 'Seçim Güvenliği', 'VIP Ziyaret', 'Basın Açıklaması', 'Diğer'];
+
+  get statFarkliIlSayisi(): number {
+    return new Set(this.filteredRows.map(r => r.il).filter(Boolean)).size;
+  }
+  get statEylemSayisi(): number {
+    return this.filteredRows.filter(r => Olay.EYLEM_TURLERI.includes(r.olayTuru ?? '')).length;
+  }
+  get statEtkinlikSayisi(): number {
+    return this.filteredRows.filter(r => Olay.ETKINLIK_TURLERI.includes(r.olayTuru ?? '')).length;
+  }
+  get statKatilimciSayisi(): number {
+    return this.filteredRows.reduce((s, r) => s + (r.katilimciSayisi ?? 0), 0);
+  }
+  get statSehitOluSayisi(): number {
+    return this.filteredRows.reduce((s, r) => s + (r.sehitOluSayisi ?? 0), 0);
+  }
+
+  // ── Filtre uygula ─────────────────────────────────────────────────────
+  applyFilters(): void {
     this.currentPage = 1;
     this.loadRows();
   }
 
-  // ── Form açma/kapama ──────────────────────────────────────────────────
-  openCreate(): void {
-    this.editId = null;
-    this.form.reset({ hassasiyet: 0, sosyalSignalSkoru: 0, mudahaleDurumu: false });
-    if (this.isCityScoped && this.tokenCityId) {
-      const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
-      this.form.get('il')!.setValue(ilAdi);
-      this.form.get('cityId')!.setValue(this.tokenCityId);
-    }
-    this.riskPreview = null;
-    this.isHighRisk  = false;
-    this.formError   = null;
-    this.formSuccess = null;
-    this.onHassasiyetChange(0);
-    this.showForm    = true;
+  clearFilters(): void {
+    this.filterDurum            = '';
+    this.filterIl               = '';
+    this.filterKonuId           = '';
+    this.filterOrganizatorId    = '';
+    this.filterDatetimeBaslangic = '';
+    this.filterDatetimeBitis     = '';
+    this.filterGozalti           = '';
+    this.filterSehitOlu          = '';
+    this.currentPage            = 1;
+    this.loadRows();
   }
 
-  openEdit(row: OlayRow): void {
-    if (!this.canEdit(row)) return;
-    this.editId = row.id;
-    this.form.patchValue({
-      baslik:          row.baslik ?? '',
-      olayTuru:        row.olayTuru ?? '',
-      tarih:           row.tarih ? row.tarih.substring(0, 10) : '',
-      il:              row.il ?? '',
-      ilce:            row.ilce ?? '',
-      mekan:           row.mekan ?? '',
-      hassasiyet:      row.hassasiyet,
-      katilimciSayisi: row.katilimciSayisi,
-      aciklama:        row.aciklama ?? '',
-      cityId:          row.cityId,
-      sosyalSignalSkoru: 0,
-    });
-    this.onHassasiyetChange(row.hassasiyet);
-    this.riskPreview = null;
-    this.isHighRisk  = false;
-    this.formError   = null;
-    this.formSuccess = null;
-    this.showForm    = true;
+  // ── Sayfalama ─────────────────────────────────────────────────────────
+  navigatePage(page: number): void {
+    if (page < 1 || page > this.totalPages) return;
+    this.currentPage = page;
+    this.applyClientFilters();
   }
 
-  closeForm(): void {
-    this.showForm    = false;
-    this.editId      = null;
-    this.riskPreview = null;
-    this.isHighRisk  = false;
-    this.form.reset();
-  }
-
-  // ── RBAC: düzenleme yetkisi ───────────────────────────────────────────
-  canEdit(row: OlayRow): boolean {
-    if (!this.tokenUserId) return false;
-    const role = this.tokenRole ?? '';
-    if (['BaskanlikYoneticisi', 'IlYoneticisi'].includes(role)) return true;
-    return row.createdByUserId === this.tokenUserId;
-  }
-
-  canCreateOrEdit(): boolean {
-    return ['IlPersoneli', 'IlYoneticisi', 'BaskanlikPersoneli', 'BaskanlikYoneticisi']
-      .includes(this.tokenRole ?? '');
-  }
-
-  // ── Kaydet ────────────────────────────────────────────────────────────
-  save(): void {
-    this.form.markAllAsTouched();
-    if (this.form.invalid) {
-      this.formError = 'Lütfen tüm zorunlu alanları doldurunuz.';
-      return;
-    }
-    if (this.isCityScoped && this.tokenCityId) {
-      const cityId = +this.form.getRawValue().cityId;
-      if (cityId !== this.tokenCityId) {
-        this.formError = 'Yalnızca kendi yetkili olduğunuz il için veri girişi yapabilirsiniz.';
-        return;
-      }
-    }
-    this.isSaving  = true;
-    this.formError = null;
-    const raw = this.form.getRawValue();
-    const payload: Record<string, unknown> = {
-      baslik:          raw.baslik,
-      olayTuru:        raw.olayTuru,
-      organizatorId:   raw.organizatorId,
-      konuId:          raw.konuId,
-      tarih:           raw.tarih,
-      baslangicSaati:  raw.baslangicSaati  || null,
-      bitisSaati:      raw.bitisSaati       || null,
-      il:              raw.il,
-      ilce:            raw.ilce             || null,
-      mekan:           raw.mekan            || null,
-      latitude:        raw.latitude         ? +raw.latitude  : null,
-      longitude:       raw.longitude        ? +raw.longitude : null,
-      katilimciSayisi: raw.katilimciSayisi  ? +raw.katilimciSayisi : null,
-      aciklama:        raw.aciklama         || null,
-      kaynakKurum:     raw.kaynakKurum      || null,
-      hassasiyet:      +raw.hassasiyet,
-      cityId:          raw.cityId           ? +raw.cityId : null,
-    };
-    const obs = this.editId
-      ? this.http.put(`${API}/olay/${this.editId}`, payload)
-      : this.http.post(`${API}/olay`, payload);
-    obs.subscribe({
-      next: () => {
-        this.isSaving    = false;
-        this.formSuccess = this.editId ? 'Kayıt başarıyla güncellendi.' : 'Yeni kayıt oluşturuldu.';
-        this.loadRows();
-        setTimeout(() => { this.closeForm(); }, 1500);
-      },
-      error: err => {
-        this.isSaving  = false;
-        const detail   = err?.error?.title ?? err?.error ?? null;
-        this.formError = typeof detail === 'string' ? detail : 'İşlem sırasında bir hata oluştu.';
-      }
-    });
-  }
-
-  // ── Durum işlemleri ───────────────────────────────────────────────────
-  baslat(id: string): void { this.statusAction(id, 'baslat', 'Olay başlatıldı.'); }
-  bitir(id: string):   void { this.statusAction(id, 'bitir',  'Olay tamamlandı.'); }
-  iptal(id: string):   void {
-    if (!confirm('Bu olayı iptal etmek istediğinizden emin misiniz?')) return;
-    this.statusAction(id, 'iptal', 'Olay iptal edildi.');
-  }
-
-  private statusAction(id: string, action: string, msg: string): void {
-    this.http.put(`${API}/olay/${id}/${action}`, {}).subscribe({
-      next: () => { this.loadRows(); },
-      error: () => { this.tableError = `${msg} sırasında hata oluştu.`; }
-    });
-  }
-  // ── Silme ──────────────────────────────────────────────────────────
-  delete(id: string): void {
-    if (!confirm('Bu kaydı kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) return;
-    this.http.delete(`${API}/olay/${id}`).subscribe({
-      next: () => { this.loadRows(); },
-      error: () => { this.tableError = 'Silme işlemi sırasında bir hata oluştu.'; }
-    });
-  }
-
-  canDelete(): boolean {
-    return this.tokenRole === 'BaskanlikYoneticisi';
-  }
   // ── Yardımcı metodlar ─────────────────────────────────────────────────
   hassasiyetLabel(v: number): string { return HASSASIYET.find(h => h.value === v)?.label ?? '-'; }
   hassasiyetColor(v: number): string { return HASSASIYET.find(h => h.value === v)?.color ?? '#aaa'; }
@@ -521,15 +301,5 @@ export class Olay implements OnInit, OnDestroy {
 
   trackById(_i: number, row: OlayRow): string { return row.id; }
 
-  fieldError(name: string): boolean {
-    const c = this.form.get(name);
-    return !!(c && c.invalid && c.touched);
-  }
-
   navigate(path: string): void { this.router.navigate([path]); }
-
-  logout(): void {
-    if (this.isBrowser) localStorage.removeItem('token');
-    this.router.navigate(['/login']);
-  }
 }

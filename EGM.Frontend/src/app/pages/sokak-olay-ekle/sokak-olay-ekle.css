@@ -1,0 +1,261 @@
+﻿/* ═══════════════════════════════════════════════════════════════════
+   Sokak Olayı Ekle - Açık Tema (Sosyal Medya / Seçim sayfalarıyla uyumlu)
+   ═══════════════════════════════════════════════════════════════════ */
+
+:host {
+  display: block;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.ekle-page {
+  padding: 16px 12px;
+  max-width: 100%;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #1a1a2e;
+  padding-bottom: 40px;
+}
+
+/* Sayfa başlık ve alert stilleri global styles.css dosyasında tanımlıdır */
+
+.btn-back {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.35);
+  color: #fff;
+  padding: 7px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-back:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+/* ── Risk önizleme bandı ──────────────────────────────────────── */
+.risk-preview-bar {
+  background: #fff;
+  border: 1px solid #e8ecf0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.high-risk-bar {
+  border-color: #e74c3c;
+  background: #fff9f9;
+}
+
+.rpb-label {
+  font-size: 0.85rem;
+  color: #4a5568;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.rpb-label strong {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.risk-warn-icon {
+  color: #e74c3c;
+  font-weight: 700;
+  font-size: 0.83rem;
+}
+
+.rpb-track {
+  height: 8px;
+  background: #f0f2f5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.rpb-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.4s, background 0.3s;
+}
+
+/* ── Form ──────────────────────────────────────────────────────── */
+.olay-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Form bölümleri ───────────────────────────────────────────── */
+.form-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid #e8ecf0;
+}
+
+.form-section legend {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #2c5f8a;
+  padding: 0 10px;
+  background: #fff;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 20px;
+  margin-top: 14px;
+}
+
+.span-2 { grid-column: span 2; }
+
+/* ── Alan grupları ────────────────────────────────────────────── */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-field label {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.req { color: #e74c3c; margin-left: 2px; }
+.hint { font-size: 0.75rem; color: #95a5a6; font-weight: 400; text-transform: none; }
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #d1d9e0;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  color: #1a1a2e;
+  background: #f8f9fa;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: #2c5f8a;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.12);
+}
+
+.form-field input.is-invalid,
+.form-field select.is-invalid {
+  border-color: #e74c3c;
+  background: #fef9f9;
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 88px;
+}
+
+.locked-input {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #eef0f3 !important;
+}
+
+.field-error {
+  font-size: 0.78rem;
+  color: #e74c3c;
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* ── Alt Butonlar ─────────────────────────────────────────────── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 4px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  border: 1px solid #e8ecf0;
+}
+
+.btn-ghost {
+  background: #fff;
+  border: 1.5px solid #d1d9e0;
+  color: #4a5568;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btn-ghost:hover {
+  border-color: #2c5f8a;
+  color: #2c5f8a;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #1a3a5c 0%, #2c5f8a 100%);
+  border: none;
+  color: #fff;
+  padding: 10px 32px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ──────────────────────────────────────────────────── */
+.spinner-sm {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ekle-page { padding: 14px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .span-2 { grid-column: span 1; }
+  .page-header { padding: 18px 16px; }
+  .page-header h1 { font-size: 1.1rem; }
+}

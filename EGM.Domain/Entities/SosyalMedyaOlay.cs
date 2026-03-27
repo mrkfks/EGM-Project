@@ -5,7 +5,7 @@ namespace EGM.Domain.Entities
 {
     public class SosyalMedyaOlay : BaseEntity
     {
-        public Guid OlayId { get; set; }
+        public Guid? OlayId { get; set; }
         public Olay? Olay { get; set; }
 
         public string? Platform { get; set; }
@@ -13,6 +13,7 @@ namespace EGM.Domain.Entities
         public DateTime PaylasimTarihi { get; set; }
         public string? IcerikOzeti { get; set; }
         public string? IlgiliKisiKurum { get; set; }
+        public string? EkranGoruntusu { get; set; }
 
         public Hassasiyet Hassasiyet { get; set; }
         public double SosyalSignalSkoru { get; set; }

@@ -1,1 +1,247 @@
-<!-- secim works -->
+﻿<div class="secim-container">
+  <!-- Uyari mesajlari -->
+  <div class="alert alert-hata" *ngIf="hata">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{ hata }}
+  </div>
+  <div class="alert alert-basari" *ngIf="basari">
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ basari }}
+  </div>
+
+  <!-- Ana icerik: Form + Kanit -->
+  <div class="main-grid">
+    <!-- Sol: Form -->
+    <div class="form-panel">
+      <h2 class="panel-title">Yeni Olay Kaydi</h2>
+
+      <!-- Musahit adi -->
+      <div class="form-group">
+        <label>Musahit Adi <span class="zorunlu">*</span></label>
+        <div class="input-wrapper">
+          <input type="text" [(ngModel)]="musahitAdi" placeholder="En az 3 karakter" [class.input-gecersiz]="musahitAdi.length > 0 && musahitAdi.length < 3" />
+          <span class="karakter-sayac" [class.gecersiz]="musahitAdi.length > 0 && musahitAdi.length < 3">{{ musahitAdi.length }}/250</span>
+        </div>
+        <small class="dogrulama-mesaj" *ngIf="musahitAdi.length > 0 && musahitAdi.length < 3">En az 3 karakter girilmeli</small>
+      </div>
+
+      <!-- Il / Ilce -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Il <span class="zorunlu">*</span></label>
+          <select [(ngModel)]="il">
+            <option value="">Il seciniz</option>
+            <option *ngFor="let i of iller" [value]="i">{{ i }}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Ilce <span class="zorunlu">*</span></label>
+          <input type="text" [(ngModel)]="ilce" placeholder="Ilce adi" />
+        </div>
+      </div>
+
+      <!-- Mahalle / Sandik No -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Mahalle</label>
+          <input type="text" [(ngModel)]="mahalle" placeholder="Mahalle adi (opsiyonel)" />
+        </div>
+        <div class="form-group">
+          <label>Sandik No <span class="zorunlu">*</span></label>
+          <input type="number" [(ngModel)]="sandikNo" placeholder="Ornek: 1001" min="1" max="99999" />
+        </div>
+      </div>
+
+      <!-- Kategori chips -->
+      <div class="form-group">
+        <label>Olay Kategorisi <span class="zorunlu">*</span></label>
+        <div class="chip-grup">
+          <button type="button" class="chip" *ngFor="let k of kategoriler"
+            [class.chip-aktif]="olayKategorisi === k"
+            [style.border-color]="olayKategorisi === k ? kategoriRenk(k) : ''"
+            [style.background-color]="olayKategorisi === k ? kategoriRenk(k) + '22' : ''"
+            [style.color]="olayKategorisi === k ? kategoriRenk(k) : ''"
+            (click)="kategoriSec(k)">
+            {{ k }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Olay Saati / Tarih -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Olay Saati <span class="zorunlu">*</span></label>
+          <input type="time" [(ngModel)]="olaySaati" />
+        </div>
+        <div class="form-group">
+          <label>Tarih <span class="zorunlu">*</span></label>
+          <input type="date" [(ngModel)]="tarih" />
+        </div>
+      </div>
+
+      <!-- Aciklama -->
+      <div class="form-group">
+        <label>Aciklama <span class="zorunlu">*</span></label>
+        <textarea [(ngModel)]="aciklama" rows="4" placeholder="Olaya iliskin ayrintili aciklama giriniz..." maxlength="2000"></textarea>
+        <small class="karakter-sayac-alan">{{ aciklama.length }} / 2000</small>
+      </div>
+
+      <!-- Kaydet butonu -->
+      <button class="btn-kaydet" (click)="kaydet()" [disabled]="!formGecerliMi() || gonderiliyor">
+        <svg *ngIf="!gonderiliyor" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+        </svg>
+        <span *ngIf="gonderiliyor" class="spinner"></span>
+        {{ gonderiliyor ? 'Kaydediliyor...' : 'Olayi Kaydet' }}
+      </button>
+    </div>
+
+    <!-- Sag: Kanit yukleme -->
+    <div class="kanit-panel">
+      <h2 class="panel-title">Kanit Dosyasi</h2>
+      <p class="panel-aciklama">Ekran goruntusu, belge veya gorsel yukleyebilirsiniz. (Maks. 5 MB)</p>
+
+      <div class="dosya-alan" [class.dosya-yuklü]="kanitDosyasiBase64" (click)="dosyaGiris.click()">
+        <input #dosyaGiris type="file" accept="image/*,.pdf" (change)="dosyaSec($event)" style="display:none" />
+        <div *ngIf="!kanitDosyasiBase64" class="dosya-bos">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <p>Tiklayarak dosya seciniz</p>
+          <small>PNG, JPG, GIF veya PDF</small>
+        </div>
+        <div *ngIf="kanitDosyasiBase64" class="dosya-yuklü-bilgi">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#27ae60" stroke-width="2">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 12 18 15 15"/>
+          </svg>
+          <p class="dosya-adi">{{ kanitDosyasiAd }}</p>
+          <small class="dosya-hazir">Dosya yuklendi</small>
+        </div>
+      </div>
+
+      <button *ngIf="kanitDosyasiBase64" class="btn-temizle" (click)="dosyaTemizle()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/>
+        </svg>
+        Dosyayi Kaldir
+      </button>
+
+      <!-- Istatistik Kutusu -->
+      <div class="istatistik-kutu">
+        <h3>Olay Ozeti</h3>
+        <div class="istatistik-satir">
+          <span class="is-etiket">Toplam Kayit</span>
+          <span class="is-deger">{{ kayitlar.length }}</span>
+        </div>
+        <div class="istatistik-satir" *ngFor="let k of kategoriler">
+          <span class="is-etiket" [style.color]="kategoriRenk(k)">{{ k }}</span>
+          <span class="is-deger">{{ kategoriSayisi(k) }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kayitlar listesi -->
+  <div class="liste-bolum">
+    <h2 class="panel-title">Kayitli Olaylar</h2>
+
+    <div *ngIf="yukleniyor" class="yukleniyor">
+      <div class="spinner-buyuk"></div>
+      <p>Kayitlar yukleniyor...</p>
+    </div>
+
+    <div *ngIf="!yukleniyor && kayitlar.length === 0" class="bos-durum">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+      </svg>
+      <p>Henuz olay kaydi bulunmuyor.</p>
+    </div>
+
+    <div *ngIf="!yukleniyor && kayitlar.length > 0" class="kayit-grid">
+      <div class="kayit-karti" *ngFor="let kayit of kayitlar" (click)="kayitDetay(kayit)">
+        <div class="kayit-kart-ust">
+          <span class="kategori-rozet"
+            [style.background-color]="kategoriRenk(kayit.olayKategorisi) + '22'"
+            [style.color]="kategoriRenk(kayit.olayKategorisi)"
+            [style.border-color]="kategoriRenk(kayit.olayKategorisi)">
+            {{ kayit.olayKategorisi }}
+          </span>
+          <span class="kayit-tarih">{{ tarihFormat(kayit.tarih) }}</span>
+        </div>
+        <h3 class="kayit-musahit">{{ kayit.musahitAdi }}</h3>
+        <div class="kayit-konum">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
+          </svg>
+          {{ kayit.il }} / {{ kayit.ilce }} — Sandik {{ kayit.sandikNo }}
+        </div>
+        <p class="kayit-aciklama-onizleme">{{ kayit.aciklama.substring(0, 80) }}{{ kayit.aciklama.length > 80 ? '...' : '' }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detay Modali -->
+<div class="modal-overlay" *ngIf="modalAcik" (click)="modalKapat()">
+  <div class="modal-icerik" (click)="$event.stopPropagation()">
+    <div class="modal-baslik">
+      <h3>Olay Detayi</h3>
+      <button class="modal-kapat" (click)="modalKapat()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-govde" *ngIf="secilenKayit">
+      <div class="modal-satir">
+        <span class="modal-etiket">Musahit Adi</span>
+        <span class="modal-deger">{{ secilenKayit.musahitAdi }}</span>
+      </div>
+      <div class="modal-satir">
+        <span class="modal-etiket">Konum</span>
+        <span class="modal-deger">{{ secilenKayit.il }} / {{ secilenKayit.ilce }}{{ secilenKayit.mahalle ? ' / ' + secilenKayit.mahalle : '' }}</span>
+      </div>
+      <div class="modal-satir">
+        <span class="modal-etiket">Sandik No</span>
+        <span class="modal-deger">{{ secilenKayit.sandikNo }}</span>
+      </div>
+      <div class="modal-satir">
+        <span class="modal-etiket">Kategori</span>
+        <span class="kategori-rozet"
+          [style.background-color]="kategoriRenk(secilenKayit.olayKategorisi) + '22'"
+          [style.color]="kategoriRenk(secilenKayit.olayKategorisi)"
+          [style.border-color]="kategoriRenk(secilenKayit.olayKategorisi)">
+          {{ secilenKayit.olayKategorisi }}
+        </span>
+      </div>
+      <div class="modal-satir">
+        <span class="modal-etiket">Olay Saati</span>
+        <span class="modal-deger">{{ secilenKayit.olaySaati }}</span>
+      </div>
+      <div class="modal-satir">
+        <span class="modal-etiket">Tarih</span>
+        <span class="modal-deger">{{ tarihFormat(secilenKayit.tarih) }}</span>
+      </div>
+      <div class="modal-satir modal-aciklama">
+        <span class="modal-etiket">Aciklama</span>
+        <p class="modal-deger">{{ secilenKayit.aciklama }}</p>
+      </div>
+      <div class="modal-satir" *ngIf="secilenKayit.kanitDosyasi">
+        <span class="modal-etiket">Kanit Dosyasi</span>
+        <span class="modal-deger dosya-var">Dosya mevcut</span>
+      </div>
+      <div class="modal-alt">
+        <button class="btn-sil" (click)="kayitSil(secilenKayit.id)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+          </svg>
+          Kaydi Sil
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

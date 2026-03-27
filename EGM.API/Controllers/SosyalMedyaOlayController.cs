@@ -55,6 +55,7 @@ namespace EGM.API.Controllers
                 PaylasimTarihi = dto.PaylasimTarihi,
                 IcerikOzeti = dto.IcerikOzeti,
                 IlgiliKisiKurum = dto.IlgiliKisiKurum,
+                EkranGoruntusu = dto.EkranGoruntusu,
                 Hassasiyet = dto.Hassasiyet,
                 SosyalSignalSkoru = dto.SosyalSignalSkoru
             };
@@ -86,6 +87,7 @@ namespace EGM.API.Controllers
             Id = s.Id, OlayId = s.OlayId, Platform = s.Platform,
             PaylasimLinki = s.PaylasimLinki, PaylasimTarihi = s.PaylasimTarihi,
             IcerikOzeti = s.IcerikOzeti, IlgiliKisiKurum = s.IlgiliKisiKurum,
+            EkranGoruntusu = s.EkranGoruntusu,
             Hassasiyet = s.Hassasiyet, SosyalSignalSkoru = s.SosyalSignalSkoru
         };
     }

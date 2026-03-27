@@ -1,1 +1,188 @@
-<!-- socialmedia works -->
+﻿<section class="sm-page">
+
+  <!-- Basari / Hata Mesajlari -->
+  <div class="alert alert-basari" *ngIf="basariMesaji">
+    <span>&#10003;</span> {{ basariMesaji }}
+  </div>
+  <div class="alert alert-hata" *ngIf="hataMesaji">
+    <span>&#9888;</span> {{ hataMesaji }}
+  </div>
+
+  <div class="sm-body">
+
+    <!-- ═══ Sol Panel - Form ═══ -->
+    <div class="sm-form-panel">
+
+      <!-- Paylasim Yapanin Kullanici Adi -->
+      <div class="field-group">
+        <label class="field-label required">Paylasimi Yapanin Kullanici Adi</label>
+        <div class="input-with-icon">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input
+            type="text"
+            class="form-input"
+            [(ngModel)]="form.kullaniciAdi"
+            placeholder="ornek: @kullanici_adi"
+            maxlength="250"
+          />
+        </div>
+        <span class="field-hint">Sosyal medya hesabinin kullanici adi</span>
+      </div>
+
+      <!-- Platform -->
+      <div class="field-group">
+        <label class="field-label required">Platform</label>
+        <div class="platform-grid">
+          <button
+            *ngFor="let p of platformlar"
+            type="button"
+            class="platform-btn"
+            [class.selected]="form.platform === p"
+            (click)="form.platform = p"
+          >{{ p }}</button>
+        </div>
+      </div>
+
+      <!-- Paylasim Linki -->
+      <div class="field-group">
+        <label class="field-label required">Paylasimin Linki</label>
+        <div class="input-with-icon">
+          <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+          </svg>
+          <input
+            type="url"
+            class="form-input"
+            [(ngModel)]="form.paylasimLinki"
+            placeholder="https://twitter.com/kullanici/status/..."
+            maxlength="2000"
+          />
+        </div>
+      </div>
+
+      <!-- Paylasim Tarihi -->
+      <div class="field-group">
+        <label class="field-label">Paylasim Tarihi ve Saati</label>
+        <input
+          type="datetime-local"
+          class="form-input"
+          [(ngModel)]="form.paylasimTarihi"
+        />
+      </div>
+
+      <!-- Paylasim Aciklamasi -->
+      <div class="field-group">
+        <label class="field-label required">Paylasimin Aciklamasi</label>
+        <textarea
+          class="form-textarea"
+          [(ngModel)]="form.icerikOzeti"
+          placeholder="Paylasimin icerigini ve onemini aciklayin..."
+          rows="5"
+          maxlength="2000"
+        ></textarea>
+        <span class="field-hint char-count">{{ form.icerikOzeti.length }} / 2000</span>
+      </div>
+
+      <!-- Hassasiyet + Signal Skoru -->
+      <div class="field-row">
+        <div class="field-group flex-1">
+          <label class="field-label">Hassasiyet Seviyesi</label>
+          <select class="form-input" [(ngModel)]="form.hassasiyet">
+            <option [value]="0">Dusuk</option>
+            <option [value]="1">Orta</option>
+            <option [value]="2">Yuksek</option>
+            <option [value]="3">Kritik</option>
+          </select>
+        </div>
+        <div class="field-group flex-1">
+          <label class="field-label">Sosyal Signal Skoru (0-100)</label>
+          <div class="score-input-wrap">
+            <input
+              type="number"
+              class="form-input"
+              [(ngModel)]="form.sosyalSignalSkoru"
+              min="0"
+              max="100"
+              step="1"
+            />
+            <div class="score-bar">
+              <div class="score-fill"
+                [style.width.%]="form.sosyalSignalSkoru"
+                [class.score-low]="form.sosyalSignalSkoru < 40"
+                [class.score-med]="form.sosyalSignalSkoru >= 40 && form.sosyalSignalSkoru < 70"
+                [class.score-high]="form.sosyalSignalSkoru >= 70"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Butonlar -->
+      <div class="form-actions">
+        <button class="btn-submit" (click)="kaydet()" [disabled]="kaydediliyor">
+          <span *ngIf="!kaydediliyor">&#10003; Kaydet</span>
+          <span *ngIf="kaydediliyor">Kaydediliyor...</span>
+        </button>
+        <button class="btn-reset" type="button" (click)="gorselKaldir()">
+          Temizle
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ═══ Sag Panel - Ekran Goruntusu ═══ -->
+    <div class="sm-screenshot-panel">
+      <div class="screenshot-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+          <circle cx="8.5" cy="8.5" r="1.5"/>
+          <polyline points="21 15 16 10 5 21"/>
+        </svg>
+        <span>Paylasimin Ekran Goruntusu</span>
+      </div>
+
+      <!-- Gorsel Yukleme Alani -->
+      <div
+        class="drop-zone"
+        [class.has-image]="form.ekranGoruntusuBase64"
+        (click)="fileInput.click()"
+      >
+        <ng-container *ngIf="!form.ekranGoruntusuBase64">
+          <div class="drop-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <p>Gorsel secmek icin tiklayin</p>
+            <span>PNG, JPG, GIF - max 5 MB</span>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="form.ekranGoruntusuBase64">
+          <img [src]="form.ekranGoruntusuBase64" alt="Ekran goruntusu onizlemesi" class="preview-img" />
+        </ng-container>
+      </div>
+
+      <input
+        #fileInput
+        type="file"
+        accept="image/*"
+        style="display:none"
+        (change)="gorselSec($event)"
+      />
+
+      <div class="screenshot-footer" *ngIf="form.ekranGoruntusuBase64">
+        <span class="file-name">{{ form.ekranGoruntusuAd }}</span>
+        <button class="btn-remove-img" (click)="gorselKaldir()">&#10005; Kaldir</button>
+      </div>
+      <div class="screenshot-hint" *ngIf="!form.ekranGoruntusuBase64">
+        Sosyal medya paylasiminin ekran goruntusunu yukleyin. Bu gorsel kayit ile birlikte saklanir.
+      </div>
+    </div>
+
+  </div>
+</section>

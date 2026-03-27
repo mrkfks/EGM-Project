@@ -16,6 +16,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IO.Compression;
 using System.Text;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using System.Text.Json;
+using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -194,6 +197,38 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseResponseCompression();
+
+// Ensure responses explicitly include charset=utf-8 when appropriate
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(state =>
+    {
+        var httpContext = (HttpContext)state!;
+        try
+        {
+            if (httpContext.Response.HasStarted) return Task.CompletedTask;
+
+            if (httpContext.Response.Headers.TryGetValue("Content-Type", out var ctValues))
+            {
+                var ct = ctValues.ToString();
+                if (!string.IsNullOrEmpty(ct) && !ct.Contains("charset", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (ct.StartsWith("text/", StringComparison.OrdinalIgnoreCase) ||
+                        ct.StartsWith("application/json", StringComparison.OrdinalIgnoreCase) ||
+                        ct.StartsWith("application/javascript", StringComparison.OrdinalIgnoreCase) ||
+                        ct.StartsWith("application/xml", StringComparison.OrdinalIgnoreCase))
+                    {
+                        try { httpContext.Response.Headers["Content-Type"] = ct + "; charset=utf-8"; } catch { }
+                    }
+                }
+            }
+        }
+        catch { }
+        return Task.CompletedTask;
+    }, context);
+
+    await next();
+});
 app.UseHttpsRedirection();
 app.UseHsts();
 app.UseCors("AllowFrontend");
@@ -203,7 +238,34 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");
-app.MapHealthChecks("/health").AllowAnonymous();
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    AllowCachingResponses = false,
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.StatusCode = report.Status == Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy
+            ? StatusCodes.Status200OK : StatusCodes.Status503ServiceUnavailable;
+
+        // Ensure Content-Type includes charset utf-8 in a safe way
+        try
+        {
+            if (!context.Response.Headers.ContainsKey("Content-Type"))
+                context.Response.Headers.Append("Content-Type", "application/json; charset=utf-8");
+            else if (!context.Response.Headers["Content-Type"].ToString().Contains("charset", StringComparison.OrdinalIgnoreCase))
+                context.Response.Headers["Content-Type"] = context.Response.Headers["Content-Type"].ToString() + "; charset=utf-8";
+        }
+        catch { }
+
+        var result = JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            totalDuration = report.TotalDuration.TotalMilliseconds,
+            entries = report.Entries.Select(e => new { key = e.Key, status = e.Value.Status.ToString(), description = e.Value.Description })
+        });
+
+        await context.Response.WriteAsync(result);
+    }
+}).AllowAnonymous();
 
 // ── Başlangıçta DB bağlantısını doğrula ─────────────────────────────────
 using (var scope = app.Services.CreateScope())

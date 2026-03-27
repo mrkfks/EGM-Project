@@ -38,7 +38,9 @@ namespace EGM.API.Controllers
             var entity = new Organizator
             {
                 Ad = dto.Ad, KurulusTarihi = dto.KurulusTarihi,
-                FaaliyetAlani = dto.FaaliyetAlani, Iletisim = dto.Iletisim
+                FaaliyetAlani = dto.FaaliyetAlani, Iletisim = dto.Iletisim,
+                Tur = dto.Tur, Aciklama = dto.Aciklama,
+                UstKurulusId = dto.UstKurulusId
             };
             var created = await _service.CreateAsync(entity);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, MapToResponse(created));
@@ -51,7 +53,9 @@ namespace EGM.API.Controllers
             var updated = new Organizator
             {
                 Ad = dto.Ad, KurulusTarihi = dto.KurulusTarihi,
-                FaaliyetAlani = dto.FaaliyetAlani, Iletisim = dto.Iletisim
+                FaaliyetAlani = dto.FaaliyetAlani, Iletisim = dto.Iletisim,
+                Tur = dto.Tur, Aciklama = dto.Aciklama,
+                UstKurulusId = dto.UstKurulusId
             };
             return await _service.UpdateAsync(id, updated) ? NoContent() : NotFound();
         }
@@ -79,34 +83,50 @@ namespace EGM.API.Controllers
         // ── Konu ─────────────────────────────────────────────────────────
         [HttpGet("konu")]
         public async Task<IActionResult> GetAllKonu()
-            => Ok(await _service.GetAllKonuAsync());
+            => Ok((await _service.GetAllKonuAsync()).Select(MapKonuToResponse));
 
         [HttpGet("konu/{id}")]
         public async Task<IActionResult> GetKonuById(Guid id)
         {
             var item = await _service.GetKonuByIdAsync(id);
-            return item == null ? NotFound() : Ok(item);
+            return item == null ? NotFound() : Ok(MapKonuToResponse(item));
         }
 
         [HttpPost("konu")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
         public async Task<IActionResult> CreateKonu([FromBody] KonuCreateDto dto)
-            => Ok(await _service.CreateKonuAsync(dto.Ad!, dto.Aciklama));
+        {
+            var created = await _service.CreateKonuAsync(dto.Ad!, dto.Aciklama, dto.Tur, dto.UstKonuId);
+            return Ok(MapKonuToResponse(created));
+        }
 
         [HttpPut("konu/{id}")]
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
         public async Task<IActionResult> UpdateKonu(Guid id, [FromBody] KonuCreateDto dto)
-            => await _service.UpdateKonuAsync(id, dto.Ad!, dto.Aciklama) ? NoContent() : NotFound();
+            => await _service.UpdateKonuAsync(id, dto.Ad!, dto.Aciklama, dto.Tur, dto.UstKonuId) ? NoContent() : NotFound();
 
         [HttpDelete("konu/{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
         public async Task<IActionResult> DeleteKonu(Guid id)
             => await _service.DeleteKonuAsync(id) ? NoContent() : NotFound();
 
+        private static KonuResponseDto MapKonuToResponse(Konu k) => new()
+        {
+            Id = k.Id, Ad = k.Ad, Aciklama = k.Aciklama,
+            Tur = k.Tur, UstKonuId = k.UstKonuId,
+            UstKonuAd = k.UstKonu?.Ad,
+            AltKonuSayisi = k.AltKonular?.Count ?? 0,
+            CreatedAt = k.CreatedAt
+        };
+
         private static OrganizatorResponseDto MapToResponse(Organizator o) => new()
         {
             Id = o.Id, Ad = o.Ad, KurulusTarihi = o.KurulusTarihi,
-            FaaliyetAlani = o.FaaliyetAlani, Iletisim = o.Iletisim
+            FaaliyetAlani = o.FaaliyetAlani, Iletisim = o.Iletisim,
+            Tur = o.Tur, Aciklama = o.Aciklama,
+            UstKurulusId = o.UstKurulusId,
+            UstKurulusAd = o.UstKurulus?.Ad,
+            AltKurulusSayisi = o.AltKuruluslar?.Count ?? 0
         };
     }
 }

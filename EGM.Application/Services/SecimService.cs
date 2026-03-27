@@ -13,17 +13,38 @@ namespace EGM.Application.Services
         private readonly IRepository<Aday> _adayRepository;
         private readonly IRepository<Parti> _partiRepository;
         private readonly IRepository<SecimKaynak> _kaynakRepository;
+        private readonly IRepository<SandikOlay> _sandikOlayRepository;
 
         public SecimService(
             IRepository<SecimSonucu> secimRepository,
             IRepository<Aday> adayRepository,
             IRepository<Parti> partiRepository,
-            IRepository<SecimKaynak> kaynakRepository)
+            IRepository<SecimKaynak> kaynakRepository,
+            IRepository<SandikOlay> sandikOlayRepository)
         {
             _secimRepository = secimRepository;
             _adayRepository = adayRepository;
             _partiRepository = partiRepository;
             _kaynakRepository = kaynakRepository;
+            _sandikOlayRepository = sandikOlayRepository;
+        }
+
+        // ── Sandik Olay CRUD ────────────────────────────────────────────
+        public async Task<IReadOnlyList<SandikOlay>> GetAllSandikOlayAsync()
+            => await _sandikOlayRepository.ListAllAsync();
+
+        public async Task<SandikOlay?> GetSandikOlayByIdAsync(Guid id)
+            => await _sandikOlayRepository.GetByIdAsync(id);
+
+        public async Task<SandikOlay> CreateSandikOlayAsync(SandikOlay kayit)
+            => await _sandikOlayRepository.AddAsync(kayit);
+
+        public async Task<bool> DeleteSandikOlayAsync(Guid id)
+        {
+            var existing = await _sandikOlayRepository.GetByIdAsync(id);
+            if (existing == null) return false;
+            await _sandikOlayRepository.DeleteAsync(existing);
+            return true;
         }
 
         // ── Seçim Sonucu CRUD ────────────────────────────────────────────

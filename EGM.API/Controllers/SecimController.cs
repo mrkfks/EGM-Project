@@ -122,11 +122,57 @@ namespace EGM.API.Controllers
         public async Task<IActionResult> DeleteKaynak(Guid id)
             => await _service.DeleteKaynakAsync(id) ? NoContent() : NotFound();
 
+        // ── Sandik Olay ──────────────────────────────────────────────────
+        [HttpGet("sandik-olay")]
+        public async Task<IActionResult> GetAllSandikOlay()
+            => Ok((await _service.GetAllSandikOlayAsync()).Select(MapSandikToResponse));
+
+        [HttpGet("sandik-olay/{id}")]
+        public async Task<IActionResult> GetSandikOlayById(Guid id)
+        {
+            var item = await _service.GetSandikOlayByIdAsync(id);
+            return item == null ? NotFound() : Ok(MapSandikToResponse(item));
+        }
+
+        [HttpPost("sandik-olay")]
+        [Authorize(Policy = "CityStaffOrAbove")]
+        public async Task<IActionResult> CreateSandikOlay([FromBody] SandikOlayCreateDto dto)
+        {
+            var entity = new SandikOlay
+            {
+                MusahitAdi = dto.MusahitAdi,
+                Il = dto.Il,
+                Ilce = dto.Ilce,
+                Mahalle = dto.Mahalle,
+                SandikNo = dto.SandikNo,
+                OlayKategorisi = dto.OlayKategorisi,
+                OlaySaati = dto.OlaySaati,
+                Aciklama = dto.Aciklama,
+                KanitDosyasi = dto.KanitDosyasi,
+                Tarih = dto.Tarih
+            };
+            var created = await _service.CreateSandikOlayAsync(entity);
+            return CreatedAtAction(nameof(GetSandikOlayById), new { id = created.Id }, MapSandikToResponse(created));
+        }
+
+        [HttpDelete("sandik-olay/{id}")]
+        [Authorize(Policy = "CityManagerOrAbove")]
+        public async Task<IActionResult> DeleteSandikOlay(Guid id)
+            => await _service.DeleteSandikOlayAsync(id) ? NoContent() : NotFound();
+
         private static SecimSonucuResponseDto MapToResponse(SecimSonucu s) => new()
         {
             Id = s.Id, SecimTuru = s.SecimTuru, Tarih = s.Tarih, BolgeTipi = s.BolgeTipi,
             BolgeId = s.BolgeId, AdayId = s.AdayId, PartiId = s.PartiId,
             OySayisi = s.OySayisi, OyOrani = s.OyOrani, KaynakOnayDurumu = s.KaynakOnayDurumu
+        };
+
+        private static SandikOlayResponseDto MapSandikToResponse(SandikOlay s) => new()
+        {
+            Id = s.Id, MusahitAdi = s.MusahitAdi, Il = s.Il, Ilce = s.Ilce,
+            Mahalle = s.Mahalle, SandikNo = s.SandikNo, OlayKategorisi = s.OlayKategorisi,
+            OlaySaati = s.OlaySaati, Aciklama = s.Aciklama, KanitDosyasi = s.KanitDosyasi,
+            Tarih = s.Tarih, CreatedAt = s.CreatedAt
         };
     }
 }

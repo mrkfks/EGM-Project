@@ -1,0 +1,205 @@
+:host {
+  display: block;
+  padding: 16px 12px;
+  overflow-y: auto;
+}
+
+.page-wrap {
+  background: #ffffff;
+  border: 1px solid #dbe5ee;
+  border-radius: 12px;
+  padding: 20px;
+  color: #153047;
+}
+
+.page-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.btn {
+  border: 1px solid #c5d2df;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: #0f6fa3;
+  color: #fff;
+  border-color: #0f6fa3;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #13334a;
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0;
+  color: #4f6478;
+}
+
+/* bulten.component.css */
+.bulten-container {
+  font-family: 'Arial', sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  color: #000;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.hizmete-ozel {
+  text-align: left;
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 10px;
+  text-decoration: underline;
+  color: #c00000; /* Resmi evraklardaki kırmızı kaşe rengine benzer */
+}
+
+.header-section h2 {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.bulten-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 15px 0 5px 0;
+  text-decoration: underline;
+}
+
+.tarih {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.table-section {
+  margin-bottom: 40px;
+}
+
+.mt-4 {
+  margin-top: 20px;
+}
+
+.table-section h4 {
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.tarih-sol {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+/* Tablo Genel Ayarları */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  table-layout: fixed;
+}
+
+th, td {
+  border: 1px solid #000;
+  padding: 6px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+tbody td {
+  min-height: 24px;
+  height: 24px;
+}
+
+.text-left {
+  text-align: left;
+}
+
+/* Detay Tablosu Sütun Genişlikleri */
+.sn-col {
+  width: 40px;
+}
+
+.detay-table th:nth-child(2) { width: 10%; } /* İL */
+.detay-table th:nth-child(3) { width: 23%; } /* EYLEM/ETKİNLİK */
+.detay-table th:nth-child(4) { width: 18%; } /* ORGANİZE EDEN */
+.detay-table th:nth-child(5) { width: 31%; } /* AÇIKLAMA */
+.detay-table th:nth-child(6) { width: 12%; } /* KATILIM SAYISI */
+
+.beklenen-table th:nth-child(2) { width: 10%; } /* İL */
+.beklenen-table th:nth-child(3) { width: 18%; } /* YER */
+.beklenen-table th:nth-child(4) { width: 20%; } /* EYLEM/ETKİNLİK */
+.beklenen-table th:nth-child(5) { width: 18%; } /* ORGANİZE EDEN */
+.beklenen-table th:nth-child(6) { width: 28%; } /* AÇIKLAMA */
+
+.operasyonel-table th:nth-child(2) { width: 14%; } /* İL */
+.operasyonel-table th:nth-child(3) { width: 16%; } /* TARİH */
+.operasyonel-table th:nth-child(4) { width: 14%; } /* GÖZALTI SAYISI */
+.operasyonel-table th:nth-child(5) { width: 56%; } /* AÇIKLAMA */
+
+/* Boş satırların yüksekliğini Excel'deki gibi tutmak için */
+.detay-table tbody tr {
+  height: 25px;
+}
+
+.total-row td {
+  font-weight: 700;
+  background: #fafafa;
+}
+
+@media (max-width: 900px) {
+  :host {
+    padding: 12px;
+  }
+
+  .bulten-container {
+    padding: 12px;
+  }
+
+  table {
+    font-size: 11px;
+  }
+}
+
+@media print {
+  :host {
+    padding: 0;
+  }
+
+  .page-wrap {
+    border: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  .page-actions {
+    display: none;
+  }
+}

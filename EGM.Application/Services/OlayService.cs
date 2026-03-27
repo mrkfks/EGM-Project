@@ -133,8 +133,11 @@ namespace EGM.Application.Services
             existing.Latitude       = updated.Latitude;
             existing.Longitude      = updated.Longitude;
             existing.KatilimciSayisi = updated.KatilimciSayisi;
+            existing.GozaltiSayisi  = updated.GozaltiSayisi;
+            existing.SehitOluSayisi = updated.SehitOluSayisi;
             existing.Aciklama       = updated.Aciklama;
             existing.KaynakKurum    = updated.KaynakKurum;
+            existing.EvrakNumarasi  = updated.EvrakNumarasi;
             existing.Hassasiyet     = updated.Hassasiyet;
             existing.RiskPuani      = CalculateRisk(existing);
 

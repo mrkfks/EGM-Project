@@ -42,6 +42,9 @@ namespace EGM.Application.Services
             existing.KurulusTarihi = updated.KurulusTarihi;
             existing.FaaliyetAlani = updated.FaaliyetAlani;
             existing.Iletisim = updated.Iletisim;
+            existing.Tur = updated.Tur;
+            existing.Aciklama = updated.Aciklama;
+            existing.UstKurulusId = updated.UstKurulusId;
 
             await _organizatorRepository.UpdateAsync(existing);
             return true;
@@ -94,19 +97,21 @@ namespace EGM.Application.Services
         public async Task<Konu?> GetKonuByIdAsync(Guid id)
             => await _konuRepository.GetByIdAsync(id);
 
-        public async Task<Konu> CreateKonuAsync(string ad, string? aciklama)
+        public async Task<Konu> CreateKonuAsync(string ad, string? aciklama, string? tur, Guid? ustKonuId)
         {
-            var konu = new Konu { Ad = ad, Aciklama = aciklama };
+            var konu = new Konu { Ad = ad, Aciklama = aciklama, Tur = tur, UstKonuId = ustKonuId };
             return await _konuRepository.AddAsync(konu);
         }
 
-        public async Task<bool> UpdateKonuAsync(Guid id, string ad, string? aciklama)
+        public async Task<bool> UpdateKonuAsync(Guid id, string ad, string? aciklama, string? tur, Guid? ustKonuId)
         {
             var existing = await _konuRepository.GetByIdAsync(id);
             if (existing == null) return false;
 
             existing.Ad = ad;
             existing.Aciklama = aciklama;
+            existing.Tur = tur;
+            existing.UstKonuId = ustKonuId;
             await _konuRepository.UpdateAsync(existing);
             return true;
         }

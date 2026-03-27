@@ -29,28 +29,23 @@ export class Sidebar implements OnInit, OnDestroy {
 
   readonly groups: NavGroup[] = [
     {
-      title: 'Ana Ekranlar',
+      title: 'Ana Sayfa',
       items: [
         { label: 'Harita', route: '/home', icon: 'map' },
+        { label: 'Olaylar', route: '/olay', icon: 'alert' },
+        { label: 'İstatistikler', route: '/istatistikler', icon: 'activity' },
+        { label: 'Raporlar', route: '/raporlar', icon: 'share' },
       ]
     },
     {
-      title: 'Olaylar & Raporlar',
+      title: 'Veri Girişi',
       items: [
-        { label: 'Olaylar',                route: '/olay',        icon: 'alert' },
-        { label: 'Operasyonel Faaliyetler', route: '/operasyonel', icon: 'activity' },
-        { label: 'Sosyal Medya Olayları',  route: '/socialmedia', icon: 'share' },
-        { label: 'Şüpheliler',             route: '/supheli',     icon: 'search-person' },
-      ]
-    },
-    {
-      title: 'Kayıtlar',
-      items: [
-        { label: 'Organizatörler',   route: '/organizasyon', icon: 'org' },
-        { label: 'Seçim Sonuçları',  route: '/secim',        icon: 'vote' },
-        { label: 'Şehitler',         route: '/sehit',        icon: 'medal' },
-        { label: 'Ölüm Kayıtları',   route: '/olu',          icon: 'cross' },
-        { label: 'VIP Ziyaretler',   route: '/vip',          icon: 'star' },
+        { label: 'Kuruluş İşlemleri', route: '/organizasyon', icon: 'org' },
+        { label: 'Konu İşlemleri', route: '/konu-islemleri', icon: 'activity' },
+        { label: 'Sokak Olayları', route: '/sokak-olay-ekle', icon: 'alert' },
+        { label: 'Sosyal Medya Olayları', route: '/socialmedia', icon: 'share' },
+        { label: 'Seçim Olayları', route: '/secim', icon: 'vote' },
+        { label: 'Ziyaretçi', route: '/vip', icon: 'star' },
       ]
     },
     {
@@ -58,6 +53,7 @@ export class Sidebar implements OnInit, OnDestroy {
       items: [
         { label: 'Kullanıcı Yönetimi', route: '/kullanicilar', icon: 'users',
           roles: ['BaskanlikYoneticisi', 'IlYoneticisi'] },
+        { label: 'Veri Yönetimi', route: '/veri-yonetimi', icon: 'database' },
       ]
     }
   ];
@@ -82,7 +78,12 @@ export class Sidebar implements OnInit, OnDestroy {
     try {
       const token = localStorage.getItem('token');
       if (!token) return;
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payloadPart = token.split('.')[1];
+      const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(Array.prototype.map.call(atob(base64), (c: string) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(json);
       this.userRole = payload['role'] ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ?? '';
     } catch { this.userRole = ''; }
   }

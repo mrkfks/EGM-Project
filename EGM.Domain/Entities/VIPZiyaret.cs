@@ -15,6 +15,7 @@ namespace EGM.Domain.Entities
         public Hassasiyet Hassasiyet { get; set; }
         public string? GuvenlikSeviyesi { get; set; }
         public string? GozlemNoktalari { get; set; }
+        public ZiyaretDurumu ZiyaretDurumu { get; set; } = ZiyaretDurumu.Planlandi;
 
         public ICollection<GuvenlikPlani> GuvenlikPlanlari { get; set; } = new List<GuvenlikPlani>();
         public ICollection<Ekip> EkipAtamasi { get; set; } = new List<Ekip>();

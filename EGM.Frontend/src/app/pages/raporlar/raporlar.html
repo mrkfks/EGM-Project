@@ -1,0 +1,132 @@
+<section class="page-wrap">
+  <div class="bulten-container">
+    <div class="page-actions">
+      <button class="btn btn-secondary" type="button" (click)="setToday()">Bugün</button>
+      <button class="btn btn-primary" type="button" (click)="printReport()">Yazdır</button>
+    </div>
+  
+    <div class="header-section">
+      <div class="hizmete-ozel">HİZMETE ÖZEL</div>
+      <h2>T.C.<br>İÇİŞLERİ BAKANLIĞI<br>Emniyet Genel Müdürlüğü<br>İstihbarat Başkanlığı</h2>
+      <h3 class="bulten-title">{{ className }}</h3>
+      <div class="tarih">{{ tarih }}</div>
+    </div>
+
+    <div class="table-section">
+      <h4>GERÇEKLEŞEN EYLEM/ETKİNLİKLER<br>(GENEL İCMAL)</h4>
+      <table class="icmal-table">
+        <thead>
+          <tr>
+            <th rowspan="2">İL</th>
+            <th rowspan="2">EYLEM/ETKİNLİK</th>
+            <th rowspan="2">KATILIM SAYISI</th>
+            <th colspan="4">TOPLAM</th>
+          </tr>
+          <tr>
+            <th>EYLEM<br>ETKİNLİK<br>SAYISI</th>
+            <th>KATILIM<br>SAYISI</th>
+            <th>GÖZALTI / TUTUKLU<br>SAYISI</th>
+            <th>ŞEHİT / ÖLÜ<br>SAYISI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let satir of icmalVerileri">
+            <td></td>
+            <td class="text-left">{{ satir.tur }}</td>
+            <td></td>
+            <td>{{ satir.eylemSayisi }}</td>
+            <td>{{ satir.katilimSayisi }}</td>
+            <td>{{ satir.gozaltiSayisi }}</td>
+            <td>{{ satir.oluSayisi }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-section mt-4">
+      <h4>GERÇEKLEŞEN EYLEMLER/ETKİNLİKLER</h4>
+      <div class="tarih-sol">{{ tarih }}</div>
+      <table class="detay-table">
+        <thead>
+          <tr>
+            <th class="sn-col">S.N.</th>
+            <th>İL</th>
+            <th>EYLEM/ETKİNLİK</th>
+            <th>ORGANİZE EDEN</th>
+            <th>AÇIKLAMA</th>
+            <th>KATILIM SAYISI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let detay of gerceklesenDetaylar; trackBy: trackBySn">
+            <td>{{ detay.sn }}</td>
+            <td>{{ detay.il }}</td>
+            <td>{{ detay.eylemEtkinlik }}</td>
+            <td>{{ detay.organizeEden }}</td>
+            <td>{{ detay.aciklama }}</td>
+            <td>{{ detay.katilimSayisi }}</td>
+          </tr>
+          <tr class="total-row">
+            <td></td>
+            <td colspan="2" class="text-left">Toplam</td>
+            <td>(-)</td>
+            <td>(-)</td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-section mt-4">
+      <h4>BEKLENEN EYLEMLER/ETKİNLİKLER</h4>
+      <div class="tarih-sol">{{ sonrakiGunTarih }}</div>
+      <table class="beklenen-table">
+        <thead>
+          <tr>
+            <th class="sn-col">S.N.</th>
+            <th>İL</th>
+            <th>YER</th>
+            <th>EYLEM/ETKİNLİK</th>
+            <th>ORGANİZE EDEN</th>
+            <th>AÇIKLAMA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let detay of beklenenDetaylar; trackBy: trackBySn">
+            <td>{{ detay.sn }}</td>
+            <td>{{ detay.il }}</td>
+            <td>{{ detay.yer }}</td>
+            <td>{{ detay.eylemEtkinlik }}</td>
+            <td>{{ detay.organizeEden }}</td>
+            <td>{{ detay.aciklama }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-section mt-4">
+      <h4>OPERASYONEL FAALİYETLER</h4>
+      <table class="operasyonel-table">
+        <thead>
+          <tr>
+            <th class="sn-col">S.N.</th>
+            <th>İL</th>
+            <th>TARİH</th>
+            <th>GÖZALTI SAYISI</th>
+            <th>AÇIKLAMA</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let detay of operasyonelFaaliyetler; trackBy: trackBySn">
+            <td>{{ detay.sn }}</td>
+            <td>{{ detay.il }}</td>
+            <td>{{ detay.tarih }}</td>
+            <td>{{ detay.gozaltiSayisi }}</td>
+            <td>{{ detay.aciklama }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>

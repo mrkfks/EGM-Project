@@ -1,0 +1,182 @@
+<div class="ekle-page">
+
+  <!-- ── Mesajlar ────────────────────────────────────────────────────── -->
+  <div class="alert alert-success" *ngIf="formSuccess">{{ formSuccess }}</div>
+  <div class="alert alert-danger"  *ngIf="formError">{{ formError }}</div>
+
+  <!-- ── Risk önizleme bandı ─────────────────────────────────────────── -->
+  <div class="risk-preview-bar" *ngIf="riskPreview" [class.high-risk-bar]="isHighRisk">
+    <span class="rpb-label">
+      Risk Puanı:
+      <strong [style.color]="riskBarColor()">
+        {{ (riskPreview.riskPuaniNormalized * 100) | number:'1.0-0' }}%
+        ({{ riskPreview.seviye }})
+      </strong>
+      <span *ngIf="isHighRisk" class="risk-warn-icon">⚠ Yüksek Riskli Kayıt</span>
+    </span>
+    <div class="rpb-track">
+      <div class="rpb-fill"
+           [style.width]="riskBarWidth()"
+           [style.background]="riskBarColor()">
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Form ────────────────────────────────────────────────────────── -->
+  <form [formGroup]="form" (ngSubmit)="save()" novalidate class="olay-form"
+        [style.--accent-color]="hassasiyetColor">
+
+    <!-- Temel Bilgiler -->
+    <fieldset class="form-section">
+      <legend>Temel Bilgiler</legend>
+      <div class="form-grid">
+
+        <div class="form-field span-2">
+          <label>Başlık <span class="req">*</span></label>
+          <input type="text" formControlName="baslik"
+                 placeholder="Olay başlığını giriniz…"
+                 [class.is-invalid]="fieldError('baslik')">
+          <div class="field-error" *ngIf="fieldError('baslik')">
+            {{ f['baslik'].errors?.['required'] ? 'Başlık zorunludur.' : 'En fazla 250 karakter.' }}
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label>Olay Türü <span class="req">*</span></label>
+          <select formControlName="olayTuru" [class.is-invalid]="fieldError('olayTuru')">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let t of OLAY_TURLERI" [value]="t">{{ t }}</option>
+          </select>
+          <div class="field-error" *ngIf="fieldError('olayTuru')">Olay türü zorunludur.</div>
+        </div>
+
+        <div class="form-field">
+          <label>Hassasiyet <span class="req">*</span></label>
+          <select formControlName="hassasiyet">
+            <option *ngFor="let h of HASSASIYET" [value]="h.value">{{ h.label }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Organizatör <span class="req">*</span></label>
+          <select formControlName="organizatorId" [class.is-invalid]="fieldError('organizatorId')">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let o of organizatorler" [value]="o.id">{{ o.ad }}</option>
+          </select>
+          <div class="field-error" *ngIf="fieldError('organizatorId')">Organizatör zorunludur.</div>
+        </div>
+
+        <div class="form-field">
+          <label>Konu <span class="req">*</span></label>
+          <select formControlName="konuId" [class.is-invalid]="fieldError('konuId')">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let k of konular" [value]="k.id">{{ k.ad }}</option>
+          </select>
+          <div class="field-error" *ngIf="fieldError('konuId')">Konu zorunludur.</div>
+        </div>
+
+        <div class="form-field">
+          <label>Tarih <span class="req">*</span></label>
+          <input type="date" formControlName="tarih" [class.is-invalid]="fieldError('tarih')">
+          <div class="field-error" *ngIf="fieldError('tarih')">Tarih zorunludur.</div>
+        </div>
+
+        <div class="form-field">
+          <label>Başlangıç Saati</label>
+          <input type="time" formControlName="baslangicSaati">
+        </div>
+
+        <div class="form-field">
+          <label>Bitiş Saati</label>
+          <input type="time" formControlName="bitisSaati">
+        </div>
+
+      </div>
+    </fieldset>
+
+    <!-- Konum & Katılım -->
+    <fieldset class="form-section">
+      <legend>Konum &amp; Katılım</legend>
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label>İl <span class="req">*</span></label>
+          <select formControlName="il" [class.is-invalid]="fieldError('il')"
+                  *ngIf="!isCityScoped">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let il of IL_LISTESI" [value]="il.ad">{{ il.ad }}</option>
+          </select>
+          <input type="text" formControlName="il" readonly *ngIf="isCityScoped"
+                 class="locked-input" title="Yetki alanınızdaki il otomatik seçilmiştir.">
+          <div class="field-error" *ngIf="fieldError('il')">İl zorunludur.</div>
+        </div>
+
+        <div class="form-field">
+          <label>İlçe</label>
+          <input type="text" formControlName="ilce" placeholder="İlçe adı…">
+        </div>
+
+        <div class="form-field span-2">
+          <label>Mekan</label>
+          <input type="text" formControlName="mekan" placeholder="Etkinlik mekanı…">
+        </div>
+
+        <div class="form-field">
+          <label>Enlem</label>
+          <input type="number" formControlName="latitude" step="0.0001"
+                 placeholder="ör. 39.9208"
+                 [class.is-invalid]="fieldError('latitude')">
+          <div class="field-error" *ngIf="fieldError('latitude')">−90 ile 90 arasında olmalı.</div>
+        </div>
+
+        <div class="form-field">
+          <label>Boylam</label>
+          <input type="number" formControlName="longitude" step="0.0001"
+                 placeholder="ör. 32.8541"
+                 [class.is-invalid]="fieldError('longitude')">
+          <div class="field-error" *ngIf="fieldError('longitude')">−180 ile 180 arasında olmalı.</div>
+        </div>
+
+        <div class="form-field">
+          <label>Tahmini Katılımcı Sayısı</label>
+          <input type="number" formControlName="katilimciSayisi" min="0" placeholder="0">
+        </div>
+
+        <div class="form-field">
+          <label>Sosyal Medya Sinyal Skoru
+            <span class="hint">(0–100)</span>
+          </label>
+          <input type="number" formControlName="sosyalSignalSkoru" min="0" max="100">
+        </div>
+
+        <div class="form-field span-2">
+          <label>Açıklama</label>
+          <textarea formControlName="aciklama" rows="3"
+                    placeholder="Olay hakkında kısa notlar…"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label>Kaynak Kurum</label>
+          <input type="text" formControlName="kaynakKurum" placeholder="Bildirim kaynağı…">
+        </div>
+
+        <div class="form-field" *ngIf="!isCityScoped">
+          <label>İl Kodu (Plaka)</label>
+          <input type="number" formControlName="cityId" min="1" max="81" placeholder="1–81">
+        </div>
+
+      </div>
+    </fieldset>
+
+    <!-- Alt butonlar -->
+    <div class="form-actions">
+      <button type="button" class="btn-ghost" (click)="goBack()">İptal</button>
+      <button type="submit" class="btn-primary" [disabled]="isSaving">
+        <span *ngIf="isSaving" class="spinner-sm"></span>
+        {{ isSaving ? 'Kaydediliyor…' : 'Kaydet' }}
+      </button>
+    </div>
+
+  </form>
+
+</div>

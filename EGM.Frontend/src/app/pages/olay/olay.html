@@ -3,31 +3,112 @@
      ══════════════════════════════════════════════════════════════════ -->
 <div class="olay-page">
 
-  <!-- ── Üst başlık ──────────────────────────────────────────────────── -->
-  <header class="page-header">
-    <div class="header-left">
-      <h1>Olay Yönetim Merkezi</h1>
-    </div>
-    <div class="header-right">
-      <button class="btn-primary" *ngIf="canCreateOrEdit()" (click)="openCreate()">
-        + Yeni Olay
-      </button>
-    </div>
-  </header>
-
   <!-- ── Tablo hata mesajı ───────────────────────────────────────────── -->
   <div class="alert alert-danger" *ngIf="tableError">{{ tableError }}</div>
 
-  <!-- ── Filtre & araç çubuğu ───────────────────────────────────────── -->
-  <div class="toolbar">
-    <div class="filter-group">
-      <label>Durum:</label>
-      <select [(ngModel)]="filterDurum" (change)="onFilterDurumChange()">
-        <option value="">Tümü</option>
-        <option *ngFor="let d of DURUM" [value]="d.value">{{ d.label }}</option>
-      </select>
+  <!-- ── Filtreler ────────────────────────────────────────────────────── -->
+  <div class="filter-bar">
+    <div class="filter-row">
+
+      <!-- Başlangıç tarih+saat -->
+      <div class="filter-group">
+        <label>Başlangıç Tarih / Saat</label>
+        <input type="datetime-local" [(ngModel)]="filterDatetimeBaslangic" class="filter-input filter-input-dt">
+      </div>
+
+      <!-- Bitiş tarih+saat -->
+      <div class="filter-group">
+        <label>Bitiş Tarih / Saat</label>
+        <input type="datetime-local" [(ngModel)]="filterDatetimeBitis" class="filter-input filter-input-dt">
+      </div>
+
+      <!-- İl -->
+      <div class="filter-group">
+        <label>İl</label>
+        <select [(ngModel)]="filterIl" class="filter-input">
+          <option value="">Tümü</option>
+          <option *ngFor="let il of IL_LISTESI" [value]="il.ad">{{ il.ad }}</option>
+        </select>
+      </div>
+
+      <!-- Konu -->
+      <div class="filter-group">
+        <label>Konu</label>
+        <select [(ngModel)]="filterKonuId" class="filter-input">
+          <option value="">Tümü</option>
+          <option *ngFor="let k of konular" [value]="k.id">{{ k.ad }}</option>
+        </select>
+      </div>
+
+      <!-- Organizatör -->
+      <div class="filter-group">
+        <label>Organize Eden</label>
+        <select [(ngModel)]="filterOrganizatorId" class="filter-input">
+          <option value="">Tümü</option>
+          <option *ngFor="let o of organizatorler" [value]="o.id">{{ o.ad }}</option>
+        </select>
+      </div>
+
+      <!-- Durum + Butonlar -->
+      <div class="filter-group">
+        <label>Durum</label>
+        <select [(ngModel)]="filterDurum" class="filter-input">
+          <option value="">Tümü</option>
+          <option *ngFor="let d of DURUM" [value]="d.value">{{ d.label }}</option>
+        </select>
+      </div>
+
+      <!-- Gözaltı -->
+      <div class="filter-group">
+        <label>Gözaltı</label>
+        <select [(ngModel)]="filterGozalti" class="filter-input">
+          <option value="">Tümü</option>
+          <option value="var">Var</option>
+          <option value="yok">Yok</option>
+        </select>
+      </div>
+
+      <!-- Şehit/Ölü -->
+      <div class="filter-group">
+        <label>Şehit / Ölü</label>
+        <select [(ngModel)]="filterSehitOlu" class="filter-input">
+          <option value="">Tümü</option>
+          <option value="var">Var</option>
+          <option value="yok">Yok</option>
+        </select>
+      </div>
+
+      <div class="filter-group filter-btn-group">
+        <label>&nbsp;</label>
+        <button class="btn-filter" (click)="applyFilters()">Filtrele</button>
+        <button class="btn-clear"  (click)="clearFilters()">Temizle</button>
+      </div>
+
     </div>
-    <span class="total-badge">Toplam: {{ totalCount }} kayıt</span>
+
+    <div class="filter-actions" *ngIf="!isLoading">
+      <span class="total-badge">Toplam: {{ totalCount }} kayıt</span>
+      <div class="stat-card">
+        <span class="stat-value">{{ statFarkliIlSayisi }}</span>
+        <span class="stat-label">Farklı İl</span>
+      </div>
+      <div class="stat-card stat-eylem">
+        <span class="stat-value">{{ statEylemSayisi }}</span>
+        <span class="stat-label">Eylem</span>
+      </div>
+      <div class="stat-card stat-etkinlik">
+        <span class="stat-value">{{ statEtkinlikSayisi }}</span>
+        <span class="stat-label">Etkinlik</span>
+      </div>
+      <div class="stat-card stat-katilim">
+        <span class="stat-value">{{ statKatilimciSayisi }}</span>
+        <span class="stat-label">Toplam Katılımcı</span>
+      </div>
+      <div class="stat-card stat-sehit">
+        <span class="stat-value">{{ statSehitOluSayisi }}</span>
+        <span class="stat-label">Şehit / Ölü</span>
+      </div>
+    </div>
   </div>
 
   <!-- ── Veri tablosu ────────────────────────────────────────────────── -->
@@ -39,35 +120,45 @@
     <table class="data-table" *ngIf="!isLoading">
       <thead>
         <tr>
-          <th>Başlık</th>
+          <th class="col-sn">S.N.</th>
           <th>Tür</th>
+          <th>Konu</th>
+          <th>Organize Eden</th>
           <th class="col-mekan">İl / İlçe</th>
-          <th>Tarih</th>
-          <th class="col-katilimci">Katılımcı</th>
-          <th>Hassasiyet</th>
+          <th>Tarih Saati</th>
+          <th>Bitiş Tarih Saati</th>
+          <th class="col-sayi">Katılımcı</th>
+          <th class="col-sayi">Gözaltı</th>
+          <th class="col-sayi">Şehit/Ölü</th>
           <th>Durum</th>
           <th class="col-risk">Risk</th>
-          <th>İşlem</th>
+          <th>Evrak No</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let row of rows; trackBy: trackById" [class.row-high-risk]="row.riskPuani >= 44">
-          <td class="td-baslik">
-            <span class="olay-baslik">{{ row.baslik ?? '—' }}</span>
-          </td>
+        <tr *ngFor="let row of rows; let i = index; trackBy: trackById" [class.row-high-risk]="row.riskPuani >= 44">
+          <td class="col-sn td-center">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
           <td>{{ row.olayTuru ?? '—' }}</td>
+          <td>{{ row.konuAd || '—' }}</td>
+          <td>{{ row.organizatorAd || '—' }}</td>
           <td class="col-mekan">
             <span class="il-text">{{ row.il ?? '—' }}</span>
             <span class="ilce-text" *ngIf="row.ilce"> / {{ row.ilce }}</span>
           </td>
-          <td>{{ formatTarih(row.tarih) }}</td>
-          <td class="td-center col-katilimci">{{ row.katilimciSayisi ?? '—' }}</td>
-          <td>
-            <span class="hassasiyet-dot"
-                  [style.background]="hassasiyetColor(row.hassasiyet)"
-                  [title]="hassasiyetLabel(row.hassasiyet)"></span>
-            {{ hassasiyetLabel(row.hassasiyet) }}
+          <td class="td-tarih">
+            {{ formatTarih(row.tarih) }}
+            <span class="saat-text" *ngIf="row.baslangicSaati"> {{ row.baslangicSaati }}</span>
           </td>
+          <td class="td-tarih">
+            <ng-container *ngIf="row.bitisSaati">
+              {{ formatTarih(row.tarih) }}
+              <span class="saat-text"> {{ row.bitisSaati }}</span>
+            </ng-container>
+            <span *ngIf="!row.bitisSaati">—</span>
+          </td>
+          <td class="td-center col-sayi">{{ row.katilimciSayisi ?? '—' }}</td>
+          <td class="td-center col-sayi">{{ row.gozaltiSayisi ?? '—' }}</td>
+          <td class="td-center col-sayi">{{ row.sehitOluSayisi ?? '—' }}</td>
           <td>
             <span class="durum-badge" [ngClass]="durumBadgeClass(row.durum)">
               {{ durumLabel(row.durum) }}
@@ -82,30 +173,10 @@
             </div>
             <span class="risk-val">{{ row.riskPuani | number:'1.0-0' }}</span>
           </td>
-          <td class="td-actions">
-            <!-- Durum işlemleri (yönetici) -->
-            <ng-container *ngIf="['IlYoneticisi','BaskanlikYoneticisi'].includes(tokenRole ?? '')">
-              <button class="btn-xs btn-start"  *ngIf="row.durum === 0" (click)="baslat(row.id)" title="Başlat">▶</button>
-              <button class="btn-xs btn-finish" *ngIf="row.durum === 1" (click)="bitir(row.id)"  title="Bitir">■</button>
-              <button class="btn-xs btn-cancel" *ngIf="row.durum !== 2" (click)="iptal(row.id)"  title="İptal">✕</button>
-            </ng-container>
-            <!-- Düzenleme: sadece yetkili -->
-            <button class="btn-xs btn-edit"
-                    *ngIf="canEdit(row)"
-                    (click)="openEdit(row)"
-                    title="Düzenle">✎</button>
-            <span class="no-perm"
-                  *ngIf="!canEdit(row) && canCreateOrEdit()"
-                  title="Bu kaydı düzenleme yetkiniz yok.">🔒</span>
-            <!-- Silme: yalnızca Başkanlık Yöneticisi -->
-            <button class="btn-xs btn-delete"
-                    *ngIf="canDelete()"
-                    (click)="delete(row.id)"
-                    title="Kaydı Sil">🗑</button>
-          </td>
+          <td class="td-evrak">{{ row.evrakNumarasi || '—' }}</td>
         </tr>
         <tr *ngIf="rows.length === 0">
-          <td colspan="9" class="empty-row">Kayıt bulunamadı.</td>
+          <td colspan="13" class="empty-row">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>
@@ -120,284 +191,4 @@
     <button class="btn-page" (click)="navigatePage(totalPages)"    [disabled]="currentPage === totalPages">»</button>
   </div>
 
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════════
-     Modal Overlay – Olay Formu
-     ══════════════════════════════════════════════════════════════════ -->
-<div class="modal-overlay" *ngIf="showForm" (click)="closeForm()">
-  <div class="modal-panel"
-       [style.border-color]="currentHassasiyetColor"
-       [style.box-shadow]="'0 0 0 2px ' + currentHassasiyetColor + '55, ' + currentHassasiyetShadow"
-       (click)="$event.stopPropagation()">
-
-    <!-- Başlık + yüksek risk uyarısı -->
-    <div class="modal-header" [class.high-risk-header]="isHighRisk">
-      <h2>
-        <span *ngIf="isHighRisk" class="risk-alert-icon" title="Yüksek Riskli Kayıt">⚠</span>
-        {{ editId ? 'Olayı Düzenle' : 'Yeni Olay Oluştur' }}
-        <span class="high-risk-label" *ngIf="isHighRisk">— YÜK­SEK RİSKLİ KAYIT</span>
-      </h2>
-      <button class="btn-close" (click)="closeForm()">✕</button>
-    </div>
-
-    <!-- Risk önizleme bandı -->
-    <div class="risk-preview-bar" *ngIf="riskPreview">
-      <div class="rpb-label">
-        Risk Puanı:
-        <strong [style.color]="riskBarColor()">
-          {{ (riskPreview.riskPuaniNormalized * 100) | number:'1.0-0' }}%
-          ({{ riskPreview.seviye }})
-        </strong>
-      </div>
-      <div class="rpb-track">
-        <div class="rpb-fill"
-             [style.width]="riskBarWidth()"
-             [style.background]="riskBarColor()">
-        </div>
-      </div>
-    </div>
-
-    <!-- Başarı/hata mesajları -->
-    <div class="alert alert-success" *ngIf="formSuccess">{{ formSuccess }}</div>
-    <div class="alert alert-danger"  *ngIf="formError">{{ formError }}</div>
-
-    <!-- ── FORM ──────────────────────────────────────────────────────── -->
-    <form [formGroup]="form" (ngSubmit)="save()" novalidate class="olay-form">
-
-      <!-- Temel bilgiler grup -->
-      <fieldset class="form-section">
-        <legend>Temel Bilgiler</legend>
-        <div class="form-grid">
-
-          <!-- Başlık -->
-          <div class="form-field span-2">
-            <label>Başlık <span class="req">*</span></label>
-            <input type="text" formControlName="baslik"
-                   placeholder="Olay başlığını giriniz…"
-                   [class.is-invalid]="fieldError('baslik')">
-            <div class="field-error" *ngIf="fieldError('baslik')">
-              {{ f['baslik'].errors?.['required'] ? 'Başlık zorunludur.' : 'Başlık en fazla 250 karakter.' }}
-            </div>
-          </div>
-
-          <!-- Olay Türü -->
-          <div class="form-field">
-            <label>Olay Türü <span class="req">*</span></label>
-            <select formControlName="olayTuru" [class.is-invalid]="fieldError('olayTuru')">
-              <option value="">— Seçiniz —</option>
-              <option *ngFor="let t of OLAY_TURLERI" [value]="t">{{ t }}</option>
-            </select>
-            <div class="field-error" *ngIf="fieldError('olayTuru')">Olay türü zorunludur.</div>
-          </div>
-
-          <!-- Hassasiyet -->
-          <div class="form-field">
-            <label>Hassasiyet <span class="req">*</span></label>
-            <select formControlName="hassasiyet">
-              <option *ngFor="let h of HASSASIYET" [value]="h.value">{{ h.label }}</option>
-            </select>
-          </div>
-
-          <!-- Organizatör -->
-          <div class="form-field">
-            <label>Organizatör <span class="req">*</span></label>
-            <select formControlName="organizatorId" [class.is-invalid]="fieldError('organizatorId')">
-              <option value="">— Seçiniz —</option>
-              <option *ngFor="let o of organizatorler" [value]="o.id">{{ o.ad }}</option>
-            </select>
-            <div class="field-error" *ngIf="fieldError('organizatorId')">Organizatör zorunludur.</div>
-          </div>
-
-          <!-- Konu -->
-          <div class="form-field">
-            <label>Konu <span class="req">*</span></label>
-            <select formControlName="konuId" [class.is-invalid]="fieldError('konuId')">
-              <option value="">— Seçiniz —</option>
-              <option *ngFor="let k of konular" [value]="k.id">{{ k.ad }}</option>
-            </select>
-            <div class="field-error" *ngIf="fieldError('konuId')">Konu zorunludur.</div>
-          </div>
-
-          <!-- Tarih -->
-          <div class="form-field">
-            <label>Tarih <span class="req">*</span></label>
-            <input type="date" formControlName="tarih" [class.is-invalid]="fieldError('tarih')">
-            <div class="field-error" *ngIf="fieldError('tarih')">Tarih zorunludur.</div>
-          </div>
-
-          <!-- Başlangıç / Bitiş saati -->
-          <div class="form-field">
-            <label>Başlangıç Saati</label>
-            <input type="time" formControlName="baslangicSaati">
-          </div>
-          <div class="form-field">
-            <label>Bitiş Saati</label>
-            <input type="time" formControlName="bitisSaati">
-          </div>
-
-        </div>
-      </fieldset>
-
-      <!-- Konum & katılım grup -->
-      <fieldset class="form-section">
-        <legend>Konum &amp; Katılım</legend>
-        <div class="form-grid">
-
-          <!-- İl -->
-          <div class="form-field">
-            <label>İl <span class="req">*</span></label>
-            <select formControlName="il" [class.is-invalid]="fieldError('il')"
-                    *ngIf="!isCityScoped">
-              <option value="">— Seçiniz —</option>
-              <option *ngFor="let il of IL_LISTESI" [value]="il.ad">{{ il.ad }}</option>
-            </select>
-            <input type="text" formControlName="il" readonly *ngIf="isCityScoped"
-                   class="locked-input" title="Yetki alanınızdaki il otomatik seçilmiştir.">
-            <div class="field-error" *ngIf="fieldError('il')">İl zorunludur.</div>
-          </div>
-
-          <!-- İlçe -->
-          <div class="form-field">
-            <label>İlçe</label>
-            <input type="text" formControlName="ilce" placeholder="İlçe adı…">
-          </div>
-
-          <!-- Mekan -->
-          <div class="form-field span-2">
-            <label>Mekan</label>
-            <input type="text" formControlName="mekan" placeholder="Etkinlik mekanı…">
-          </div>
-
-          <!-- Koordinatlar -->
-          <div class="form-field">
-            <label>Enlem</label>
-            <input type="number" formControlName="latitude" step="0.0001"
-                   placeholder="ör. 39.9208"
-                   [class.is-invalid]="fieldError('latitude')">
-            <div class="field-error" *ngIf="fieldError('latitude')">−90 ile 90 arasında olmalı.</div>
-          </div>
-          <div class="form-field">
-            <label>Boylam</label>
-            <input type="number" formControlName="longitude" step="0.0001"
-                   placeholder="ör. 32.8541"
-                   [class.is-invalid]="fieldError('longitude')">
-            <div class="field-error" *ngIf="fieldError('longitude')">−180 ile 180 arasında olmalı.</div>
-          </div>
-
-          <!-- Katılımcı Sayısı -->
-          <div class="form-field">
-            <label>Tahmini Katılımcı Sayısı</label>
-            <input type="number" formControlName="katilimciSayisi" min="0"
-                   placeholder="0"
-                   [class.is-invalid]="fieldError('katilimciSayisi')">
-          </div>
-
-          <!-- Sosyal Sinyal Skoru -->
-          <div class="form-field">
-            <label>Sosyal Medya Sinyal Skoru
-              <span class="hint">(0 – 100, Risk hesaplamasını etkiler)</span>
-            </label>
-            <input type="number" formControlName="sosyalSignalSkoru" min="0" max="100">
-          </div>
-
-          <!-- Açıklama -->
-          <div class="form-field span-2">
-            <label>Açıklama</label>
-            <textarea formControlName="aciklama" rows="3"
-                      placeholder="Olay hakkında kısa notlar…"></textarea>
-          </div>
-
-          <!-- Kaynak Kurum -->
-          <div class="form-field">
-            <label>Kaynak Kurum</label>
-            <input type="text" formControlName="kaynakKurum" placeholder="Bildirim kaynağı…">
-          </div>
-
-          <!-- CityId (başkanlık personeli için görünür) -->
-          <div class="form-field" *ngIf="!isCityScoped">
-            <label>İl Kodu (Plaka)</label>
-            <input type="number" formControlName="cityId" min="1" max="81" placeholder="1–81">
-          </div>
-
-        </div>
-      </fieldset>
-
-      <!-- ── Seçim Güvenliği – koşullu bölüm ─────────────────────────── -->
-      <fieldset class="form-section section-secim" *ngIf="isSecimGuvenligi">
-        <legend class="legend-secim">🗳 Seçim Güvenliği Bilgileri</legend>
-        <div class="form-grid">
-
-          <div class="form-field">
-            <label>Sandık No <span class="req">*</span></label>
-            <input type="text" formControlName="sandikNo"
-                   placeholder="ör. 1042"
-                   [class.is-invalid]="fieldError('sandikNo')">
-            <div class="field-error" *ngIf="fieldError('sandikNo')">Sandık numarası zorunludur.</div>
-          </div>
-
-          <div class="form-field">
-            <label>Okul Adı <span class="req">*</span></label>
-            <input type="text" formControlName="okulAdi"
-                   placeholder="Sandığın bulunduğu okul…"
-                   [class.is-invalid]="fieldError('okulAdi')">
-            <div class="field-error" *ngIf="fieldError('okulAdi')">Okul adı zorunludur.</div>
-          </div>
-
-          <div class="form-field">
-            <label>Seçim İlçesi <span class="req">*</span></label>
-            <input type="text" formControlName="secimIlce"
-                   placeholder="İlçe adı…"
-                   [class.is-invalid]="fieldError('secimIlce')">
-            <div class="field-error" *ngIf="fieldError('secimIlce')">Seçim ilçesi zorunludur.</div>
-          </div>
-
-          <div class="form-field form-check-field">
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="mudahaleDurumu">
-              <span>Müdahale Durumu</span>
-            </label>
-          </div>
-
-        </div>
-      </fieldset>
-
-      <!-- ── VIP Ziyaret – koşullu bölüm ─────────────────────────────── -->
-      <fieldset class="form-section section-vip" *ngIf="isVIPZiyaret">
-        <legend class="legend-vip">⭐ VIP Ziyaret Bilgileri</legend>
-        <div class="form-grid">
-
-          <div class="form-field span-2">
-            <label>Güzergah <span class="req">*</span></label>
-            <textarea formControlName="guzergah" rows="2"
-                      placeholder="Tespit edilen güzergah önlemleri…"
-                      [class.is-invalid]="fieldError('guzergah')"></textarea>
-            <div class="field-error" *ngIf="fieldError('guzergah')">Güzergah bilgisi zorunludur.</div>
-          </div>
-
-          <div class="form-field">
-            <label>Güvenlik Seviyesi <span class="req">*</span></label>
-            <select formControlName="guvenlikSeviyesi" [class.is-invalid]="fieldError('guvenlikSeviyesi')">
-              <option value="">— Seçiniz —</option>
-              <option value="Standart">Standart</option>
-              <option value="Artırılmış">Artırılmış</option>
-              <option value="Maksimum">Maksimum</option>
-            </select>
-            <div class="field-error" *ngIf="fieldError('guvenlikSeviyesi')">Güvenlik seviyesi zorunludur.</div>
-          </div>
-
-        </div>
-      </fieldset>
-
-      <!-- Form alt butonları -->
-      <div class="form-actions">
-        <button type="button" class="btn-ghost" (click)="closeForm()">İptal</button>
-        <button type="submit" class="btn-primary" [disabled]="isSaving">
-          <span *ngIf="isSaving" class="spinner-sm"></span>
-          {{ isSaving ? 'Kaydediliyor…' : (editId ? 'Güncelle' : 'Kaydet') }}
-        </button>
-      </div>
-
-    </form>
-  </div>
 </div>

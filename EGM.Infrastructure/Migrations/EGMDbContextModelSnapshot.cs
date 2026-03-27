@@ -250,10 +250,18 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Tur")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("UstKonuId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UstKonuId");
 
                     b.ToTable("Konular");
                 });
@@ -334,11 +342,17 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<int>("Durum")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("EvrakNumarasi")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("GercekBaslangicTarihi")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("GercekBitisTarihi")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("GozaltiSayisi")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Hassasiyet")
                         .HasColumnType("INTEGER");
@@ -378,6 +392,9 @@ namespace EGM.Infrastructure.Migrations
 
                     b.Property<double>("RiskPuani")
                         .HasColumnType("REAL");
+
+                    b.Property<int?>("SehitOluSayisi")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Tarih")
                         .HasColumnType("TEXT");
@@ -485,6 +502,9 @@ namespace EGM.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Aciklama")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Ad")
                         .HasColumnType("TEXT");
 
@@ -507,10 +527,18 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<DateTime>("KurulusTarihi")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Tur")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("UstKurulusId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UstKurulusId");
 
                     b.ToTable("Organizatorler");
                 });
@@ -540,6 +568,60 @@ namespace EGM.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Partiler");
+                });
+
+            modelBuilder.Entity("EGM.Domain.Entities.SandikOlay", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Aciklama")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Il")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ilce")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("KanitDosyasi")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Mahalle")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MusahitAdi")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OlayKategorisi")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan>("OlaySaati")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SandikNo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Tarih")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SandikOlaylar");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.SecimKaynak", b =>
@@ -687,6 +769,9 @@ namespace EGM.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("EkranGoruntusu")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Hassasiyet")
                         .HasColumnType("INTEGER");
 
@@ -699,7 +784,7 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("OlayId")
+                    b.Property<Guid?>("OlayId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PaylasimLinki")
@@ -870,6 +955,9 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("ZiyaretDurumu")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ZiyaretEdenAdSoyad")
                         .HasColumnType("TEXT");
 
@@ -967,6 +1055,16 @@ namespace EGM.Infrastructure.Migrations
                     b.Navigation("OperasyonelFaaliyet");
                 });
 
+            modelBuilder.Entity("EGM.Domain.Entities.Konu", b =>
+                {
+                    b.HasOne("EGM.Domain.Entities.Konu", "UstKonu")
+                        .WithMany("AltKonular")
+                        .HasForeignKey("UstKonuId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("UstKonu");
+                });
+
             modelBuilder.Entity("EGM.Domain.Entities.Olay", b =>
                 {
                     b.HasOne("EGM.Domain.Entities.Konu", "Konu")
@@ -1006,6 +1104,15 @@ namespace EGM.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Olay");
+                });
+
+            modelBuilder.Entity("EGM.Domain.Entities.Organizator", b =>
+                {
+                    b.HasOne("EGM.Domain.Entities.Organizator", "UstKurulus")
+                        .WithMany("AltKuruluslar")
+                        .HasForeignKey("UstKurulusId");
+
+                    b.Navigation("UstKurulus");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.SecimSonucu", b =>
@@ -1050,9 +1157,7 @@ namespace EGM.Infrastructure.Migrations
                 {
                     b.HasOne("EGM.Domain.Entities.Olay", "Olay")
                         .WithMany("SosyalMedyaOlaylar")
-                        .HasForeignKey("OlayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OlayId");
 
                     b.Navigation("Olay");
                 });
@@ -1096,6 +1201,8 @@ namespace EGM.Infrastructure.Migrations
 
             modelBuilder.Entity("EGM.Domain.Entities.Konu", b =>
                 {
+                    b.Navigation("AltKonular");
+
                     b.Navigation("Olaylar");
                 });
 
@@ -1121,6 +1228,8 @@ namespace EGM.Infrastructure.Migrations
 
             modelBuilder.Entity("EGM.Domain.Entities.Organizator", b =>
                 {
+                    b.Navigation("AltKuruluslar");
+
                     b.Navigation("Olaylar");
                 });
 

@@ -31,7 +31,10 @@ namespace EGM.Infrastructure.Repositories
             int page,
             int pageSize)
         {
-            var q = _db.Olaylar.Where(o => !o.IsDeleted);
+            var q = _db.Olaylar
+                .Include(o => o.Organizator)
+                .Include(o => o.Konu)
+                .Where(o => !o.IsDeleted);
 
             if (durum.HasValue)         q = q.Where(o => o.Durum == durum.Value);
             if (tarihBaslangic.HasValue) q = q.Where(o => o.Tarih >= tarihBaslangic.Value);

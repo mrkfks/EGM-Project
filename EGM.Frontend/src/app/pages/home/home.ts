@@ -130,6 +130,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
     try {
       await this.initMap();
+      setTimeout(() => this.map?.invalidateSize(), 200);
     } catch (err) {
       console.error('[EGM] initMap() failed', err);
       this.errorMsg = 'Harita başlatılamadı. Lütfen sayfayı yenileyin.';
@@ -483,8 +484,12 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     try {
       const tok = localStorage.getItem('token');
       if (!tok) return;
-      const raw     = tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const payload = JSON.parse(atob(raw));
+      const payloadPart = tok.split('.')[1];
+      const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const json = decodeURIComponent(Array.prototype.map.call(atob(base64), (c: string) => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      const payload = JSON.parse(json);
       this.tokenCityId = payload.cityId ?? payload.CityId ?? null;
       this.tokenRole   = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
                       ?? payload.role ?? null;

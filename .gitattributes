@@ -1,2 +1,12 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Ensure text files are checked out as UTF-8
+*.cs     text working-tree-encoding=UTF-8
+*.ts     text working-tree-encoding=UTF-8
+*.js     text working-tree-encoding=UTF-8
+*.json   text working-tree-encoding=UTF-8
+*.html   text working-tree-encoding=UTF-8
+*.css    text working-tree-encoding=UTF-8
+*.md     text working-tree-encoding=UTF-8
+*.xml    text working-tree-encoding=UTF-8

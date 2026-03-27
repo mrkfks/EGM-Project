@@ -1,0 +1,415 @@
+﻿<div class="konu-container">
+
+  <!-- Alerts -->
+  <div *ngIf="hataMesaji" class="alert alert-hata">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         width="16" height="16" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    {{ hataMesaji }}
+    <button class="alert-kapat" (click)="alertKapat()">&#10005;</button>
+  </div>
+  <div *ngIf="basariMesaji" class="alert alert-basari">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         width="16" height="16" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{ basariMesaji }}
+    <button class="alert-kapat" (click)="alertKapat()">&#10005;</button>
+  </div>
+
+  <!-- Sekme Bar -->
+  <div class="sekme-bar">
+    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'liste'"
+            (click)="aktifSekme = 'liste'; panelKapat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+        <line x1="8" y1="18" x2="21" y2="18"/>
+        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+        <line x1="3" y1="18" x2="3.01" y2="18"/>
+      </svg>
+      Konu Listesi
+      <span class="sekme-sayac">{{ tumKonular.length }}</span>
+    </button>
+    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'ekle'"
+            (click)="aktifSekme = 'ekle'; panelKapat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Yeni Konu Ekle
+    </button>
+  </div>
+
+  <!-- ───────── LISTE SEKMESI ─────────────────────────────────────────── -->
+  <div *ngIf="aktifSekme === 'liste'">
+
+    <!-- Ozet Satirlari -->
+    <div class="ozet-satiri">
+      <div class="ozet-kart ozet-toplam">
+        <span class="ozet-sayi">{{ tumKonular.length }}</span>
+        <span class="ozet-etiket">Toplam Konu</span>
+      </div>
+      <div class="ozet-kart ozet-ana">
+        <span class="ozet-sayi">{{ anaKonular.length }}</span>
+        <span class="ozet-etiket">Ana Konu</span>
+      </div>
+      <div class="ozet-kart ozet-alt">
+        <span class="ozet-sayi">{{ toplamAltKonuSayisi }}</span>
+        <span class="ozet-etiket">Alt Konu</span>
+      </div>
+    </div>
+
+    <!-- Filtre Bari -->
+    <div class="filtre-bar">
+      <div class="arama-kutu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             class="arama-ikon" width="16" height="16"
+             stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" placeholder="Konu adi veya aciklama ile ara..."
+               [(ngModel)]="aramaMetni" (ngModelChange)="filtrele()" />
+      </div>
+      <select class="tur-filtre" [(ngModel)]="turFiltresi" (ngModelChange)="filtrele()">
+        <option value="">Tum Kategoriler</option>
+        <option *ngFor="let t of turler" [value]="t">{{ t }}</option>
+      </select>
+      <button class="btn-yenile" (click)="konulariGetir()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Yenile
+      </button>
+    </div>
+
+    <!-- Icerik: Konu Listesi + Detay Paneli -->
+    <div class="liste-detay-grid" [class.panel-acik]="secilenKonu">
+
+      <!-- Sol: Liste + Agac -->
+      <div class="liste-bolum">
+
+        <div *ngIf="yukleniyor" class="yukleniyor">
+          <div class="spinner-buyuk"></div>
+          <p>Konular yukleniyor...</p>
+        </div>
+
+        <div *ngIf="!yukleniyor && filtrelenmis.length === 0" class="bos-durum">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c8d0d8" stroke-width="1.5"
+               width="48" height="48">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          <p>Kayitli konu bulunamadi.</p>
+          <button class="btn-ekle-kucuk" (click)="aktifSekme = 'ekle'">Konu Ekle</button>
+        </div>
+
+        <!-- Hiyerarsik Agac Gorunumu -->
+        <div *ngIf="!yukleniyor && filtrelenmis.length > 0">
+
+          <!-- Arama aktifse duz liste, yoksa agac yapisi -->
+          <ng-container *ngIf="aramaMetni || turFiltresi; else agacGorunum">
+            <div class="konu-satiri" *ngFor="let k of filtrelenmis"
+                 [class.satir-secili]="secilenKonu?.id === k.id"
+                 (click)="konuSec(k)">
+              <div class="satir-sol">
+                <span *ngIf="k.ustKonuId" class="girintili-ikon">&#8627;</span>
+                <span class="tur-rozet"
+                      [style.background]="turRenk(k.tur).bg"
+                      [style.color]="turRenk(k.tur).color"
+                      [style.border-color]="turRenk(k.tur).border">
+                  {{ k.tur || 'Diger' }}
+                </span>
+                <span class="satir-ad">{{ k.ad }}</span>
+                <span *ngIf="k.ustKonuAd" class="satir-ust-bilgi">
+                  ({{ k.ustKonuAd }})
+                </span>
+              </div>
+              <div class="satir-sag">
+                <span *ngIf="k.altKonuSayisi > 0" class="alt-badge">
+                  {{ k.altKonuSayisi }} alt
+                </span>
+                <button class="btn-sil-satir" (click)="silModalAc(k, $event)" title="Sil">&#128465;</button>
+              </div>
+            </div>
+          </ng-container>
+
+          <!-- Agac Gorunum -->
+          <ng-template #agacGorunum>
+            <div class="agac-govde">
+              <div class="agac-dal" *ngFor="let ana of anaKonular">
+                <!-- Ana Konu -->
+                <div class="konu-satiri ana-satir"
+                     [class.satir-secili]="secilenKonu?.id === ana.id"
+                     (click)="konuSec(ana)">
+                  <div class="satir-sol">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         class="agac-toggle-ikon" width="14" height="14">
+                      <polyline points="9 18 15 12 9 6"/>
+                    </svg>
+                    <span class="tur-rozet"
+                          [style.background]="turRenk(ana.tur).bg"
+                          [style.color]="turRenk(ana.tur).color"
+                          [style.border-color]="turRenk(ana.tur).border">
+                      {{ ana.tur || 'Ana Konu' }}
+                    </span>
+                    <span class="satir-ad ana-ad">{{ ana.ad }}</span>
+                  </div>
+                  <div class="satir-sag">
+                    <span *ngIf="ana.altKonuSayisi > 0" class="alt-badge">
+                      {{ ana.altKonuSayisi }} alt
+                    </span>
+                    <button class="btn-sil-satir" (click)="silModalAc(ana, $event)" title="Sil">&#128465;</button>
+                  </div>
+                </div>
+
+                <!-- Alt Konular -->
+                <div class="alt-konular-bloc" *ngIf="altKonulariGetir(ana.id).length > 0">
+                  <div class="konu-satiri alt-satir"
+                       *ngFor="let alt of altKonulariGetir(ana.id)"
+                       [class.satir-secili]="secilenKonu?.id === alt.id"
+                       (click)="konuSec(alt)">
+                    <div class="satir-sol">
+                      <span class="agac-cizgi">&#9500;&#9472;</span>
+                      <span class="tur-rozet tur-rozet-kucuk"
+                            [style.background]="turRenk(alt.tur).bg"
+                            [style.color]="turRenk(alt.tur).color"
+                            [style.border-color]="turRenk(alt.tur).border">
+                        {{ alt.tur || 'Alt' }}
+                      </span>
+                      <span class="satir-ad">{{ alt.ad }}</span>
+                    </div>
+                    <div class="satir-sag">
+                      <button class="btn-sil-satir" (click)="silModalAc(alt, $event)" title="Sil">&#128465;</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ust konusu olmayan ama turFiltresine uymayan konular -->
+              <div class="agac-dal"
+                   *ngFor="let bagimsiz of filtrelenmis"
+                   [ngClass]="{ 'gizli': bagimsiz.ustKonuId !== null || anaKonular.indexOf(bagimsiz) !== -1 }">
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+
+      <!-- Sag: Detay Paneli -->
+      <div class="detay-panel" *ngIf="secilenKonu">
+        <div class="detay-baslik">
+          <div>
+            <span class="tur-rozet"
+                  [style.background]="turRenk(secilenKonu.tur).bg"
+                  [style.color]="turRenk(secilenKonu.tur).color"
+                  [style.border-color]="turRenk(secilenKonu.tur).border">
+              {{ secilenKonu.tur || 'Diger' }}
+            </span>
+            <h2 class="detay-ad">{{ secilenKonu.ad }}</h2>
+          </div>
+          <button class="detay-kapat" (click)="panelKapat()">&#10005;</button>
+        </div>
+
+        <div class="detay-govde">
+          <div class="detay-satir" *ngIf="secilenKonu.ustKonuAd">
+            <span class="detay-etiket">Bagli Oldugu Ana Konu</span>
+            <button class="ust-link" (click)="navigateToUst(secilenKonu.ustKonuId!)">
+              &#8593; {{ secilenKonu.ustKonuAd }}
+            </button>
+          </div>
+          <div class="detay-satir">
+            <span class="detay-etiket">Kayit Tarihi</span>
+            <span class="detay-deger">{{ tarihFormat(secilenKonu.createdAt) }}</span>
+          </div>
+          <div class="detay-satir detay-aciklama" *ngIf="secilenKonu.aciklama">
+            <span class="detay-etiket">Konu Aciklamasi</span>
+            <p class="detay-deger aciklama-metin">{{ secilenKonu.aciklama }}</p>
+          </div>
+          <div class="detay-satir" *ngIf="!secilenKonu.aciklama">
+            <span class="detay-etiket">Konu Aciklamasi</span>
+            <span class="detay-bos">Aciklama girilmemis.</span>
+          </div>
+
+          <!-- Alt Konular -->
+          <div class="alt-konular-bolum">
+            <h3 class="alt-baslik" *ngIf="altKonular.length > 0">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+                <polyline points="6 3 20 12 6 21 6 3"/>
+              </svg>
+              Bagli Alt Konular ({{ altKonular.length }})
+            </h3>
+            <div class="alt-konu-satiri" *ngFor="let alt of altKonular"
+                 (click)="konuSec(alt)">
+              <span class="tur-rozet-kucuk"
+                    [style.background]="turRenk(alt.tur).bg"
+                    [style.color]="turRenk(alt.tur).color"
+                    [style.border-color]="turRenk(alt.tur).border">
+                {{ alt.tur }}
+              </span>
+              <span class="alt-konu-ad">{{ alt.ad }}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
+
+            <div *ngIf="altKonular.length === 0">
+              <p class="alt-bos">Bu konuya bagli alt konu bulunmuyor.</p>
+              <button class="btn-alt-ekle"
+                      (click)="formUstKonuId = secilenKonu!.id; aktifSekme = 'ekle'; panelKapat()">
+                + Alt Konu Ekle
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────── EKLE SEKMESI ──────────────────────────────────────────── -->
+  <div *ngIf="aktifSekme === 'ekle'">
+    <div class="icerik-grid">
+
+      <!-- Form Paneli -->
+      <div class="form-panel">
+        <h2 class="panel-title">Yeni Konu Tanimi</h2>
+
+        <div class="form-group">
+          <label>Konu Adi <span class="zorunlu">*</span></label>
+          <input type="text" placeholder="ornegin: Ekonomik ve Sosyal Hak Talepleri"
+                 [(ngModel)]="formAd" />
+        </div>
+
+        <div class="form-group">
+          <label>Konu Kategorisi <span class="zorunlu">*</span></label>
+          <div class="tur-secici">
+            <button *ngFor="let t of turler" class="tur-btn"
+                    [class.tur-aktif]="formTur === t"
+                    [style.background]="formTur === t ? turRenk(t).bg : ''"
+                    [style.color]="formTur === t ? turRenk(t).color : ''"
+                    [style.border-color]="formTur === t ? turRenk(t).border : ''"
+                    (click)="formTur = t">{{ t }}</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ust Konu (Opsiyonel)</label>
+          <select [(ngModel)]="formUstKonuId">
+            <option [ngValue]="null">-- Bagimsiz / Ana Konu --</option>
+            <option *ngFor="let k of anaKonular" [ngValue]="k.id">
+              [{{ k.tur || 'Ana' }}] {{ k.ad }}
+            </option>
+          </select>
+          <span class="alan-aciklama">
+            Bu konuyu bir ana basliga baglamak icin ust konu secin.
+            Ornegin: "Isci Haklari Eylemleri" konusunu
+            "Ekonomik ve Sosyal Hak Talepleri" altina ekleyin.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label>Konu Aciklamasi / Istihbarat Notu</label>
+          <textarea rows="7"
+                    placeholder="Bu konu kategorisi hakkinda genel bilgi, gozlemler, onemli notlar..."
+                    [(ngModel)]="formAciklama"></textarea>
+          <span class="alan-aciklama">
+            Bu alan gizli kalmakta olup sadece yetkili personel tarafindan gorulur.
+          </span>
+        </div>
+
+        <button class="btn-kaydet" (click)="konuEkle()"
+                [disabled]="!formGecerliMi() || ekleniyor">
+          <span *ngIf="!ekleniyor">Konuyu Kaydet</span>
+          <span *ngIf="ekleniyor" class="spinner"></span>
+          <span *ngIf="ekleniyor">Kaydediliyor...</span>
+        </button>
+      </div>
+
+      <!-- Bilgi / Onizleme Paneli -->
+      <div class="bilgi-panel">
+        <h2 class="panel-title">Mevcut Konu Yapisi</h2>
+        <div class="mini-agac">
+          <div class="mini-agac-bos" *ngIf="anaKonular.length === 0">
+            Henuz kayitli konu yok.
+          </div>
+          <div class="mini-dal" *ngFor="let ana of anaKonular">
+            <div class="mini-ana">
+              <span class="tur-rozet-kucuk"
+                    [style.background]="turRenk(ana.tur).bg"
+                    [style.color]="turRenk(ana.tur).color"
+                    [style.border-color]="turRenk(ana.tur).border">
+                {{ ana.tur || 'Ana' }}
+              </span>
+              <span class="mini-ad">{{ ana.ad }}</span>
+            </div>
+            <div class="mini-alt" *ngFor="let alt of altKonulariGetir(ana.id)">
+              <span class="mini-girintili">&#8627;</span>
+              <span class="tur-rozet-kucuk"
+                    [style.background]="turRenk(alt.tur).bg"
+                    [style.color]="turRenk(alt.tur).color"
+                    [style.border-color]="turRenk(alt.tur).border">
+                {{ alt.tur || 'Alt' }}
+              </span>
+              <span class="mini-alt-ad">{{ alt.ad }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="kategori-rehberi">
+          <h3 class="rehber-baslik">Kategori Rehberi</h3>
+          <div class="rehber-satir" *ngFor="let tur of turler">
+            <span class="tur-rozet-kucuk"
+                  [style.background]="turRenk(tur).bg"
+                  [style.color]="turRenk(tur).color"
+                  [style.border-color]="turRenk(tur).border">
+              {{ tur }}
+            </span>
+            <span class="rehber-sayi">{{ turSayisi(tur) }} konu</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── SIL MODAL ──────────────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="silModalAcik" (click)="modalKapat()">
+  <div class="modal-icerik" (click)="$event.stopPropagation()">
+    <div class="modal-baslik">
+      <h3>Konu Sil</h3>
+      <button class="modal-kapat" (click)="modalKapat()">&#10005;</button>
+    </div>
+    <div class="modal-govde" *ngIf="silinecek">
+      <div class="uyari-kutu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="30" height="30">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <div>
+          <p><strong>{{ silinecek.ad }}</strong> kalici olarak silinecektir.</p>
+          <p *ngIf="silinecek.altKonuSayisi > 0" class="uyari-alt-metin">
+            Dikkat: Bu konunun {{ silinecek.altKonuSayisi }} alt konusu bulunmaktadir.
+            Alt konular ust konu referansini kaybeder.
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-alt">
+      <button class="btn-iptal" (click)="modalKapat()">Vazgec</button>
+      <button class="btn-sil-modal" (click)="konuSil()" [disabled]="siliyor">
+        <span *ngIf="!siliyor">Evet, Sil</span>
+        <span *ngIf="siliyor" class="spinner"></span>
+        <span *ngIf="siliyor">Siliniyor...</span>
+      </button>
+    </div>
+  </div>
+</div>

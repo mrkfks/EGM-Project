@@ -11,15 +11,11 @@
   background: linear-gradient(180deg, #061a2a 0%, #0a2f4a 60%, #0a3154 100%);
   display: flex;
   flex-direction: column;
-  z-index: 1050;
-  overflow: hidden;
+  z-index: 1040;
+  overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: 2px 0 16px rgba(0,0,0,0.35);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-}
-
-/* ── Scrollable nav area ─────────────────────────── */
-.egm-sidebar:hover {
-  overflow-y: auto;
 }
 .egm-sidebar::-webkit-scrollbar { width: 4px; }
 .egm-sidebar::-webkit-scrollbar-track { background: transparent; }

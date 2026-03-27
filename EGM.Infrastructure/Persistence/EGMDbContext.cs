@@ -38,6 +38,7 @@ namespace EGM.Infrastructure
         public DbSet<Konu> Konular { get; set; } = null!;
 
         // Seçim
+        public DbSet<SandikOlay> SandikOlaylar { get; set; } = null!;
         public DbSet<SecimSonucu> SecimSonuclari { get; set; } = null!;
         public DbSet<Aday> Adaylar { get; set; } = null!;
         public DbSet<Parti> Partiler { get; set; } = null!;
@@ -73,6 +74,7 @@ namespace EGM.Infrastructure
             modelBuilder.Entity<Organizator>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<KategoriOrganizator>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Konu>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<SandikOlay>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<SecimSonucu>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Aday>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Parti>().HasQueryFilter(e => !e.IsDeleted);
@@ -178,6 +180,13 @@ namespace EGM.Infrastructure
                 .HasOne(o => o.Konu)
                 .WithMany(k => k.Olaylar)
                 .HasForeignKey(o => o.KonuId);
+
+            // ── Konu hiyerarşi (self-reference) ─────────────────────────
+            modelBuilder.Entity<Konu>()
+                .HasOne(k => k.UstKonu)
+                .WithMany(k => k.AltKonular)
+                .HasForeignKey(k => k.UstKonuId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // ── SosyalMedyaOlay - Olay ──────────────────────────────────
             modelBuilder.Entity<SosyalMedyaOlay>()

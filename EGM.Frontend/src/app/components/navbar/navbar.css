@@ -15,8 +15,15 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 20px;
-  z-index: 1040;
+  z-index: 1050;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Responsive: sidebar gizlenince navbar tam genişliğe geçer */
+@media (max-width: 900px) {
+  .egm-navbar {
+    left: 0;
+  }
 }
 
 /* ── Sol bölüm ────────────────────────────── */

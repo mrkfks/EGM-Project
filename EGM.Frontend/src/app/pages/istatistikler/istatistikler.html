@@ -1,0 +1,283 @@
+﻿<section class="ist-page">
+
+  <!-- Filtre Bar -->
+  <div class="ist-filter-bar">
+    <div class="flt-group">
+      <label>Başlangıç Tarih / Saat</label>
+      <input type="datetime-local" [(ngModel)]="filterDatetimeBaslangic" class="flt-input flt-input-dt" />
+    </div>
+    <div class="flt-group">
+      <label>Bitiş Tarih / Saat</label>
+      <input type="datetime-local" [(ngModel)]="filterDatetimeBitis" class="flt-input flt-input-dt" />
+    </div>
+    <div class="flt-group">
+      <label>İl</label>
+      <select [(ngModel)]="filterIl" class="flt-input">
+        <option value="">Tümü</option>
+        <option *ngFor="let il of ilListesi" [value]="il.ad">{{ il.ad }}</option>
+      </select>
+    </div>
+    <div class="flt-group">
+      <label>Konu</label>
+      <select [(ngModel)]="filterKonuId" class="flt-input">
+        <option value="">Tümü</option>
+        <option *ngFor="let k of konular" [value]="k.id">{{ k.ad }}</option>
+      </select>
+    </div>
+    <div class="flt-group">
+      <label>Organize Eden</label>
+      <select [(ngModel)]="filterOrganizatorId" class="flt-input">
+        <option value="">Tümü</option>
+        <option *ngFor="let o of organizatorler" [value]="o.id">{{ o.ad }}</option>
+      </select>
+    </div>
+    <div class="flt-group">
+      <label>Durum</label>
+      <select [(ngModel)]="filterDurum" class="flt-input">
+        <option value="">Tümü</option>
+        <option value="0">Planlandı</option>
+        <option value="1">Gerçekleşti</option>
+        <option value="2">İptal</option>
+      </select>
+    </div>
+    <div class="flt-group">
+      <label>Gözaltı</label>
+      <select [(ngModel)]="filterGozalti" class="flt-input">
+        <option value="">Tümü</option>
+        <option value="var">Var</option>
+        <option value="yok">Yok</option>
+      </select>
+    </div>
+    <div class="flt-group">
+      <label>Şehit / Ölü</label>
+      <select [(ngModel)]="filterSehitOlu" class="flt-input">
+        <option value="">Tümü</option>
+        <option value="var">Var</option>
+        <option value="yok">Yok</option>
+      </select>
+    </div>
+    <div class="flt-buttons">
+      <!-- İndir dropdown -->
+      <div class="indir-dropdown-wrap">
+        <button class="btn-indir" (click)="indirMenuToggle($event)">
+          &#128229; İndir <span class="indir-ok">&#9660;</span>
+        </button>
+        <div class="indir-menu" *ngIf="indirMenuAcik">
+          <button class="indir-item" (click)="indirExcel()">
+            <span class="indir-item-icon">&#128196;</span> Excel
+          </button>
+          <button class="indir-item" (click)="indirGrafikPng()">
+            <span class="indir-item-icon">&#128247;</span> Grafik PNG
+          </button>
+        </div>
+      </div>
+      <button class="btn-apply" (click)="filtreUygula()">Filtrele</button>
+      <button class="btn-clear" (click)="filtreTemizle()">Temizle</button>
+    </div>
+  </div>
+
+  <!-- Yuklenme / Hata -->
+  <div class="ist-loading" *ngIf="yukleniyor">
+    <div class="spinner"></div>
+    <span>Veriler yukleniyor...</span>
+  </div>
+  <div class="ist-error" *ngIf="hata && !yukleniyor">{{ hata }}</div>
+
+  <ng-container *ngIf="!yukleniyor && !hata">
+
+    <!-- Ozet Kartlar -->
+    <div class="ist-kart-grid">
+      <div class="ist-kart">
+        <span class="kart-icon">&#128203;</span>
+        <div class="kart-deger">{{ toplamOlay }}</div>
+        <div class="kart-etiket">Toplam Olay</div>
+      </div>
+      <div class="ist-kart ist-kart-green">
+        <span class="kart-icon">&#9989;</span>
+        <div class="kart-deger">{{ gerceklesti }}</div>
+        <div class="kart-etiket">Gerceklesti</div>
+      </div>
+      <div class="ist-kart ist-kart-blue">
+        <span class="kart-icon">&#128197;</span>
+        <div class="kart-deger">{{ planlandiSayisi }}</div>
+        <div class="kart-etiket">Planlanmis</div>
+      </div>
+      <div class="ist-kart ist-kart-red">
+        <span class="kart-icon">&#10060;</span>
+        <div class="kart-deger">{{ iptal }}</div>
+        <div class="kart-etiket">Iptal</div>
+      </div>
+      <div class="ist-kart ist-kart-orange">
+        <span class="kart-icon">&#9888;</span>
+        <div class="kart-deger">{{ ortalamaRisk | number:'1.2-2' }}</div>
+        <div class="kart-etiket">Ort. Risk Puani</div>
+      </div>
+    </div>
+
+    <!-- Grafik Izgara - 1. Satir -->
+    <div class="ist-grafik-grid">
+
+      <!-- Durum Dagilimi -->
+      <div class="grafik-kart">
+        <div class="grafik-baslik">
+          <span>Durum Dagilimi</span>
+          <button class="btn-dl" (click)="grafigIndir(durumChartRef, 'durum-dagilimi.png')" title="PNG indir">&#11015;</button>
+        </div>
+        <div class="grafik-alan">
+          <canvas #durumChart></canvas>
+        </div>
+      </div>
+
+      <!-- Hassasiyet Dagilimi -->
+      <div class="grafik-kart">
+        <div class="grafik-baslik">
+          <span>Hassasiyet Dagilimi</span>
+          <button class="btn-dl" (click)="grafigIndir(hassasiyetChartRef, 'hassasiyet-dagilimi.png')" title="PNG indir">&#11015;</button>
+        </div>
+        <div class="grafik-alan">
+          <canvas #hassasiyetChart></canvas>
+        </div>
+      </div>
+
+      <!-- Aylik Trend -->
+      <div class="grafik-kart grafik-kart-wide">
+        <div class="grafik-baslik">
+          <span>Aylik Olay Trendi</span>
+          <button class="btn-dl" (click)="grafigIndir(trendChartRef, 'aylik-trend.png')" title="PNG indir">&#11015;</button>
+        </div>
+        <div class="grafik-alan">
+          <canvas #trendChart></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Grafik Izgara - 2. Satir -->
+    <div class="ist-grafik-grid">
+
+      <!-- Olay Turu Dagilimi -->
+      <div class="grafik-kart grafik-kart-wide">
+        <div class="grafik-baslik">
+          <span>Olay Turu Dagilimi</span>
+          <button class="btn-dl" (click)="grafigIndir(turChartRef, 'olay-turu-dagilimi.png')" title="PNG indir">&#11015;</button>
+        </div>
+        <div class="grafik-alan grafik-alan-tall">
+          <canvas #turChart></canvas>
+        </div>
+      </div>
+
+      <!-- Illere Gore Dagilim -->
+      <div class="grafik-kart grafik-kart-wide">
+        <div class="grafik-baslik">
+          <span>Illere Gore Dagilim (Top 15)</span>
+          <button class="btn-dl" (click)="grafigIndir(ilChartRef, 'il-dagilimi.png')" title="PNG indir">&#11015;</button>
+        </div>
+        <div class="grafik-alan grafik-alan-tall">
+          <canvas #ilChart></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Özel Grafik Oluşturucu -->
+    <div class="ozel-grafik-kart">
+      <div class="grafik-baslik">
+        <span>Özel Grafik Oluşturucu</span>
+        <button class="btn-dl" *ngIf="ozelGrafikVar" (click)="grafigIndir(ozelChartRef, 'ozel-grafik.png')" title="PNG indir">&#11015; İndir</button>
+      </div>
+
+      <div class="ozel-grafik-ayarlar">
+        <!-- Grafik Türü -->
+        <div class="ozel-ayar-satir">
+          <span class="ozel-ayar-etiket">Grafik Türü</span>
+          <div class="grafik-secici-grup">
+            <button
+              *ngFor="let t of grafikTurleri"
+              class="grafik-secici-btn"
+              [class.secili]="secilenGrafikTuru === t.deger"
+              (click)="secilenGrafikTuru = t.deger">
+              {{ t.etiket }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Veri Ekseni (scatter hariç) -->
+        <div class="ozel-ayar-satir" *ngIf="secilenGrafikTuru !== 'scatter'">
+          <span class="ozel-ayar-etiket">Veri Ekseni</span>
+          <div class="grafik-secici-grup">
+            <button
+              *ngFor="let e of eksenSecenekleri"
+              class="grafik-secici-btn grafik-secici-btn-sm"
+              [class.secili]="secilenEksen === e.deger"
+              (click)="secilenEksen = e.deger">
+              {{ e.etiket }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Scatter bilgi satırı -->
+        <div class="ozel-ayar-satir" *ngIf="secilenGrafikTuru === 'scatter'">
+          <span class="ozel-ayar-etiket">Eksen</span>
+          <span class="ozel-info-text">Risk Puanı (Y) ↔ Katılımcı Sayısı (X)</span>
+        </div>
+
+        <!-- Oluştur Butonu -->
+        <div class="ozel-ayar-aksiyon">
+          <button class="btn-apply" (click)="ozelGrafikOlustur()">Grafik Oluştur</button>
+        </div>
+      </div>
+
+      <!-- Canvas Alanı -->
+      <div class="ozel-grafik-goruntu">
+        <div class="ozel-grafik-bos" *ngIf="!ozelGrafikVar">
+          Grafik türünü ve veri eksenini seçerek "Grafik Oluştur" butonuna tıklayın
+        </div>
+        <canvas #ozelChart [style.visibility]="ozelGrafikVar ? 'visible' : 'hidden'"></canvas>
+      </div>
+    </div>
+
+    <!-- Veri Tablosu -->
+    <div class="ist-tablo-kart">
+      <div class="grafik-baslik">
+        <span>Olay Listesi ({{ filtreliVeri.length }} kayit)</span>
+      </div>
+      <div class="tablo-scroll">
+        <table class="ist-tablo">
+          <thead>
+            <tr>
+              <th>Baslik</th>
+              <th>Tur</th>
+              <th>Tarih</th>
+              <th>Il</th>
+              <th>Hassasiyet</th>
+              <th>Durum</th>
+              <th>Risk</th>
+              <th>Katilimci</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let o of filtreliVeri">
+              <td>{{ o.baslik }}</td>
+              <td>{{ o.olayTuru }}</td>
+              <td>{{ o.tarih | date:'dd.MM.yyyy' }}</td>
+              <td>{{ o.il }}</td>
+              <td>
+                <span class="hss-badge hss-{{ o.hassasiyet }}">{{ hassasiyetEtiket(o.hassasiyet) }}</span>
+              </td>
+              <td>
+                <span class="dur-badge dur-{{ o.durum }}">{{ durumEtiket(o.durum) }}</span>
+              </td>
+              <td class="risk-cell">{{ o.riskPuani | number:'1.2-2' }}</td>
+              <td>{{ o.katilimciSayisi | number }}</td>
+            </tr>
+            <tr *ngIf="filtreliVeri.length === 0">
+              <td colspan="8" class="no-data">Sonuc bulunamadi.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+
+</section>

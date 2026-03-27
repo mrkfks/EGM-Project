@@ -1,5 +1,17 @@
 @import "leaflet/dist/leaflet.css";
 
+:root {
+  --egm-navbar-height: 58px;
+  --egm-sidebar-width: 220px;
+  --egm-content-bg: #f0f4f8;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --egm-sidebar-width: 0px;
+  }
+}
+
 /* ── Base ────────────────────────────────────────── */
 html, body {
   height: 100%;
@@ -20,10 +32,21 @@ app-root {
   position: absolute;
   inset: 0;
   display: block;
-  width: 100%;
-  height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
+}
+
+/* Fallback selectors for router-outlet render differences across Angular versions */
+.main-content > router-outlet + *,
+.main-content > router-outlet > * {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+/* Harita sayfası: scroll olmamalı, tam kaplama */
+.main-content > app-home {
+  overflow: hidden;
 }
 
 /* ── Login sayfası: navbar ve sidebar gizle, main-content sıfırla ── */
@@ -69,4 +92,181 @@ body.no-scroll { overflow: hidden; }
 .leaflet-control-attribution {
   font-size: 9px !important;
   opacity: 0.6;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   EGM – Ortak Sayfa Stilleri (tüm bileşenlerde kullanılır)
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Sayfa Başlık ─────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, #1a3a5c 0%, #2c5f8a 100%);
+  color: #fff;
+  padding: 22px 28px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 15px rgba(26, 58, 92, 0.35);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.header-icon {
+  width: 52px;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-icon svg {
+  stroke: #fff;
+  fill: none;
+}
+
+.page-header h1 {
+  margin: 0 0 4px 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.header-sub {
+  margin: 0;
+  font-size: 0.88rem;
+  opacity: 0.82;
+}
+
+/* ── Uyarı Mesajları ──────────────────────────────────────────────── */
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.alert-hata,
+.alert-danger  { background: #fdecea; border: 1px solid #e74c3c; color: #c0392b; }
+
+.alert-basari,
+.alert-success { background: #e8f6ed; border: 1px solid #27ae60; color: #1e8449; }
+
+.alert-kapat {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.6;
+  margin-left: auto;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.alert-kapat:hover { opacity: 1; }
+
+/* ── Yükleme Animasyonu ───────────────────────────────────────────── */
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e8ecf0;
+  border-top-color: #2c5f8a;
+  border-radius: 50%;
+  animation: egm-spin 0.9s linear infinite;
+}
+
+.spinner-sm {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: egm-spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+
+@keyframes egm-spin { to { transform: rotate(360deg); } }
+
+/* ── Geliştirme Aşaması Sayfaları (Stub) ─────────────────────────── */
+.stub-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 2rem;
+  background: #f0f4f8;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.stub-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(6, 26, 42, 0.09), 0 2px 8px rgba(6, 26, 42, 0.05);
+}
+
+.stub-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #0a2f4a 0%, #0f6fa3 100%);
+  border-radius: 16px;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 14px rgba(15, 111, 163, 0.3);
+}
+
+.stub-icon-wrap svg {
+  width: 28px;
+  height: 28px;
+  stroke: #fff;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stub-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0d1f2d;
+  margin: 0 0 0.5rem;
+}
+
+.stub-sub {
+  font-size: 0.85rem;
+  color: #6b7d8f;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.stub-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  background: #e8f4fb;
+  border: 1px solid #b3d9ef;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0f6fa3;
+  letter-spacing: 0.04em;
 }

@@ -1,1 +1,340 @@
-<!-- organizasyon works -->
+﻿<div class="org-container">
+
+  <!-- Alerts -->
+  <div *ngIf="hataMesaji" class="alert alert-hata">
+    <span>&#9888;</span> {{ hataMesaji }}
+    <button class="alert-kapat" (click)="alertKapat()">&#10005;</button>
+  </div>
+  <div *ngIf="basariMesaji" class="alert alert-basari">
+    <span>&#10003;</span> {{ basariMesaji }}
+    <button class="alert-kapat" (click)="alertKapat()">&#10005;</button>
+  </div>
+
+  <!-- Sekme Bar -->
+  <div class="sekme-bar">
+    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'liste'"
+            (click)="aktifSekme = 'liste'; panelKapat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <rect x="2" y="7" width="6" height="10" rx="1"/><rect x="16" y="7" width="6" height="10" rx="1"/>
+        <rect x="9" y="2" width="6" height="6" rx="1"/>
+      </svg>
+      Kurulus Listesi
+      <span class="sekme-sayac">{{ tumKuruluslar.length }}</span>
+    </button>
+    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'ekle'"
+            (click)="aktifSekme = 'ekle'; panelKapat()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Yeni Kurulus Ekle
+    </button>
+  </div>
+
+  <!-- ─────────────────── LISTE SEKMESI ──────────────────────────── -->
+  <div *ngIf="aktifSekme === 'liste'">
+
+    <!-- Ozet Bar -->
+    <div class="ozet-bar">
+      <div class="ozet-kart" *ngFor="let tur of turler">
+        <span class="ozet-sayi">{{ turSayisi(tur) }}</span>
+        <span class="ozet-etiket"
+              [style.color]="turRenk(tur).color">{{ tur }}</span>
+      </div>
+    </div>
+
+    <!-- Filtre Araclari -->
+    <div class="filtre-bar">
+      <div class="arama-kutu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" class="arama-ikon"
+             width="16" height="16">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" placeholder="Kurulus adi, faaliyet alani veya aciklama ara..."
+               [(ngModel)]="aramaMetni" (ngModelChange)="filtrele()" />
+      </div>
+      <select class="tur-filtre" [(ngModel)]="turFiltresi" (ngModelChange)="filtrele()">
+        <option value="">Tum Turler</option>
+        <option *ngFor="let t of turler" [value]="t">{{ t }}</option>
+      </select>
+      <button class="btn-yenile" (click)="kuruluslariGetir()" title="Yenile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Yenile
+      </button>
+    </div>
+
+    <!-- Ana Icerik: Tablo + Detay Paneli -->
+    <div class="liste-detay-grid" [class.panel-acik]="secilenKurulus">
+
+      <!-- Sol: Kurulus Kartlari -->
+      <div class="kartlar-bolum">
+
+        <div *ngIf="yukleniyor" class="yukleniyor">
+          <div class="spinner-buyuk"></div>
+          <p>Kuruluslar yukleniyor...</p>
+        </div>
+
+        <div *ngIf="!yukleniyor && filtrelenmis.length === 0" class="bos-durum">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#c8d0d8" stroke-width="1.5"
+               width="48" height="48">
+            <rect x="2" y="7" width="6" height="10" rx="1"/>
+            <rect x="16" y="7" width="6" height="10" rx="1"/>
+            <rect x="9" y="2" width="6" height="6" rx="1"/>
+          </svg>
+          <p>Kayitli kurulus bulunamadi.</p>
+          <button class="btn-ekle" (click)="aktifSekme = 'ekle'">Kurulus Ekle</button>
+        </div>
+
+        <div *ngIf="!yukleniyor && filtrelenmis.length > 0" class="kurulus-grid">
+          <div class="kurulus-karti" *ngFor="let k of filtrelenmis"
+               [class.secili]="secilenKurulus?.id === k.id"
+               (click)="kurulusSec(k)">
+            <div class="kart-ust">
+              <span class="tur-rozet"
+                    [style.background]="turRenk(k.tur).bg"
+                    [style.color]="turRenk(k.tur).color"
+                    [style.border-color]="turRenk(k.tur).border">
+                {{ k.tur || 'Diger' }}
+              </span>
+              <div class="kart-aksiyon">
+                <span *ngIf="k.altKurulusSayisi > 0" class="alt-sayi-badge">
+                  {{ k.altKurulusSayisi }} alt
+                </span>
+                <button class="btn-sil-kucuk" (click)="silModalAc(k, $event)" title="Sil">&#128465;</button>
+              </div>
+            </div>
+            <h3 class="kart-ad">{{ k.ad }}</h3>
+            <div class="kart-meta" *ngIf="k.ustKurulusAd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+              {{ k.ustKurulusAd }}
+            </div>
+            <div class="kart-faaliyet" *ngIf="k.faaliyetAlani">{{ k.faaliyetAlani }}</div>
+            <div class="kart-tarih">Kurulus: {{ tarihFormat(k.kurulusTarihi) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sag: Detay Paneli -->
+      <div class="detay-panel" *ngIf="secilenKurulus">
+        <div class="detay-baslik">
+          <div>
+            <span class="tur-rozet"
+                  [style.background]="turRenk(secilenKurulus.tur).bg"
+                  [style.color]="turRenk(secilenKurulus.tur).color"
+                  [style.border-color]="turRenk(secilenKurulus.tur).border">
+              {{ secilenKurulus.tur || 'Diger' }}
+            </span>
+            <h2 class="detay-ad">{{ secilenKurulus.ad }}</h2>
+          </div>
+          <button class="detay-kapat" (click)="panelKapat()">&#10005;</button>
+        </div>
+
+        <div class="detay-govde">
+          <!-- Bilgi Satirlari -->
+          <div class="detay-satir" *ngIf="secilenKurulus.ustKurulusAd">
+            <span class="detay-etiket">Ust Kurulus</span>
+            <span class="detay-deger">
+              <button class="ust-link" (click)="navigateToUst(secilenKurulus.ustKurulusId!)">
+                {{ secilenKurulus.ustKurulusAd }}
+              </button>
+            </span>
+          </div>
+          <div class="detay-satir">
+            <span class="detay-etiket">Kurulus Tarihi</span>
+            <span class="detay-deger">{{ tarihFormat(secilenKurulus.kurulusTarihi) }}</span>
+          </div>
+          <div class="detay-satir" *ngIf="secilenKurulus.faaliyetAlani">
+            <span class="detay-etiket">Faaliyet Alani</span>
+            <span class="detay-deger">{{ secilenKurulus.faaliyetAlani }}</span>
+          </div>
+          <div class="detay-satir" *ngIf="secilenKurulus.iletisim">
+            <span class="detay-etiket">Iletisim</span>
+            <span class="detay-deger">{{ secilenKurulus.iletisim }}</span>
+          </div>
+          <div class="detay-satir detay-aciklama" *ngIf="secilenKurulus.aciklama">
+            <span class="detay-etiket">Aciklama / Notlar</span>
+            <p class="detay-deger">{{ secilenKurulus.aciklama }}</p>
+          </div>
+
+          <!-- Alt Kuruluslar -->
+          <div class="alt-kuruluslar-bolum" *ngIf="altKuruluslar.length > 0">
+            <h3 class="alt-baslik">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+                <polyline points="6 3 20 12 6 21 6 3"/>
+              </svg>
+              Bagli Alt Kuruluslar ({{ altKuruluslar.length }})
+            </h3>
+            <div class="alt-kurulus-karti" *ngFor="let alt of altKuruluslar"
+                 (click)="kurulusSec(alt)">
+              <span class="tur-rozet-kucuk"
+                    [style.background]="turRenk(alt.tur).bg"
+                    [style.color]="turRenk(alt.tur).color"
+                    [style.border-color]="turRenk(alt.tur).border">
+                {{ alt.tur }}
+              </span>
+              <span class="alt-kurulus-ad">{{ alt.ad }}</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
+          </div>
+
+          <div class="alt-kuruluslar-bolum" *ngIf="altKuruluslar.length === 0 && !secilenKurulus.ustKurulusId">
+            <p class="alt-bos">Bu kurulusun kayitli alt kurulusu bulunmuyor.</p>
+            <button class="btn-alt-ekle" (click)="formUstKurulusId = secilenKurulus!.id; aktifSekme = 'ekle'; panelKapat()">
+              + Alt Kurulus Ekle
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────── EKLE SEKMESI ───────────────────────────── -->
+  <div *ngIf="aktifSekme === 'ekle'">
+    <div class="icerik-grid">
+      <!-- Form -->
+      <div class="form-panel">
+        <h2 class="panel-title">Yeni Kurulus Kaydı</h2>
+
+        <div class="form-group">
+          <label>Kurulus Adi <span class="zorunlu">*</span></label>
+          <input type="text" placeholder="ornegin: Kamu-Sen, Turk-Is..." [(ngModel)]="formAd" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kurulus Turu <span class="zorunlu">*</span></label>
+            <div class="tur-secici">
+              <button *ngFor="let t of turler" class="tur-btn"
+                      [class.tur-aktif]="formTur === t"
+                      [style.background]="formTur === t ? turRenk(t).bg : ''"
+                      [style.color]="formTur === t ? turRenk(t).color : ''"
+                      [style.border-color]="formTur === t ? turRenk(t).border : ''"
+                      (click)="formTur = t">
+                {{ t }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Ust Kurulus (Opsiyonel)</label>
+          <select [(ngModel)]="formUstKurulusId">
+            <option [ngValue]="null">-- Bagimsiz / Ust Kurulus --</option>
+            <option *ngFor="let k of ustDuzeyKuruluslar" [ngValue]="k.id">
+              {{ k.tur ? '[' + k.tur + '] ' : '' }}{{ k.ad }}
+            </option>
+          </select>
+          <span class="alan-aciklama">Ornegin: Sendika eklerken ust kurulusa (Konfederasyon) baglayin.</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Kurulus Tarihi <span class="zorunlu">*</span></label>
+            <input type="date" [(ngModel)]="formKurulusTarihi" />
+          </div>
+          <div class="form-group">
+            <label>Iletisim / Web</label>
+            <input type="text" placeholder="www.orneksite.org.tr" [(ngModel)]="formIletisim" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Faaliyet Alani</label>
+          <input type="text" placeholder="Kamu calisanlari, Saglik, Egitim..." [(ngModel)]="formFaaliyetAlani" />
+        </div>
+
+        <div class="form-group">
+          <label>Aciklama / Istihbarat Notu</label>
+          <textarea rows="5" placeholder="Kurulus hakkinda genel bilgi, aktiviteler, gozlemler..."
+                    [(ngModel)]="formAciklama"></textarea>
+          <span class="alan-aciklama">Bu alan gizli kalir ve sadece yetkili personel tarafindan gorulur.</span>
+        </div>
+
+        <button class="btn-kaydet" (click)="kurulusEkle()"
+                [disabled]="!formGecerliMi() || ekleniyor">
+          <span *ngIf="!ekleniyor">Kurulusu Kaydet</span>
+          <span *ngIf="ekleniyor" class="spinner"></span>
+          <span *ngIf="ekleniyor">Kaydediliyor...</span>
+        </button>
+      </div>
+
+      <!-- Bilgi Paneli -->
+      <div class="ozet-panel">
+        <h2 class="panel-title">Kayitli Kuruluslar</h2>
+        <div class="hiyerarsi-liste">
+          <div class="hiyerarsi-grup" *ngFor="let ust of ustDuzeyKuruluslar">
+            <div class="hiyerarsi-ust">
+              <span class="tur-rozet-kucuk"
+                    [style.background]="turRenk(ust.tur).bg"
+                    [style.color]="turRenk(ust.tur).color"
+                    [style.border-color]="turRenk(ust.tur).border">
+                {{ ust.tur }}
+              </span>
+              <span class="hiyerarsi-ad">{{ ust.ad }}</span>
+            </div>
+            <div class="hiyerarsi-alt" *ngFor="let alt of altKuruluslariGetir(ust.id)">
+              <span class="hiyerarsi-ok">&#8627;</span>
+              <span class="tur-rozet-kucuk"
+                    [style.background]="turRenk(alt.tur).bg"
+                    [style.color]="turRenk(alt.tur).color"
+                    [style.border-color]="turRenk(alt.tur).border">
+                {{ alt.tur }}
+              </span>
+              <span class="hiyerarsi-alt-ad">{{ alt.ad }}</span>
+            </div>
+          </div>
+          <div *ngIf="ustDuzeyKuruluslar.length === 0" class="hiyerarsi-bos">
+            Henuz kayitli kurulus bulunmuyor.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── SIL ONAY MODAL ─────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="silModalAcik" (click)="modalKapat()">
+  <div class="modal-icerik" (click)="$event.stopPropagation()">
+    <div class="modal-baslik">
+      <h3>Kurulus Sil</h3>
+      <button class="modal-kapat" (click)="modalKapat()">&#10005;</button>
+    </div>
+    <div class="modal-govde" *ngIf="silinecek">
+      <div class="uyari-kutu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <p>
+          <strong>{{ silinecek.ad }}</strong> kalici olarak silinecektir.
+          <span *ngIf="silinecek.altKurulusSayisi > 0" class="uyari-alt">
+            Bu kurulusun {{ silinecek.altKurulusSayisi }} alt kurulusu vardir.
+          </span>
+        </p>
+      </div>
+    </div>
+    <div class="modal-alt">
+      <button class="btn-iptal" (click)="modalKapat()">Vazgec</button>
+      <button class="btn-sil-modal" (click)="kurulusSil()" [disabled]="siliyor">
+        <span *ngIf="!siliyor">Evet, Sil</span>
+        <span *ngIf="siliyor" class="spinner"></span>
+        <span *ngIf="siliyor">Siliniyor...</span>
+      </button>
+    </div>
+  </div>
+</div>
