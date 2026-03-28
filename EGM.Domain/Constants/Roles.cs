@@ -1,39 +1,41 @@
-namespace EGM.Domain.Constants;
+﻿namespace EGM.Domain.Constants;
 
 public static class Roles
 {
-    // ── Beş rol (hiyerarşik sıralamayla) ─────────────────────────────────
+    // ── Altı rol (hiyerarşik sıralamayla) ────────────────────────────────
     /// <summary>Varsayılan rol. Sadece okuma/izleme yetkisi vardır.</summary>
     public const string Izleyici            = "Izleyici";
 
     /// <summary>İl personeli: kendi iline veri girebilir, sadece kendi kayıtlarını düzenler.</summary>
     public const string IlPersoneli         = "IlPersoneli";
 
-    /// <summary>İl yöneticisi: ilindeki tüm veriyi yönetir, İzleyici → İl Personeli atayabilir.</summary>
+    /// <summary>İl yöneticisi: ilindeki tüm veriyi yönetir, kendi ilinin personelini yönetir.</summary>
     public const string IlYoneticisi        = "IlYoneticisi";
 
     /// <summary>Başkanlık personeli: coğrafi kısıt yok, yalnızca kendi kayıtlarını düzenler.</summary>
     public const string BaskanlikPersoneli  = "BaskanlikPersoneli";
 
-    /// <summary>Başkanlık yöneticisi / süper admin: tam yetki, tüm atamalar.</summary>
+    /// <summary>Başkanlık yöneticisi: 81 il genelinde yönetim yetkisi.</summary>
     public const string BaskanlikYoneticisi = "BaskanlikYoneticisi";
 
-    // ── Geriye-dönük uyumluluk takma adları (eski kod varsa)  ────────────
+    /// <summary>Yetkili: Tüm sistemde sınırsız erişim ve düzenleme hakkı.</summary>
+    public const string Yetkili             = "Yetkili";
+
+    // ── Geriye-dönük uyumluluk takma adları ─────────────────────────────
     public const string IlPersonel         = IlPersoneli;
     public const string IlAdmin            = IlYoneticisi;
     public const string BaskanlikPersonel  = BaskanlikPersoneli;
     public const string BaskanlikAdmin     = BaskanlikYoneticisi;
-    public const string Yonetici           = BaskanlikYoneticisi;
+    public const string Yonetici           = Yetkili;
 
     // ── Hiyerarşi (düşükten yükseğe) ─────────────────────────────────────
     private static readonly List<string> Hierarchy = new()
     {
-        Izleyici, IlPersoneli, IlYoneticisi, BaskanlikPersoneli, BaskanlikYoneticisi
+        Izleyici, IlPersoneli, IlYoneticisi, BaskanlikPersoneli, BaskanlikYoneticisi, Yetkili
     };
 
     /// <summary>
-    /// İki rol arasında <paramref name="assignerRole"/> rolünün
-    /// <paramref name="targetRole"/> rolünden üstte olup olmadığını döner.
+    /// İki rol arasında assignerRole rolünün targetRole rolünden üstte olup olmadığını döner.
     /// </summary>
     public static bool IsAbove(string assignerRole, string targetRole)
     {

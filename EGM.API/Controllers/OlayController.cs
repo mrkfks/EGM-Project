@@ -87,6 +87,23 @@ namespace EGM.API.Controllers
             return Ok(MapToResponse(olay));
         }
 
+        [HttpGet("by-organizator/{organizatorId}")]
+        public async Task<IActionResult> GetByOrganizator(
+            Guid organizatorId,
+            [FromQuery] DateTime? tarihBaslangic = null,
+            [FromQuery] DateTime? tarihBitis = null)
+        {
+            var olaylar = await _olayService.GetByOrganizatorAsync(organizatorId, tarihBaslangic, tarihBitis);
+            return Ok(olaylar.Select(o => MapToResponse(o)));
+        }
+
+        [HttpGet("by-konu/{konuId}")]
+        public async Task<IActionResult> GetByKonu(Guid konuId)
+        {
+            var olaylar = await _olayService.GetByKonuAsync(konuId);
+            return Ok(olaylar.Select(o => MapToResponse(o)));
+        }
+
         [HttpGet("{id}/rota")]
         public async Task<IActionResult> GetRota(Guid id)
         {

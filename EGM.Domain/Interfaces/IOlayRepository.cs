@@ -19,5 +19,14 @@ namespace EGM.Domain.Interfaces
             int? cityId,
             int page,
             int pageSize);
+
+        /// <summary>Belirli bir organizatöre ait olayları tarih filtresiyle getirir.</summary>
+        Task<IReadOnlyList<Olay>> GetByOrganizatorAsync(
+            Guid organizatorId,
+            DateTime? tarihBaslangic,
+            DateTime? tarihBitis);
+
+        /// <summary>Belirli bir konuya ait olayları getirir.</summary>
+        Task<IReadOnlyList<Olay>> GetByKonuAsync(Guid konuId);
     }
 }

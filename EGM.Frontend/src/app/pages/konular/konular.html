@@ -1,0 +1,82 @@
+<section class="page-wrap">
+
+  <!-- İstatistik kartları -->
+  @if (!yukleniyor && !hataMesaji) {
+    <div class="stats-row">
+      <div class="stat-card stat-card--blue">
+        <span class="stat-value">{{ tumKayitlar.length }}</span>
+        <span class="stat-label">Toplam Konu</span>
+      </div>
+      <div class="stat-card stat-card--green">
+        <span class="stat-value">{{ anaKonuSayisi }}</span>
+        <span class="stat-label">Ana Konu</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">{{ altKonuSayisi }}</span>
+        <span class="stat-label">Alt Konu</span>
+      </div>
+    </div>
+  }
+
+  <!-- Filtreler -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label class="filter-label">Arama</label>
+      <input
+        type="text"
+        class="filter-input"
+        placeholder="Konu adı veya açıklama..."
+        [(ngModel)]="aramaMetni"
+        (input)="filtrele()"
+      />
+    </div>
+    <div class="filter-group">
+      <label class="filter-label">Tür</label>
+      <select class="filter-input" [(ngModel)]="turFiltresi" (change)="filtrele()">
+        <option value="">Tümü</option>
+        @for (tur of turler; track tur) {
+          <option [value]="tur">{{ tur }}</option>
+        }
+      </select>
+    </div>
+    <span class="filter-count">{{ filtrelenmis.length }} kayıt</span>
+  </div>
+
+  <!-- Yükleniyor -->
+  @if (yukleniyor) {
+    <div class="loading-area">
+      <div class="spinner"></div>
+      <span>Yükleniyor...</span>
+    </div>
+  }
+
+  <!-- Hata -->
+  @if (hataMesaji) {
+    <div class="error-box">{{ hataMesaji }}</div>
+  }
+
+  <!-- Ana Konular Kartları -->
+  @if (!yukleniyor && !hataMesaji) {
+    <div class="ana-konu-kart-row">
+      @for (ana of filtrelenmis.filter(k => !k.ustKonuId); track ana.id) {
+        <div class="ana-konu-kart" (click)="altKonularaGit(ana.id)" style="cursor:pointer;">
+          <div class="ana-konu-kart-baslik">
+            <span class="ana-konu-kart-ad">{{ ana.ad }}</span>
+            <span class="badge"
+                  [style.background]="turRenk(ana.tur).bg"
+                  [style.color]="turRenk(ana.tur).color"
+                  [style.border-color]="turRenk(ana.tur).border">
+              {{ ana.tur }}
+            </span>
+          </div>
+          <div class="ana-konu-kart-alt">
+            <span class="ana-konu-kart-altkonu">Alt Konu: <b>{{ ana.altKonuSayisi }}</b></span>
+          </div>
+          <div class="ana-konu-kart-aciklama">{{ ana.aciklama || '—' }}</div>
+        </div>
+      }
+    </div>
+  }
+
+
+</section>

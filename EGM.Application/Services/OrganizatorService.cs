@@ -8,6 +8,22 @@ namespace EGM.Application.Services
 {
     public class OrganizatorService
     {
+        private static readonly string[] VarsayilanKategoriler =
+        {
+            "Ana Konu",
+            "Ekonomik ve Sosyal Haklar",
+            "Isci Haklari Eylemleri",
+            "Emekli Haklari Eylemleri",
+            "Tarim ve Gida",
+            "Cevre ve Iklim",
+            "Egitim",
+            "Saglik",
+            "Konut ve Kentsel Donusum",
+            "Siyasi Talepler",
+            "Kamu Guvenligi",
+            "Diger"
+        };
+
         private readonly IRepository<Organizator> _organizatorRepository;
         private readonly IRepository<KategoriOrganizator> _kategoriRepository;
         private readonly IRepository<Konu> _konuRepository;
@@ -44,6 +60,11 @@ namespace EGM.Application.Services
             existing.Iletisim = updated.Iletisim;
             existing.Tur = updated.Tur;
             existing.Aciklama = updated.Aciklama;
+            existing.Telefon = updated.Telefon;
+            existing.Eposta = updated.Eposta;
+            existing.SosyalMedyaHesaplari = updated.SosyalMedyaHesaplari;
+            existing.SiyasiYonelim = updated.SiyasiYonelim;
+            existing.KutukNumarasi = updated.KutukNumarasi;
             existing.UstKurulusId = updated.UstKurulusId;
 
             await _organizatorRepository.UpdateAsync(existing);
@@ -69,7 +90,20 @@ namespace EGM.Application.Services
         // ── Kategori Organizatör CRUD ────────────────────────────────────
 
         public async Task<IReadOnlyList<KategoriOrganizator>> GetAllKategoriAsync()
-            => await _kategoriRepository.ListAllAsync();
+        {
+            var kategoriler = await _kategoriRepository.ListAllAsync();
+            if (kategoriler.Count > 0)
+            {
+                return kategoriler;
+            }
+
+            foreach (var ad in VarsayilanKategoriler)
+            {
+                await _kategoriRepository.AddAsync(new KategoriOrganizator { Ad = ad });
+            }
+
+            return await _kategoriRepository.ListAllAsync();
+        }
 
         public async Task<KategoriOrganizator?> GetKategoriByIdAsync(Guid id)
             => await _kategoriRepository.GetByIdAsync(id);
@@ -78,6 +112,16 @@ namespace EGM.Application.Services
         {
             var kategori = new KategoriOrganizator { Ad = ad };
             return await _kategoriRepository.AddAsync(kategori);
+        }
+
+        public async Task<bool> UpdateKategoriAsync(Guid id, string ad)
+        {
+            var existing = await _kategoriRepository.GetByIdAsync(id);
+            if (existing == null) return false;
+
+            existing.Ad = ad;
+            await _kategoriRepository.UpdateAsync(existing);
+            return true;
         }
 
         public async Task<bool> DeleteKategoriAsync(Guid id)

@@ -1,0 +1,340 @@
+<div class="detay-sayfa">
+
+  <!-- Geri Dön Butonu -->
+  <div class="ust-bar">
+    <button class="btn-geri" (click)="geriDon()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+      Kuruluşlar Listesi
+    </button>
+  </div>
+
+  <!-- Yükleniyor -->
+  <div *ngIf="yukleniyor" class="yukleniyor-ekran">
+    <div class="spinner-buyuk"></div>
+    <p>Kuruluş bilgileri yükleniyor...</p>
+  </div>
+
+  <!-- Hata -->
+  <div *ngIf="!yukleniyor && hataMesaji" class="hata-ekran">
+    <p>{{ hataMesaji }}</p>
+    <button class="btn-geri" (click)="geriDon()">Geri Dön</button>
+  </div>
+
+  <!-- İçerik -->
+  <div *ngIf="!yukleniyor && kurulus" class="detay-kart">
+
+    <!-- Başlık Alanı -->
+    <div class="detay-header">
+      <div class="header-sol">
+        <img *ngIf="orgLogolari[kurulus.id]; else logoYok"
+             [src]="orgLogolari[kurulus.id]"
+             class="kurulus-logo" [alt]="kurulus.ad"
+             (click)="fotografiAc(orgLogolari[kurulus.id], kurulus.ad)"
+             title="Büyük gör" />
+        <ng-template #logoYok>
+          <div class="kurulus-logo-placeholder" title="Resim eklenmemiş">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="3"/>
+              <path d="M3 9h18M9 21V9"/>
+            </svg>
+          </div>
+        </ng-template>
+        <div>
+          <span class="tur-rozet"
+                [style.background]="turRenk(kurulus.tur).bg"
+                [style.color]="turRenk(kurulus.tur).color"
+                [style.border-color]="turRenk(kurulus.tur).border">
+            {{ kurulus.tur || 'Diğer' }}
+          </span>
+          <h1 class="kurulus-ad">{{ kurulus.ad }}</h1>
+          <p class="kurulus-faaliyet" *ngIf="kurulus.faaliyetAlani">{{ kurulus.faaliyetAlani }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sekmeler -->
+    <div class="sekmeler">
+      <button class="sekme" [class.aktif-sekme]="aktifSekme === 'bilgi'"
+              (click)="sekmeGec('bilgi')">
+        Genel Bilgi
+      </button>
+      <button class="sekme" [class.aktif-sekme]="aktifSekme === 'olaylar'"
+              (click)="sekmeGec('olaylar')">
+        Organize Ettiği Olaylar
+        <span class="sekme-sayi" *ngIf="olaylar.length > 0">{{ olaylar.length }}</span>
+      </button>
+    </div>
+
+    <!-- Sekme: Genel Bilgi -->
+    <div class="sekme-icerik" *ngIf="aktifSekme === 'bilgi'">
+      <div class="bilgi-grid">
+
+        <!-- Sol Kolon -->
+        <div class="bilgi-kolon">
+          <div class="bilgi-satir" *ngIf="kurulus.kutukNumarasi">
+            <span class="bilgi-etiket">Kütük No</span>
+            <span class="bilgi-deger bilgi-kod">{{ kurulus.kutukNumarasi }}</span>
+          </div>
+          <div class="bilgi-satir">
+            <span class="bilgi-etiket">Kuruluş Tarihi</span>
+            <span class="bilgi-deger">{{ tarihFormat(kurulus.kurulusTarihi) }}</span>
+          </div>
+          <div class="bilgi-satir" *ngIf="kurulus.siyasiYonelim">
+            <span class="bilgi-etiket">Siyasi Yönelim</span>
+            <span class="bilgi-deger">{{ kurulus.siyasiYonelim }}</span>
+          </div>
+          <div class="bilgi-satir" *ngIf="kurulus.ustKurulusAd">
+            <span class="bilgi-etiket">Üst Kuruluş</span>
+            <span class="bilgi-deger">
+              <button class="link-btn" (click)="navigateToUst(kurulus.ustKurulusId!)">
+                {{ kurulus.ustKurulusAd }}
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <!-- Sağ Kolon -->
+        <div class="bilgi-kolon">
+          <div class="bilgi-satir" *ngIf="kurulus.telefon">
+            <span class="bilgi-etiket">Telefon</span>
+            <span class="bilgi-deger">{{ kurulus.telefon }}</span>
+          </div>
+          <div class="bilgi-satir" *ngIf="kurulus.eposta">
+            <span class="bilgi-etiket">E-Posta</span>
+            <span class="bilgi-deger">{{ kurulus.eposta }}</span>
+          </div>
+          <div class="bilgi-satir" *ngIf="kurulus.iletisim">
+            <span class="bilgi-etiket">İletişim / Web</span>
+            <span class="bilgi-deger">{{ kurulus.iletisim }}</span>
+          </div>
+          <div class="bilgi-satir" *ngIf="sosyalMedya.length > 0">
+            <span class="bilgi-etiket">Sosyal Medya</span>
+            <div class="sosyal-liste">
+              <span class="sosyal-item" *ngFor="let s of sosyalMedya">
+                <strong>{{ s.platform }}:</strong> {{ s.hesap }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Açıklama -->
+      <div class="bilgi-satir-tam" *ngIf="kurulus.aciklama">
+        <span class="bilgi-etiket">Açıklama / Notlar</span>
+        <p class="bilgi-aciklama">{{ kurulus.aciklama }}</p>
+      </div>
+
+      <!-- Alt Kuruluşlar -->
+      <div class="alt-bolum" *ngIf="altKuruluslar.length > 0">
+        <h3 class="alt-baslik">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+            <polyline points="6 3 20 12 6 21 6 3"/>
+          </svg>
+          Bağlı Alt Kuruluşlar ({{ altKuruluslar.length }})
+        </h3>
+        <div class="alt-grid">
+          <div class="alt-karti" *ngFor="let alt of altKuruluslar"
+               (click)="navigateToAlt(alt.id)">
+            <div class="alt-ust">
+              <span class="tur-rozet-kucuk"
+                    [style.background]="turRenk(alt.tur).bg"
+                    [style.color]="turRenk(alt.tur).color"
+                    [style.border-color]="turRenk(alt.tur).border">
+                {{ alt.tur }}
+              </span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </div>
+            <span class="alt-ad">{{ alt.ad }}</span>
+            <span class="alt-tarih" *ngIf="alt.faaliyetAlani">{{ alt.faaliyetAlani }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sekme: Olaylar -->
+    <div class="sekme-icerik" *ngIf="aktifSekme === 'olaylar'">
+
+      <!-- Filtre Paneli -->
+      <div class="filtre-panel">
+
+        <!-- Satır 1: Arama + Tarih -->
+        <div class="filtre-satir">
+          <div class="filtre-arama">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" width="14" height="14" class="arama-ikon">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" placeholder="Olay adı veya il ara..."
+                   [(ngModel)]="olayArama" />
+          </div>
+          <div class="tarih-grup">
+            <label>Başlangıç</label>
+            <input type="date" [(ngModel)]="olayTarihBaslangic" (change)="olaylariGetir()" />
+          </div>
+          <span class="tarih-ayrac">—</span>
+          <div class="tarih-grup">
+            <label>Bitiş</label>
+            <input type="date" [(ngModel)]="olayTarihBitis" (change)="olaylariGetir()" />
+          </div>
+        </div>
+
+        <!-- Satır 2: Seçimli Filtreler -->
+        <div class="filtre-satir">
+          <div class="filtre-secim-grup">
+            <label>Olay Türü</label>
+            <select [(ngModel)]="olayTurFiltre">
+              <option value="">Tümü</option>
+              <option *ngFor="let t of mevcutOlayTurleri" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div class="filtre-secim-grup">
+            <label>Durum</label>
+            <select [(ngModel)]="olayDurumFiltre">
+              <option value="">Tümü</option>
+              <option value="0">Planlandı</option>
+              <option value="1">Devam Ediyor</option>
+              <option value="2">Tamamlandı</option>
+              <option value="3">İptal Edildi</option>
+            </select>
+          </div>
+          <div class="filtre-secim-grup">
+            <label>Risk Seviyesi</label>
+            <select [(ngModel)]="olayRiskFiltre">
+              <option value="">Tümü</option>
+              <option value="dusuk">Düşük (0–3)</option>
+              <option value="orta">Orta (4–6)</option>
+              <option value="yuksek">Yüksek (7+)</option>
+            </select>
+          </div>
+          <div class="filtre-secim-grup" *ngIf="mevcutIller.length > 0">
+            <label>İl</label>
+            <select [(ngModel)]="olayIlFiltre">
+              <option value="">Tümü</option>
+              <option *ngFor="let il of mevcutIller" [value]="il">{{ il }}</option>
+            </select>
+          </div>
+          <button class="btn-filtre-temizle" *ngIf="aktifFiltreSayisi > 0"
+                  (click)="filtreleriTemizle()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+            Filtreleri Temizle
+            <span class="filtre-sayi">{{ aktifFiltreSayisi }}</span>
+          </button>
+        </div>
+
+        <!-- Sonuç özeti -->
+        <div class="filtre-ozet" *ngIf="olaylar.length > 0">
+          <span *ngIf="filtrelenmisOlaylar.length === olaylar.length">
+            {{ olaylar.length }} olay
+          </span>
+          <span *ngIf="filtrelenmisOlaylar.length !== olaylar.length">
+            {{ filtrelenmisOlaylar.length }} / {{ olaylar.length }} olay gösteriliyor
+          </span>
+        </div>
+      </div>
+
+      <!-- Yükleniyor -->
+      <div *ngIf="olayYukleniyor" class="olay-yukleniyor">
+        <div class="spinner-kucuk"></div>
+        <span>Olaylar yükleniyor...</span>
+      </div>
+
+      <!-- Boş -->
+      <div *ngIf="!olayYukleniyor && filtrelenmisOlaylar.length === 0" class="olay-bos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c8d0d8" stroke-width="1.5"
+             width="40" height="40">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <p>{{ aktifFiltreSayisi > 0 ? 'Filtreyle eşleşen olay bulunamadı.' : 'Bu kuruluşa ait kayıtlı olay bulunamadı.' }}</p>
+      </div>
+
+      <!-- Olay Listesi -->
+      <div *ngIf="!olayYukleniyor && filtrelenmisOlaylar.length > 0" class="olay-listesi">
+        <div class="olay-satiri" *ngFor="let o of filtrelenmisOlaylar">
+          <div class="olay-tarih-kutu">
+            <span class="olay-gun">{{ o.tarih | date:'dd' : '' : 'tr' }}</span>
+            <span class="olay-ay">{{ o.tarih | date:'MMM' : '' : 'tr' }}</span>
+            <span class="olay-yil">{{ o.tarih | date:'yyyy' : '' : 'tr' }}</span>
+          </div>
+          <div class="olay-icerik">
+            <div class="olay-ust">
+              <span class="olay-tur-badge">{{ o.olayTuru }}</span>
+              <span class="olay-durum"
+                    [style.background]="durumEtiketleri[o.durum]?.bg"
+                    [style.color]="durumEtiketleri[o.durum]?.color">
+                {{ durumEtiketleri[o.durum]?.ad ?? 'Belirsiz' }}
+              </span>
+            </div>
+            <div class="olay-baslik">{{ o.baslik }}</div>
+            <div class="olay-meta">
+              <span *ngIf="o.il">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     width="11" height="11" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                {{ o.il }}{{ o.ilce ? ' / ' + o.ilce : '' }}{{ o.mekan ? ' · ' + o.mekan : '' }}
+              </span>
+              <span *ngIf="o.konuAd" class="olay-konu">{{ o.konuAd }}</span>
+            </div>
+            <div class="olay-sayilar" *ngIf="o.katilimciSayisi || o.gozaltiSayisi">
+              <span *ngIf="o.katilimciSayisi" class="olay-stat">
+                &#128100; {{ o.katilimciSayisi | number }} kişi
+              </span>
+              <span *ngIf="o.gozaltiSayisi" class="olay-stat olay-stat-uyari">
+                &#9874; {{ o.gozaltiSayisi }} gözaltı
+              </span>
+            </div>
+          </div>
+          <div class="olay-risk" [class.risk-dusuk]="o.riskPuani < 4"
+               [class.risk-orta]="o.riskPuani >= 4 && o.riskPuani < 7"
+               [class.risk-yuksek]="o.riskPuani >= 7">
+            {{ o.riskPuani | number:'1.0-1' }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Fotoğraf Modal (Lightbox) -->
+<div class="fotograf-overlay" *ngIf="acikFotograf" (click)="fotografiKapat()">
+  <div class="fotograf-modal" (click)="$event.stopPropagation()">
+    <div class="fotograf-modal-ust">
+      <span class="fotograf-modal-baslik">{{ acikFotografBaslik }}</span>
+      <div class="fotograf-modal-aksiyonlar">
+        <a class="btn-fotograf-indir" [href]="acikFotograf" [download]="acikFotografBaslik">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          İndir
+        </a>
+        <button class="btn-fotograf-kapat" (click)="fotografiKapat()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="fotograf-modal-govde">
+      <img [src]="acikFotograf" [alt]="acikFotografBaslik" class="fotograf-modal-img" />
+    </div>
+  </div>
+</div>

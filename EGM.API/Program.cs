@@ -79,21 +79,21 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("CityStaffOrAbove", p =>
         p.RequireRole(
             Roles.IlPersoneli, Roles.IlYoneticisi,
-            Roles.BaskanlikPersoneli, Roles.BaskanlikYoneticisi));
+            Roles.BaskanlikPersoneli, Roles.BaskanlikYoneticisi, Roles.Yetkili));
 
     // Şehir yöneticisi ve üzeri: onay/yönetim
     options.AddPolicy("CityManagerOrAbove", p =>
         p.RequireRole(
             Roles.IlYoneticisi,
-            Roles.BaskanlikPersoneli, Roles.BaskanlikYoneticisi));
+            Roles.BaskanlikPersoneli, Roles.BaskanlikYoneticisi, Roles.Yetkili));
 
     // Yalnızca Başkanlık rolleri (coğrafi kısıtsız)
     options.AddPolicy("HQOnly", p =>
-        p.RequireRole(Roles.BaskanlikPersoneli, Roles.BaskanlikYoneticisi));
+        p.RequireRole(Roles.BaskanlikPersoneli, Roles.BaskanlikYoneticisi, Roles.Yetkili));
 
-    // Yalnızca Süper Admin
+    // Yalnızca Başkanlık Yöneticisi ve Yetkili
     options.AddPolicy("HQManagerOnly", p =>
-        p.RequireRole(Roles.BaskanlikYoneticisi));
+        p.RequireRole(Roles.BaskanlikYoneticisi, Roles.Yetkili));
 });
 
 // ── HttpContext Accessor (AuditInterceptor için) ─────────────────────────
@@ -137,6 +137,7 @@ builder.Services.AddScoped<OluService>();
 builder.Services.AddScoped<SosyalMedyaOlayService>();
 builder.Services.AddScoped<SupheliService>();
 builder.Services.AddScoped<VIPZiyaretService>();
+builder.Services.AddScoped<RaporlarService>();
 
 // ── Bildirim Servisi ─────────────────────────────────────────────────────
 builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();

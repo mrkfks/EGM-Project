@@ -13,31 +13,61 @@ import { Operasyonel } from './pages/operasyonel/operasyonel';
 import { Sehit } from './pages/sehit/sehit';
 import { Kullanicilar } from './pages/kullanicilar/kullanicilar';
 import { Istatistikler } from './pages/istatistikler/istatistikler';
+import { Bultenler } from './pages/bultenler/bultenler';
 import { Raporlar } from './pages/raporlar/raporlar';
+import { RaporKuruluslar } from './pages/rapor-kuruluslar/rapor-kuruluslar';
+import { RaporKonular } from './pages/rapor-konular/rapor-konular';
 import { KonuIslemleri } from './pages/konu-islemleri/konu-islemleri';
+import { Konular } from './pages/konular/konular';
 import { SokakOlayEkle } from './pages/sokak-olay-ekle/sokak-olay-ekle';
 import { VeriYonetimi } from './pages/veri-yonetimi/veri-yonetimi';
-import { authGuard } from './guards/auth.guard';
+import { KurulusDetay } from './pages/kurulus-detay/kurulus-detay';
+import { KonuDetay } from './pages/konu-detay/konu-detay';
+import { authGuard, roleGuard, ROLES } from './guards/auth.guard';
 
+// Kısa yardımcılar
+const IL_PERSONELI_VE_UZERI = [
+  ROLES.IlPersoneli, ROLES.IlYoneticisi,
+  ROLES.BaskanlikPersoneli, ROLES.BaskanlikYoneticisi, ROLES.Yetkili
+];
+const IL_YONETICISI_VE_UZERI = [
+  ROLES.IlYoneticisi,
+  ROLES.BaskanlikPersoneli, ROLES.BaskanlikYoneticisi, ROLES.Yetkili
+];
+const HQ_YONETICISI_VE_UZERI = [ROLES.BaskanlikYoneticisi, ROLES.Yetkili];
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
     { path: 'login', component: Login },
-    { path: 'home',         component: Home,         canActivate: [authGuard] },
-    { path: 'olay',             component: Olay,         canActivate: [authGuard] },
-    { path: 'sokak-olay-ekle',  component: SokakOlayEkle, canActivate: [authGuard] },
-    { path: 'vip',          component: VIP,           canActivate: [authGuard] },
-    { path: 'organizasyon', component: Organizasyon,  canActivate: [authGuard] },
-    { path: 'secim',        component: Secim,         canActivate: [authGuard] },
-    { path: 'socialmedia',  component: Socialmedia,   canActivate: [authGuard] },
-    { path: 'olu',          component: Olu,           canActivate: [authGuard] },
-    { path: 'supheli',      component: Supheli,       canActivate: [authGuard] },
-    { path: 'operasyonel',  component: Operasyonel,   canActivate: [authGuard] },
-    { path: 'istatistikler', component: Istatistikler, canActivate: [authGuard] },
-    { path: 'raporlar',      component: Raporlar,      canActivate: [authGuard] },
-    { path: 'konu-islemleri', component: KonuIslemleri, canActivate: [authGuard] },
-    { path: 'sehit',        component: Sehit,         canActivate: [authGuard] },
-    { path: 'kullanicilar', component: Kullanicilar,  canActivate: [authGuard] },
-    { path: 'veri-yonetimi', component: VeriYonetimi,  canActivate: [authGuard] },
-    { path: 'province/:id', component: Province,      canActivate: [authGuard] },
+
+    // ── Herkese açık (sadece giriş gerekli) ──────────────────────────────
+    { path: 'home',              component: Home,          canActivate: [authGuard] },
+    { path: 'olay',              component: Olay,          canActivate: [authGuard] },
+    { path: 'istatistikler',     component: Istatistikler, canActivate: [authGuard] },
+    { path: 'raporlar',          component: Bultenler,     canActivate: [authGuard] },
+    { path: 'rapor-gunluk-bulten', component: Raporlar,   canActivate: [authGuard] },
+    { path: 'rapor-kuruluslar',  component: RaporKuruluslar, canActivate: [authGuard] },
+    { path: 'kurulus-detay/:id', component: KurulusDetay, canActivate: [authGuard] },
+    { path: 'konu-detay/:id',    component: KonuDetay,    canActivate: [authGuard] },
+    { path: 'rapor-konular',     component: RaporKonular, canActivate: [authGuard] },
+    { path: 'konular',           component: Konular,       canActivate: [authGuard] },
+    { path: 'province/:id',      component: Province,      canActivate: [authGuard] },
+
+    // ── İl Personeli ve üzeri ────────────────────────────────────────────
+    { path: 'sokak-olay-ekle', component: SokakOlayEkle, canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
+    { path: 'socialmedia',     component: Socialmedia,   canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
+    { path: 'secim',           component: Secim,         canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
+
+    // ── İl Yöneticisi ve üzeri ───────────────────────────────────────────
+    { path: 'vip',             component: VIP,           canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'organizasyon',    component: Organizasyon,  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'konu-islemleri',  component: KonuIslemleri, canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'kullanicilar',    component: Kullanicilar,  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'olu',             component: Olu,           canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'supheli',         component: Supheli,       canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'operasyonel',     component: Operasyonel,   canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'sehit',           component: Sehit,         canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+
+    // ── Başkanlık Yöneticisi ve Yetkili ─────────────────────────────────
+    { path: 'veri-yonetimi',   component: VeriYonetimi,  canActivate: [authGuard, roleGuard(HQ_YONETICISI_VE_UZERI)] },
 ];

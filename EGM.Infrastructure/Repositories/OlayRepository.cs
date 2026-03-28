@@ -50,5 +50,33 @@ namespace EGM.Infrastructure.Repositories
 
             return (items, total);
         }
+
+        public async Task<IReadOnlyList<Olay>> GetByOrganizatorAsync(
+            Guid organizatorId,
+            DateTime? tarihBaslangic,
+            DateTime? tarihBitis)
+        {
+            var q = _db.Olaylar
+                .Include(o => o.Organizator)
+                .Include(o => o.Konu)
+                .Where(o => !o.IsDeleted && o.OrganizatorId == organizatorId);
+
+            if (tarihBaslangic.HasValue) q = q.Where(o => o.Tarih >= tarihBaslangic.Value);
+            if (tarihBitis.HasValue)     q = q.Where(o => o.Tarih <= tarihBitis.Value);
+
+            return await q
+                .OrderByDescending(o => o.Tarih)
+                .ToListAsync();
+        }
+
+        public async Task<IReadOnlyList<Olay>> GetByKonuAsync(Guid konuId)
+        {
+            return await _db.Olaylar
+                .Include(o => o.Organizator)
+                .Include(o => o.Konu)
+                .Where(o => !o.IsDeleted && o.KonuId == konuId)
+                .OrderByDescending(o => o.Tarih)
+                .ToListAsync();
+        }
     }
 }

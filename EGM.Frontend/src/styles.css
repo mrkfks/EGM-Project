@@ -270,3 +270,12 @@ body.no-scroll { overflow: hidden; }
   color: #0f6fa3;
   letter-spacing: 0.04em;
 }
+
+select[formControlName="il"] {
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}

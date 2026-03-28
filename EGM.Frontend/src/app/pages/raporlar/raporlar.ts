@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Component, OnInit } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
+
+const API = environment.apiUrl;
 
 interface IcmalVerisi {
   tur: string;
@@ -13,6 +18,7 @@ interface GerceklesenDetay {
   sn: number;
   il: string;
   eylemEtkinlik: string;
+  saat: string;
   organizeEden: string;
   aciklama: string;
   katilimSayisi: string;
@@ -23,6 +29,7 @@ interface BeklenenDetay {
   il: string;
   yer: string;
   eylemEtkinlik: string;
+  saat: string;
   organizeEden: string;
   aciklama: string;
 }
@@ -31,56 +38,122 @@ interface OperasyonelDetay {
   sn: number;
   il: string;
   tarih: string;
+  supheliSayisi: string;
   gozaltiSayisi: string;
   aciklama: string;
+}
+
+// API response shape (camelCase from .NET)
+interface GunlukBultenDto {
+  tarih: string;
+  sonrakiGunTarih: string;
+  icmalVerileri: { tur: string; eylemSayisi: number; katilimSayisi: number; gozaltiSayisi: number; oluSayisi: number }[];
+  gerceklesenDetaylar: { sn: number; il: string; eylemEtkinlik: string; saat: string; organizeEden: string; aciklama: string; katilimSayisi: number }[];
+  beklenenDetaylar: { sn: number; il: string; yer: string; eylemEtkinlik: string; saat: string; organizeEden: string; aciklama: string }[];
+  operasyonelFaaliyetler: { sn: number; il: string; tarih: string; supheliSayisi: number; gozaltiSayisi: number; aciklama: string }[];
 }
 
 @Component({
   selector: 'app-raporlar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './raporlar.html',
   styleUrls: ['./raporlar.css'],
 })
-export class Raporlar {
+export class Raporlar implements OnInit {
   className = 'LEGAL GUNLUK BULTEN';
   tarih = '';
   sonrakiGunTarih = '';
+  seciliTarih = '';
 
-  icmalVerileri: IcmalVerisi[] = [
-    { tur: 'BASIN AÇIKLAMASI', eylemSayisi: '(-)', katilimSayisi: '(-)', gozaltiSayisi: '', oluSayisi: '' },
-    { tur: 'EYLEM/ETKİNLİK', eylemSayisi: '(-)', katilimSayisi: '(-)', gozaltiSayisi: '', oluSayisi: '' }
-  ];
+  isLoading = false;
+  errorMessage = '';
 
-  gerceklesenDetaylar: GerceklesenDetay[] = Array.from({ length: 12 }, (_, i) => ({
-    sn: i + 1,
-    il: '',
-    eylemEtkinlik: '',
-    organizeEden: '',
-    aciklama: '',
-    katilimSayisi: ''
-  }));
+  icmalVerileri: IcmalVerisi[] = [];
+  gerceklesenDetaylar: GerceklesenDetay[] = [];
+  beklenenDetaylar: BeklenenDetay[] = [];
+  operasyonelFaaliyetler: OperasyonelDetay[] = [];
 
-  beklenenDetaylar: BeklenenDetay[] = Array.from({ length: 13 }, (_, i) => ({
-    sn: i + 1,
-    il: '',
-    yer: '',
-    eylemEtkinlik: '',
-    organizeEden: '',
-    aciklama: ''
-  }));
-
-  operasyonelFaaliyetler: OperasyonelDetay[] = Array.from({ length: 2 }, (_, i) => ({
-    sn: i + 1,
-    il: '',
-    tarih: '',
-    gozaltiSayisi: '',
-    aciklama: ''
-  }));
+  constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.setToday();
-    this.fillSampleData();
+  }
+
+  setToday(): void {
+    const now = new Date();
+    this.seciliTarih = now.toISOString().split('T')[0];
+    this.tarih = this.toDisplayDate(now);
+    this.sonrakiGunTarih = this.toDisplayDate(new Date(now.getTime() + 86_400_000));
+    this.loadBulten(this.seciliTarih);
+  }
+
+  onTarihChange(): void {
+    if (!this.seciliTarih) return;
+    const d = new Date(this.seciliTarih + 'T00:00:00');
+    this.tarih = this.toDisplayDate(d);
+    this.sonrakiGunTarih = this.toDisplayDate(new Date(d.getTime() + 86_400_000));
+    this.loadBulten(this.seciliTarih);
+  }
+
+  loadBulten(tarih: string): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+
+    this.http.get<GunlukBultenDto>(
+      `${API}/api/raporlar/gunluk-bulten?tarih=${tarih}`,
+      { headers }
+    ).subscribe({
+      next: (data) => {
+        this.tarih           = data.tarih;
+        this.sonrakiGunTarih = data.sonrakiGunTarih;
+
+        this.icmalVerileri = data.icmalVerileri.map(v => ({
+          tur:           v.tur,
+          eylemSayisi:   v.eylemSayisi.toString(),
+          katilimSayisi: v.katilimSayisi.toString(),
+          gozaltiSayisi: v.gozaltiSayisi === 0 ? '(-)' : v.gozaltiSayisi.toString(),
+          oluSayisi:     v.oluSayisi === 0     ? '(-)' : v.oluSayisi.toString(),
+        }));
+
+        this.gerceklesenDetaylar = data.gerceklesenDetaylar.map(d => ({
+          sn:            d.sn,
+          il:            d.il,
+          eylemEtkinlik: d.eylemEtkinlik,
+          saat:          d.saat,
+          organizeEden:  d.organizeEden,
+          aciklama:      d.aciklama,
+          katilimSayisi: d.katilimSayisi.toString(),
+        }));
+
+        this.beklenenDetaylar = data.beklenenDetaylar.map(b => ({
+          sn:            b.sn,
+          il:            b.il,
+          yer:           b.yer,
+          eylemEtkinlik: b.eylemEtkinlik,
+          saat:          b.saat,
+          organizeEden:  b.organizeEden,
+          aciklama:      b.aciklama,
+        }));
+
+        this.operasyonelFaaliyetler = data.operasyonelFaaliyetler.map(f => ({
+          sn:            f.sn,
+          il:            f.il,
+          tarih:         f.tarih,
+          supheliSayisi: f.supheliSayisi.toString(),
+          gozaltiSayisi: f.gozaltiSayisi.toString(),
+          aciklama:      f.aciklama,
+        }));
+
+        this.isLoading = false;
+      },
+      error: () => {
+        this.errorMessage = 'Bülten verisi yüklenemedi. Bağlantıyı kontrol edin.';
+        this.isLoading = false;
+      }
+    });
   }
 
   printReport(): void {
@@ -89,82 +162,12 @@ export class Raporlar {
     }
   }
 
-  setToday(): void {
-    const now = new Date();
-    this.tarih = this.toDisplayDate(now);
-    this.sonrakiGunTarih = this.toDisplayDate(new Date(now.getTime() + 86_400_000));
-  }
-
   trackBySn(_index: number, item: { sn: number }): number {
     return item.sn;
-  }
-
-  private fillSampleData(): void {
-    this.gerceklesenDetaylar = [
-      {
-        sn: 1,
-        il: 'Ankara',
-        eylemEtkinlik: 'Basın Açıklaması',
-        organizeEden: 'Sendika Temsilciliği',
-        aciklama: 'Kamu çalışanlarının taleplerine ilişkin açıklama.',
-        katilimSayisi: '120'
-      },
-      {
-        sn: 2,
-        il: 'İstanbul',
-        eylemEtkinlik: 'Yürüyüş',
-        organizeEden: 'STK Platformu',
-        aciklama: 'İzinli yürüyüş etkinliği, olaysız sonlandı.',
-        katilimSayisi: '450'
-      },
-      ...Array.from({ length: 10 }, (_, i) => ({
-        sn: i + 3,
-        il: '',
-        eylemEtkinlik: '',
-        organizeEden: '',
-        aciklama: '',
-        katilimSayisi: ''
-      }))
-    ];
-
-    this.beklenenDetaylar = [
-      {
-        sn: 1,
-        il: 'İzmir',
-        yer: 'Konak Meydanı',
-        eylemEtkinlik: 'Yürüyüş',
-        organizeEden: 'Sivil Toplum Platformu',
-        aciklama: 'Beklenen katılım orta seviyede.'
-      },
-      ...Array.from({ length: 12 }, (_, i) => ({
-        sn: i + 2,
-        il: '',
-        yer: '',
-        eylemEtkinlik: '',
-        organizeEden: '',
-        aciklama: ''
-      }))
-    ];
-
-    this.operasyonelFaaliyetler = [
-      {
-        sn: 1,
-        il: 'Ankara',
-        tarih: this.tarih,
-        gozaltiSayisi: '0',
-        aciklama: 'Önemli bir gelişme bulunmamaktadır.'
-      },
-      {
-        sn: 2,
-        il: '',
-        tarih: '',
-        gozaltiSayisi: '',
-        aciklama: ''
-      }
-    ];
   }
 
   private toDisplayDate(value: Date): string {
     return value.toLocaleDateString('tr-TR');
   }
 }
+

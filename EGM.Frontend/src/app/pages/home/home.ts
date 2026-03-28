@@ -88,7 +88,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   // UI state
   currentLayer: 'street' | 'satellite' | 'heatmap' = 'street';
   durumFilter = 'tum';
-  zamanFilter = '24h';
+  zamanFilter = 'tum';
   isLoading   = false;
   errorMsg: string | null = null;
 
@@ -277,7 +277,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
     this.http.get<any>(`${this.apiBase}/api/olay`, { params }).subscribe({
       next: (res: any) => {
-        this.olaylar   = (res?.Items ?? []) as OlayMapItem[];
+        this.olaylar   = (res?.items ?? []) as OlayMapItem[];
         this.isLoading = false;
         this.renderMarkers();
       },

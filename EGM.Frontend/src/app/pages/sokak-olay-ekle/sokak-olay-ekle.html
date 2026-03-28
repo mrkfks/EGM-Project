@@ -1,45 +1,35 @@
 <div class="ekle-page">
-
-  <!-- ── Mesajlar ────────────────────────────────────────────────────── -->
-  <div class="alert alert-success" *ngIf="formSuccess">{{ formSuccess }}</div>
-  <div class="alert alert-danger"  *ngIf="formError">{{ formError }}</div>
-
-  <!-- ── Risk önizleme bandı ─────────────────────────────────────────── -->
-  <div class="risk-preview-bar" *ngIf="riskPreview" [class.high-risk-bar]="isHighRisk">
-    <span class="rpb-label">
-      Risk Puanı:
-      <strong [style.color]="riskBarColor()">
-        {{ (riskPreview.riskPuaniNormalized * 100) | number:'1.0-0' }}%
-        ({{ riskPreview.seviye }})
-      </strong>
-      <span *ngIf="isHighRisk" class="risk-warn-icon">⚠ Yüksek Riskli Kayıt</span>
-    </span>
-    <div class="rpb-track">
-      <div class="rpb-fill"
-           [style.width]="riskBarWidth()"
-           [style.background]="riskBarColor()">
-      </div>
+  <div class="user-plans">
+    <h3>Planlanan Olaylar</h3>
+    <div *ngIf="userPlans.length === 0" class="no-plans">
+      Henüz bir planlama eklenmedi.
+    </div>
+    <div *ngFor="let plan of userPlans" class="plan-item">
+      <h4>{{ plan.baslik }}</h4>
+      <p><strong>Olay Türü:</strong> {{ plan.olayTuru }}</p>
+      <p><strong>Tarih:</strong> {{ plan.tarih | date:'dd.MM.yyyy' }}</p>
+      <p><strong>Hassasiyet:</strong> {{ plan.hassasiyet }}</p>
+      <button (click)="editPlan(plan)">Düzenle</button>
     </div>
   </div>
 
-  <!-- ── Form ────────────────────────────────────────────────────────── -->
-  <form [formGroup]="form" (ngSubmit)="save()" novalidate class="olay-form"
-        [style.--accent-color]="hassasiyetColor">
+  <div class="content" [formGroup]="form">
+    <!-- Buttons above Temel Bilgiler -->
+    <div class="form-switch-buttons">
+      <button type="button"
+        [class.active]="activeForm === 'planned'"
+        class="btn full-width"
+        (click)="switchToPlannedForm()">Planlananlar Formu</button>
+      <button type="button"
+        [class.active]="activeForm === 'completed'"
+        class="btn full-width"
+        (click)="switchToCompletedForm()">Gerçekleşenler Formu</button>
+    </div>
 
     <!-- Temel Bilgiler -->
     <fieldset class="form-section">
       <legend>Temel Bilgiler</legend>
       <div class="form-grid">
-
-        <div class="form-field span-2">
-          <label>Başlık <span class="req">*</span></label>
-          <input type="text" formControlName="baslik"
-                 placeholder="Olay başlığını giriniz…"
-                 [class.is-invalid]="fieldError('baslik')">
-          <div class="field-error" *ngIf="fieldError('baslik')">
-            {{ f['baslik'].errors?.['required'] ? 'Başlık zorunludur.' : 'En fazla 250 karakter.' }}
-          </div>
-        </div>
 
         <div class="form-field">
           <label>Olay Türü <span class="req">*</span></label>
@@ -76,19 +66,15 @@
         </div>
 
         <div class="form-field">
-          <label>Tarih <span class="req">*</span></label>
-          <input type="date" formControlName="tarih" [class.is-invalid]="fieldError('tarih')">
+          <label>Başlangıç Tarihi &amp; Saati <span class="req">*</span></label>
+          <input type="datetime-local" formControlName="tarih" [class.is-invalid]="fieldError('tarih')">
           <div class="field-error" *ngIf="fieldError('tarih')">Tarih zorunludur.</div>
         </div>
 
-        <div class="form-field">
-          <label>Başlangıç Saati</label>
-          <input type="time" formControlName="baslangicSaati">
-        </div>
-
-        <div class="form-field">
-          <label>Bitiş Saati</label>
-          <input type="time" formControlName="bitisSaati">
+        <!-- Gerçekleşenler formuna özel: Bitiş Tarihi & Saati -->
+        <div class="form-field" *ngIf="activeForm === 'completed'">
+          <label>Bitiş Tarihi &amp; Saati</label>
+          <input type="datetime-local" formControlName="bitisTarihi">
         </div>
 
       </div>
@@ -102,7 +88,7 @@
         <div class="form-field">
           <label>İl <span class="req">*</span></label>
           <select formControlName="il" [class.is-invalid]="fieldError('il')"
-                  *ngIf="!isCityScoped">
+                   *ngIf="!isCityScoped">
             <option value="">— Seçiniz —</option>
             <option *ngFor="let il of IL_LISTESI" [value]="il.ad">{{ il.ad }}</option>
           </select>
@@ -116,67 +102,180 @@
           <input type="text" formControlName="ilce" placeholder="İlçe adı…">
         </div>
 
-        <div class="form-field span-2">
+        <div class="form-field">
           <label>Mekan</label>
           <input type="text" formControlName="mekan" placeholder="Etkinlik mekanı…">
         </div>
 
         <div class="form-field">
-          <label>Enlem</label>
-          <input type="number" formControlName="latitude" step="0.0001"
-                 placeholder="ör. 39.9208"
-                 [class.is-invalid]="fieldError('latitude')">
-          <div class="field-error" *ngIf="fieldError('latitude')">−90 ile 90 arasında olmalı.</div>
-        </div>
-
-        <div class="form-field">
-          <label>Boylam</label>
-          <input type="number" formControlName="longitude" step="0.0001"
-                 placeholder="ör. 32.8541"
-                 [class.is-invalid]="fieldError('longitude')">
-          <div class="field-error" *ngIf="fieldError('longitude')">−180 ile 180 arasında olmalı.</div>
-        </div>
-
-        <div class="form-field">
-          <label>Tahmini Katılımcı Sayısı</label>
+          <label>{{ activeForm === 'completed' ? 'Katılımcı Sayısı' : 'Tahmini Katılımcı Sayısı' }}</label>
           <input type="number" formControlName="katilimciSayisi" min="0" placeholder="0">
         </div>
-
-        <div class="form-field">
-          <label>Sosyal Medya Sinyal Skoru
-            <span class="hint">(0–100)</span>
-          </label>
-          <input type="number" formControlName="sosyalSignalSkoru" min="0" max="100">
+        <!-- Gerçekleşenler formuna özel: şehit, ölü, gözaltı -->
+        <div class="form-field" *ngIf="activeForm === 'completed'">
+          <label>Şehit Sayısı</label>
+          <input type="number" formControlName="sehitSayisi" min="0" placeholder="0">
         </div>
-
+        <div class="form-field" *ngIf="activeForm === 'completed'">
+          <label>Ölü Sayısı</label>
+          <input type="number" formControlName="oluSayisi" min="0" placeholder="0">
+        </div>
+        <div class="form-field" *ngIf="activeForm === 'completed'">
+          <label>Gözaltı Sayısı</label>
+          <input type="number" formControlName="gozaltiSayisi" min="0" placeholder="0">
+        </div>
         <div class="form-field span-2">
           <label>Açıklama</label>
           <textarea formControlName="aciklama" rows="3"
                     placeholder="Olay hakkında kısa notlar…"></textarea>
         </div>
 
-        <div class="form-field">
-          <label>Kaynak Kurum</label>
-          <input type="text" formControlName="kaynakKurum" placeholder="Bildirim kaynağı…">
-        </div>
-
-        <div class="form-field" *ngIf="!isCityScoped">
-          <label>İl Kodu (Plaka)</label>
-          <input type="number" formControlName="cityId" min="1" max="81" placeholder="1–81">
-        </div>
-
       </div>
     </fieldset>
 
-    <!-- Alt butonlar -->
+    <!-- Alt buton -->
     <div class="form-actions">
-      <button type="button" class="btn-ghost" (click)="goBack()">İptal</button>
-      <button type="submit" class="btn-primary" [disabled]="isSaving">
-        <span *ngIf="isSaving" class="spinner-sm"></span>
-        {{ isSaving ? 'Kaydediliyor…' : 'Kaydet' }}
-      </button>
+      <button type="button" class="btn btn-primary" (click)="kaydet()">Kaydet</button>
     </div>
 
-  </form>
+  </div>
 
+  <div class="completed-events">
+    <h3>Gerçekleşen Olaylar</h3>
+    <div *ngIf="completedEvents.length === 0" class="no-events">
+      Henüz gerçekleşen bir olay yok.
+    </div>
+    <div *ngFor="let event of completedEvents" class="event-item">
+      <h4>{{ event.baslik }}</h4>
+      <p><strong>Olay Türü:</strong> {{ event.olayTuru }}</p>
+      <p><strong>Tarih:</strong> {{ event.tarih | date:'dd.MM.yyyy' }}</p>
+      <p><strong>Hassasiyet:</strong> {{ event.hassasiyet }}</p>
+    </div>
+  </div>
 </div>
+
+<style>
+  .ekle-page {
+    display: grid;
+    grid-template-columns: 1fr 3fr 1fr; /* Left column for user plans, middle for form, right for spacing */
+    gap: 1rem; /* Add some spacing between columns */
+  }
+
+  .user-plans {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .user-plans h3 {
+    margin-bottom: 1rem;
+  }
+
+  .plan-item {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+  }
+
+  .plan-item h4 {
+    margin: 0 0 0.5rem;
+  }
+
+  .plan-item button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .plan-item button:hover {
+    background-color: #0056b3;
+  }
+
+  .no-plans {
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  .content {
+    background-color: #ffffff; /* Keep the form background white */
+  }
+
+  .empty-column {
+    background-color: #f8f9fa; /* Light gray background for visibility */
+  }
+
+  .completed-events {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .completed-events h3 {
+    margin-bottom: 1rem;
+  }
+
+  .event-item {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #fff;
+  }
+
+  .event-item h4 {
+    margin: 0 0 0.5rem;
+  }
+
+  .no-events {
+    color: #6c757d;
+    font-style: italic;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+
+  .form-switch-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-switch-buttons .btn {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    background-color: #e9ecef;
+    color: #495057;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    width: 100%;
+  }
+
+  .form-switch-buttons .btn.active {
+    background-color: #1a1a2e;
+    color: #fff;
+  }
+
+  .form-switch-buttons .btn:not(.active):hover {
+    background-color: #ced4da;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+  }
+</style>

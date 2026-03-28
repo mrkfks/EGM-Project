@@ -1,4 +1,4 @@
-/* ─── GENEL YAPISI ────────────────────────────────────────────────── */
+﻿/* ─── GENEL YAPISI ────────────────────────────────────────────────── */
 .org-container {
   padding: 16px 12px;
   max-width: 100%;
@@ -615,6 +615,101 @@
   margin-top: 5px;
 }
 
+/* ─── SOSYAL MEDYA ──────────────────────────────────────────────── */
+.sosyal-ekle-satir {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.sosyal-platform-sec {
+  flex: 0 0 150px;
+  padding: 8px 10px;
+  border: 1.5px solid #dde3ea;
+  border-radius: 7px;
+  background: #f8fafb;
+  font-size: 0.82rem;
+  color: #374151;
+  outline: none;
+}
+
+.sosyal-hesap-input {
+  flex: 1;
+  padding: 8px 11px;
+  border: 1.5px solid #dde3ea;
+  border-radius: 7px;
+  background: #f8fafb;
+  font-size: 0.82rem;
+  color: #374151;
+  outline: none;
+}
+
+.sosyal-hesap-input:focus,
+.sosyal-platform-sec:focus {
+  border-color: #3b82f6;
+  background: #fff;
+}
+
+.btn-sosyal-ekle {
+  padding: 8px 14px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+.btn-sosyal-ekle:hover { opacity: 0.88; }
+
+.sosyal-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sosyal-satir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0f6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.sosyal-platform-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1d4ed8;
+  background: #dbeafe;
+  border-radius: 5px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.sosyal-hesap-text {
+  flex: 1;
+  font-size: 0.82rem;
+  color: #334155;
+  word-break: break-all;
+}
+
+.btn-sosyal-sil {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.btn-sosyal-sil:hover { color: #ef4444; }
+
 /* ─── TUR SECICI ─────────────────────────────────────────────────── */
 .tur-secici {
   display: flex;
@@ -636,6 +731,80 @@
 
 .tur-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 .tur-aktif { font-weight: 700; }
+
+/* ─── TUR BUTON WRAP (sil butonu ile beraber) ────────────────────── */
+.tur-btn-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.tur-sil-inline {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  color: #c0392b;
+  padding: 0 3px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+  margin-left: -2px;
+}
+.tur-btn-wrap:hover .tur-sil-inline { opacity: 0.6; }
+.tur-btn-wrap:hover .tur-sil-inline:hover { opacity: 1; }
+.tur-sil-inline:disabled { opacity: 0 !important; cursor: not-allowed; }
+
+/* ─── SATIR ICI TUR EKLEME ───────────────────────────────────────── */
+.tur-btn-ekle-trigger {
+  border-style: dashed !important;
+  color: #2c5f8a !important;
+  background: none !important;
+}
+.tur-btn-ekle-trigger:hover { background: #eaf2ff !important; }
+
+.tur-yeni-ekle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.tur-inline-input {
+  width: 120px;
+  padding: 5px 10px;
+  border: 1.5px solid #2c5f8a;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: #1a1a2e;
+  outline: none;
+  background: #fff;
+}
+
+.tur-inline-kaydet {
+  padding: 5px 12px;
+  background: #1a3a5c;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tur-inline-kaydet:hover:not(:disabled) { background: #2c5f8a; }
+.tur-inline-kaydet:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.tur-inline-iptal {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #8a94a6;
+  padding: 3px 6px;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
+}
+.tur-inline-iptal:hover { background: #fdecea; color: #c0392b; }
 
 /* ─── KAYDET BUTONU ──────────────────────────────────────────────── */
 .btn-kaydet {
@@ -704,6 +873,159 @@
   text-align: center;
   padding: 24px 0;
 }
+
+/* ─── TUR YONETIM PANELI ─────────────────────────────────────────── */
+.tur-ekle-satir {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tur-ekle-input {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1.5px solid #dde3ea;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: #1a1a2e;
+  background: #fff;
+  transition: border-color 0.15s;
+}
+.tur-ekle-input:focus {
+  outline: none;
+  border-color: #2c5f8a;
+  box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.1);
+}
+
+.btn-tur-ekle {
+  padding: 9px 16px;
+  background: #1a3a5c;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-tur-ekle:hover:not(:disabled) { background: #2c5f8a; }
+.btn-tur-ekle:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.tur-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tur-liste-satir {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #f8fafb;
+  border: 1px solid #e8edf2;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.tur-liste-satir:hover { background: #f0f4f8; }
+
+/* ─── LOGO ALANI ─────────────────────────────────────────────────── */
+.tur-logo-alan {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  overflow: visible;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.tur-logo-thumb {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1.5px solid #e8edf2;
+  display: block;
+  transition: opacity 0.15s;
+}
+.tur-logo-alan:hover .tur-logo-thumb { opacity: 0.75; }
+
+.tur-logo-placeholder {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #eaf2ff;
+  border: 1.5px dashed #afc8e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: #6b9dc5;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tur-logo-alan:hover .tur-logo-placeholder {
+  background: #d0e8fa;
+  border-color: #2c5f8a;
+}
+
+.tur-logo-sil {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  background: #e74c3c;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 2;
+}
+.tur-logo-alan:hover .tur-logo-sil { opacity: 1; }
+
+.tur-logo-file-input {
+  display: none;
+}
+
+/* ─── FORM TUR BUTONUNDA LOGO ────────────────────────────────────── */
+.tur-btn-logo {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  object-fit: cover;
+  vertical-align: middle;
+  margin-right: 3px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.tur-kullanim-sayi {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
+.btn-tur-sil {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #c0392b;
+  padding: 2px 5px;
+  border-radius: 5px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: opacity 0.15s, background 0.15s;
+}
+.btn-tur-sil:hover:not(:disabled) { opacity: 1; background: #fdecea; }
+.btn-tur-sil:disabled { opacity: 0.2; cursor: not-allowed; }
 
 /* ─── SIL MODAL ──────────────────────────────────────────────────── */
 .modal-overlay {
@@ -819,3 +1141,250 @@
 }
 .btn-sil-modal:hover:not(:disabled) { background: #c0392b; }
 .btn-sil-modal:disabled { opacity: 0.6; cursor: not-allowed; }
+/* Kurulus Logosu Ekle Paneli */
+.org-logo-file-input { display: none; }
+
+.logo-kurulus-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.logo-sec-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.logo-sec-select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.9rem;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.18s;
+  appearance: auto;
+}
+.logo-sec-select:focus { border-color: rgba(255,255,255,0.4); }
+.logo-sec-select option { background: #2c3a5a; color: #fff; }
+
+.logo-upload-karti {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  transition: opacity 0.2s;
+}
+.logo-upload-karti.pasif { opacity: 0.45; pointer-events: none; }
+
+.logo-upload-alan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 36px 20px 32px;
+  border: 2px dashed rgba(255,255,255,0.25);
+  border-radius: 14px;
+  cursor: pointer;
+  background: rgba(255,255,255,0.04);
+  transition: background 0.2s, border-color 0.2s;
+  text-align: center;
+  user-select: none;
+}
+.logo-upload-alan:hover {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.5);
+}
+
+.logo-upload-ikon {
+  width: 54px;
+  height: 54px;
+  color: rgba(255,255,255,0.5);
+  flex-shrink: 0;
+}
+
+.logo-upload-baslik {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+}
+
+.logo-upload-alt {
+  margin: 0;
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.4);
+}
+
+.logo-onizleme-alan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 24px 16px;
+  border: 2px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+}
+
+.logo-onizleme-img {
+  width: 110px;
+  height: 110px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  padding: 6px;
+}
+
+.logo-onizleme-aksiyonlar {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-logo-degistir, .btn-logo-sil {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+.btn-logo-degistir {
+  background: rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.9);
+}
+.btn-logo-degistir:hover { background: rgba(255,255,255,0.22); }
+.btn-logo-sil {
+  background: rgba(192,57,43,0.2);
+  color: #f1948a;
+}
+.btn-logo-sil:hover { background: rgba(192,57,43,0.4); }
+
+.logo-aciklama-metin {
+  margin: 14px 0 0;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.38);
+  line-height: 1.55;
+  text-align: center;
+}
+
+/* Form icindeki logo upload alani */
+.gizli-input { display: none; }
+
+.alan-opsiyonel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #9ca3af;
+  margin-left: 4px;
+}
+
+.form-logo-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 28px 16px 24px;
+  border: 2px dashed #d1d9e6;
+  border-radius: 12px;
+  cursor: pointer;
+  background: #f9fbfd;
+  text-align: center;
+  user-select: none;
+  transition: background 0.18s, border-color 0.18s;
+}
+.form-logo-upload:hover {
+  background: #f0f5fb;
+  border-color: #a0b4cc;
+}
+
+.form-logo-ikon {
+  width: 44px;
+  height: 44px;
+  color: #8a9bb0;
+}
+
+.form-logo-baslik {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.form-logo-alt {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #6daa3b;
+}
+
+.form-logo-onizleme {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border: 1.5px solid #dde3ea;
+  border-radius: 12px;
+  background: #f9fbfd;
+}
+
+.form-logo-img {
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #fff;
+  padding: 4px;
+  border: 1px solid #e5eaf0;
+}
+
+.form-logo-degistir {
+  padding: 5px 14px;
+  background: #f0f4f8;
+  border: 1px solid #dde3ea;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #374151;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background 0.15s;
+}
+.form-logo-degistir:hover { background: #e2e8f0; }
+
+.form-logo-sil {
+  padding: 4px 8px;
+  background: #fdecea;
+  border: 1px solid #f1948a;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  color: #c0392b;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: background 0.15s;
+}
+.form-logo-sil:hover { background: #fadbd8; }
+
+/* Panel icindeki logo onizleme */
+.panel-onizleme {
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.panel-logo-img {
+  width: 130px;
+  height: 130px;
+}
+.panel-logo-aksiyonlar {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}

@@ -188,3 +188,90 @@
 .btn-sil-modal { display: flex; align-items: center; gap: 7px; padding: 9px 22px; background: #e74c3c; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 0.88rem; font-weight: 700; font-family: inherit; transition: background 0.12s; }
 .btn-sil-modal:hover:not(:disabled) { background: #c0392b; }
 .btn-sil-modal:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* --- KATEGORI TUR SECICI (organizasyon stiliyle eslestirildi) --- */
+.tur-secici { display: flex; flex-wrap: wrap; gap: 7px; }
+
+.tur-btn {
+  padding: 6px 13px;
+  border: 1.5px solid #dde3ea;
+  border-radius: 20px;
+  background: #f8fafb;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+.tur-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.tur-aktif { font-weight: 700; }
+
+.tur-btn-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.tur-sil-inline {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  color: #c0392b;
+  padding: 0 3px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+  margin-left: -2px;
+}
+.tur-btn-wrap:hover .tur-sil-inline { opacity: 0.6; }
+.tur-btn-wrap:hover .tur-sil-inline:hover { opacity: 1; }
+
+.tur-btn-ekle-trigger {
+  border-style: dashed !important;
+  color: #2c5f8a !important;
+  background: none !important;
+}
+.tur-btn-ekle-trigger:hover { background: #eaf2ff !important; }
+
+.tur-yeni-ekle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tur-inline-input {
+  width: 140px;
+  padding: 5px 10px;
+  border: 1.5px solid #2c5f8a;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: #1a1a2e;
+  outline: none;
+  background: #fff;
+  font-family: inherit;
+}
+.tur-inline-kaydet {
+  padding: 5px 12px;
+  background: #1a3a5c;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+.tur-inline-kaydet:hover:not(:disabled) { background: #2c5f8a; }
+.tur-inline-kaydet:disabled { opacity: 0.45; cursor: not-allowed; }
+.tur-inline-iptal {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #8a94a6;
+  padding: 3px 6px;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
+}
+.tur-inline-iptal:hover { background: #fdecea; color: #c0392b; }

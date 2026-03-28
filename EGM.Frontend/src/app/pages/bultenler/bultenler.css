@@ -1,0 +1,122 @@
+:host {
+  display: block;
+  padding: 20px 16px;
+}
+
+.bultenler-wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Başlık ─────────────────────────── */
+.bultenler-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #dbe5ee;
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.bultenler-header-icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.bultenler-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #153047;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #6b8299;
+}
+
+/* ── Kart Grid ──────────────────────── */
+.kart-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bulten-kart {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  padding: 20px 24px;
+  border-radius: 12px;
+  border: 1px solid #dbe5ee;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.bulten-kart:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(27, 47, 85, 0.12);
+}
+
+.card--navy {
+  background: #1b2f55;
+  border-color: #1b2f55;
+  color: #fff;
+}
+
+.card--navy:hover {
+  background: #243a66;
+}
+
+.kart-icon {
+  font-size: 32px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.kart-icerik {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kart-baslik {
+  font-size: 1rem;
+  font-weight: 700;
+  color: inherit;
+}
+
+.card--navy .kart-baslik {
+  color: #fff;
+}
+
+.kart-aciklama {
+  font-size: 13px;
+  color: #6b8299;
+  line-height: 1.4;
+}
+
+.card--navy .kart-aciklama {
+  color: #a8c0d8;
+}
+
+.kart-ok {
+  font-size: 28px;
+  font-weight: 300;
+  color: #9ab0c4;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.card--navy .kart-ok {
+  color: #5d89b8;
+}

@@ -15,6 +15,21 @@ export interface NavGroup {
   items: NavItem[];
 }
 
+// Rol sabitleri
+const R = {
+  Izleyici:           'Izleyici',
+  IlPersoneli:        'IlPersoneli',
+  IlYoneticisi:       'IlYoneticisi',
+  BaskanlikPersoneli: 'BaskanlikPersoneli',
+  BaskanlikYoneticisi:'BaskanlikYoneticisi',
+  Yetkili:            'Yetkili',
+};
+
+// Kısa yardımcı diziler
+const IL_P_VE_UZERI = [R.IlPersoneli, R.IlYoneticisi, R.BaskanlikPersoneli, R.BaskanlikYoneticisi, R.Yetkili];
+const IL_Y_VE_UZERI = [R.IlYoneticisi, R.BaskanlikPersoneli, R.BaskanlikYoneticisi, R.Yetkili];
+const HQ_Y_VE_UZERI = [R.BaskanlikYoneticisi, R.Yetkili];
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
@@ -29,31 +44,37 @@ export class Sidebar implements OnInit, OnDestroy {
 
   readonly groups: NavGroup[] = [
     {
-      title: 'Ana Sayfa',
+      title: '',
       items: [
-        { label: 'Harita', route: '/home', icon: 'map' },
-        { label: 'Olaylar', route: '/olay', icon: 'alert' },
+        // İzleyici dahil tüm roller erişebilir
+        { label: 'Harita',      route: '/home',           icon: 'map' },
+        { label: 'Olaylar',     route: '/olay',           icon: 'alert' },
         { label: 'İstatistikler', route: '/istatistikler', icon: 'activity' },
-        { label: 'Raporlar', route: '/raporlar', icon: 'share' },
+        { label: 'Bültenler',   route: '/raporlar',       icon: 'share' },
+        { label: 'Kuruluşlar',  route: '/rapor-kuruluslar', icon: 'org' },
+        { label: 'Konular',     route: '/konular',        icon: 'activity' },
       ]
     },
     {
-      title: 'Veri Girişi',
+      title: 'Formlar',
       items: [
-        { label: 'Kuruluş İşlemleri', route: '/organizasyon', icon: 'org' },
-        { label: 'Konu İşlemleri', route: '/konu-islemleri', icon: 'activity' },
-        { label: 'Sokak Olayları', route: '/sokak-olay-ekle', icon: 'alert' },
-        { label: 'Sosyal Medya Olayları', route: '/socialmedia', icon: 'share' },
-        { label: 'Seçim Olayları', route: '/secim', icon: 'vote' },
-        { label: 'Ziyaretçi', route: '/vip', icon: 'star' },
+        // İl Personeli ve üzeri
+        { label: 'Sokak Olayları',         route: '/sokak-olay-ekle', icon: 'alert',  roles: IL_P_VE_UZERI },
+        { label: 'Sosyal Medya Olayları',  route: '/socialmedia',     icon: 'share',  roles: IL_P_VE_UZERI },
+        { label: 'Seçim Olayları',         route: '/secim',           icon: 'vote',   roles: IL_P_VE_UZERI },
+        // İl Yöneticisi ve üzeri
+        { label: 'Ziyaretçi',             route: '/vip',             icon: 'star',   roles: IL_Y_VE_UZERI },
       ]
     },
     {
       title: 'Yönetim',
       items: [
-        { label: 'Kullanıcı Yönetimi', route: '/kullanicilar', icon: 'users',
-          roles: ['BaskanlikYoneticisi', 'IlYoneticisi'] },
-        { label: 'Veri Yönetimi', route: '/veri-yonetimi', icon: 'database' },
+        // İl Yöneticisi ve üzeri
+        { label: 'Kullanıcı Yönetimi', route: '/kullanicilar',   icon: 'users',    roles: IL_Y_VE_UZERI },
+        { label: 'Kuruluş İşlemleri', route: '/organizasyon',   icon: 'org',      roles: IL_Y_VE_UZERI },
+        { label: 'Konu İşlemleri',    route: '/konu-islemleri', icon: 'activity', roles: IL_Y_VE_UZERI },
+        // Başkanlık Yöneticisi ve Yetkili
+        { label: 'Veri Yönetimi',     route: '/veri-yonetimi',  icon: 'database', roles: HQ_Y_VE_UZERI },
       ]
     }
   ];

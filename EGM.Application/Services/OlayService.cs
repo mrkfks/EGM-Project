@@ -74,6 +74,21 @@ namespace EGM.Application.Services
             return olay;
         }
 
+        // ── Organizatöre göre getir ──────────────────────────────────────
+        public async Task<IReadOnlyList<Olay>> GetByOrganizatorAsync(
+            Guid organizatorId,
+            DateTime? tarihBaslangic,
+            DateTime? tarihBitis)
+        {
+            return await _olayRepository.GetByOrganizatorAsync(organizatorId, tarihBaslangic, tarihBitis);
+        }
+
+        // ── Konuya göre getir ─────────────────────────────────────────────
+        public async Task<IReadOnlyList<Olay>> GetByKonuAsync(Guid konuId)
+        {
+            return await _olayRepository.GetByKonuAsync(konuId);
+        }
+
         // ── Oluşturma ────────────────────────────────────────────────────
         public async Task<Olay> CreateOlayAsync(Olay olay)
         {

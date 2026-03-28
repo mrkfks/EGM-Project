@@ -539,11 +539,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
+      "projectUniqueName": "c:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
       "projectName": "EGM.Application",
-      "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
+      "projectPath": "c:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
       "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\obj\\",
+      "outputPath": "c:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\mrkfk\\AppData\\Roaming\\NuGet\\NuGet.Config"

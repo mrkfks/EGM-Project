@@ -44,7 +44,7 @@ namespace EGM.API.Controllers
             => Ok(new { PartiId = partiId, ToplamOy = await _service.GetToplamOyByPartiAsync(partiId) });
 
         [HttpPost]
-        [Authorize(Roles = $"{Roles.BaskanlikPersonel},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
+        [Authorize(Policy = "CityStaffOrAbove")]
         public async Task<IActionResult> Create([FromBody] SecimSonucuCreateDto dto)
         {
             var entity = new SecimSonucu

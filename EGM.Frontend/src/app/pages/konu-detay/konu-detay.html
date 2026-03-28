@@ -1,0 +1,155 @@
+<section class="page-wrap">
+
+  <!-- Geri Butonu + Başlık -->
+  <div class="page-header">
+    <button class="btn-geri" (click)="geri()">
+      ← Geri
+    </button>
+    @if (konu) {
+      <div class="konu-baslik-wrap">
+        <h2 class="konu-baslik">{{ konu.ad }}</h2>
+        <span class="badge"
+              [style.background]="turRenk(konu.tur).bg"
+              [style.color]="turRenk(konu.tur).color"
+              [style.border]="'1px solid ' + turRenk(konu.tur).border">
+          {{ konu.tur || '—' }}
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- Yükleniyor -->
+  @if (yukleniyor) {
+    <div class="loading-area"><div class="spinner"></div><span>Yükleniyor...</span></div>
+  }
+
+  <!-- Hata -->
+  @if (hataMesaji) {
+    <div class="error-box">{{ hataMesaji }}</div>
+  }
+
+  @if (!yukleniyor && konu) {
+    <!-- Konu Bilgi Kartı -->
+    <div class="bilgi-kart">
+      <div class="bilgi-row">
+        <span class="bilgi-etiket">Üst Konu</span>
+        <span class="bilgi-deger">{{ konu.ustKonuAd || '—' }}</span>
+      </div>
+      <div class="bilgi-row">
+        <span class="bilgi-etiket">Açıklama</span>
+        <span class="bilgi-deger">{{ konu.aciklama || '—' }}</span>
+      </div>
+      <div class="bilgi-row">
+        <span class="bilgi-etiket">Alt Konu Sayısı</span>
+        <span class="bilgi-deger">{{ konu.altKonuSayisi }}</span>
+      </div>
+    </div>
+
+    <!-- Özet İstatistikler -->
+    @if (!olayYukleniyor) {
+      <div class="stats-row">
+        <div class="stat-card stat-card--blue">
+          <span class="stat-value">{{ olaylar.length }}</span>
+          <span class="stat-label">Toplam Olay</span>
+        </div>
+        <div class="stat-card stat-card--green">
+          <span class="stat-value">{{ toplamKatilimci | number }}</span>
+          <span class="stat-label">Toplam Katılımcı</span>
+        </div>
+        <div class="stat-card stat-card--red">
+          <span class="stat-value">{{ toplamGozalti }}</span>
+          <span class="stat-label">Gözaltı</span>
+        </div>
+      </div>
+    }
+
+    <!-- Olaylar Bölümü -->
+    <div class="bolum-baslik">Bu Konu Kapsamındaki Olaylar / Etkinlikler</div>
+
+    <!-- Filtreler -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label class="filter-label">Arama</label>
+        <input type="text" class="filter-input" placeholder="Başlık, il, kurum..."
+               [(ngModel)]="aramaMetni" (input)="filtrele()" />
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Olay Türü</label>
+        <select class="filter-input" [(ngModel)]="turFiltresi" (change)="filtrele()">
+          <option value="">Tümü</option>
+          @for (t of olayTurleri; track t) {
+            <option [value]="t">{{ t }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Durum</label>
+        <select class="filter-input" [(ngModel)]="durumFiltresi" (change)="filtrele()">
+          <option value="">Tümü</option>
+          <option value="0">Planlandı</option>
+          <option value="1">Devam Ediyor</option>
+          <option value="2">Tamamlandı</option>
+          <option value="3">İptal</option>
+        </select>
+      </div>
+      <span class="filter-count">{{ filtreliOlaylar.length }} kayıt</span>
+    </div>
+
+    <!-- Olay Yükleniyor -->
+    @if (olayYukleniyor) {
+      <div class="loading-area"><div class="spinner"></div><span>Olaylar yükleniyor...</span></div>
+    }
+
+    <!-- Olay Listesi -->
+    @if (!olayYukleniyor) {
+      @if (filtreliOlaylar.length === 0) {
+        <div class="empty-box">Bu konu kapsamında kayıtlı olay bulunamadı.</div>
+      }
+      <div class="olay-liste">
+        @for (olay of filtreliOlaylar; track olay.id) {
+          <div class="olay-kart">
+            <div class="olay-kart-ust">
+              <div class="olay-kart-sol">
+                <span class="olay-baslik">{{ olay.baslik }}</span>
+                <div class="olay-meta">
+                  <span class="olay-meta-item">📅 {{ olay.tarih | date:'dd.MM.yyyy' }}</span>
+                  <span class="olay-meta-item">📍 {{ olay.il }}{{ olay.ilce ? ' / ' + olay.ilce : '' }}</span>
+                  @if (olay.mekan) {
+                    <span class="olay-meta-item">🏛 {{ olay.mekan }}</span>
+                  }
+                  @if (olay.organizatorAd) {
+                    <span class="olay-meta-item">🏢 {{ olay.organizatorAd }}</span>
+                  }
+                  @if (olay.evrakNumarasi) {
+                    <span class="olay-meta-item">📄 {{ olay.evrakNumarasi }}</span>
+                  }
+                </div>
+              </div>
+              <div class="olay-kart-sag">
+                <span class="badge-kucuk"
+                      [style.background]="durumRenkleri[olay.durum]?.bg"
+                      [style.color]="durumRenkleri[olay.durum]?.color">
+                  {{ durumEtiketleri[olay.durum] }}
+                </span>
+                <span class="badge-kucuk"
+                      [style.background]="hassasiyetRenkleri[olay.hassasiyet]?.bg"
+                      [style.color]="hassasiyetRenkleri[olay.hassasiyet]?.color">
+                  {{ hassasiyetEtiketleri[olay.hassasiyet] }}
+                </span>
+              </div>
+            </div>
+            <div class="olay-kart-alt">
+              <span class="olay-istat">👥 {{ olay.katilimciSayisi ?? 0 }} katılımcı</span>
+              <span class="olay-istat">🚔 {{ olay.gozaltiSayisi ?? 0 }} gözaltı</span>
+              <span class="olay-tur-badge">{{ olay.olayTuru }}</span>
+            </div>
+            @if (olay.aciklama) {
+              <div class="olay-aciklama">{{ olay.aciklama }}</div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+</section>

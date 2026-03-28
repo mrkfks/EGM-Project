@@ -18,6 +18,59 @@ namespace EGM.Application.DTOs
         public bool HasPreviousPage => Page > 1;
     }
 
+    // ── Günlük Bülten Raporu ─────────────────────────────────────────────
+    public class GunlukBultenDto
+    {
+        public string Tarih { get; init; } = string.Empty;
+        public string SonrakiGunTarih { get; init; } = string.Empty;
+        public IReadOnlyList<IcmalVeriDto> IcmalVerileri { get; init; } = [];
+        public IReadOnlyList<GerceklesenDetayDto> GerceklesenDetaylar { get; init; } = [];
+        public IReadOnlyList<BeklenenDetayDto> BeklenenDetaylar { get; init; } = [];
+        public IReadOnlyList<OperasyonelFaaliyetBultenDto> OperasyonelFaaliyetler { get; init; } = [];
+    }
+
+    public class IcmalVeriDto
+    {
+        public string Tur { get; init; } = string.Empty;
+        public int EylemSayisi { get; init; }
+        public int KatilimSayisi { get; init; }
+        public int GozaltiSayisi { get; init; }
+        public int OluSayisi { get; init; }
+    }
+
+    public class GerceklesenDetayDto
+    {
+        public int Sn { get; init; }
+        public string Il { get; init; } = string.Empty;
+        public string EylemEtkinlik { get; init; } = string.Empty;
+        public string Saat { get; init; } = string.Empty;
+        public string OrganizeEden { get; init; } = string.Empty;
+        public string Aciklama { get; init; } = string.Empty;
+        public int KatilimSayisi { get; init; }
+    }
+
+    public class BeklenenDetayDto
+    {
+        public int Sn { get; init; }
+        public string Il { get; init; } = string.Empty;
+        public string Yer { get; init; } = string.Empty;
+        public string EylemEtkinlik { get; init; } = string.Empty;
+        public string Saat { get; init; } = string.Empty;
+        public string OrganizeEden { get; init; } = string.Empty;
+        public string Aciklama { get; init; } = string.Empty;
+    }
+
+    public class OperasyonelFaaliyetBultenDto
+    {
+        public int Sn { get; init; }
+        public string Il { get; init; } = string.Empty;
+        public string Tarih { get; init; } = string.Empty;
+        public int SupheliSayisi { get; init; }
+        public int GozaltiSayisi { get; init; }
+        public string Aciklama { get; init; } = string.Empty;
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     // ── Olay ────────────────────────────────────────────────────────────
     public class OlayCreateDto
     {
@@ -333,6 +386,22 @@ namespace EGM.Application.DTOs
         [StringLength(2000)]
         public string? Aciklama { get; set; }
 
+        [StringLength(50)]
+        public string? Telefon { get; set; }
+
+        [StringLength(250)]
+        [EmailAddress]
+        public string? Eposta { get; set; }
+
+        [StringLength(2000)]
+        public string? SosyalMedyaHesaplari { get; set; }
+
+        [StringLength(100)]
+        public string? SiyasiYonelim { get; set; }
+
+        [StringLength(100)]
+        public string? KutukNumarasi { get; set; }
+
         public Guid? UstKurulusId { get; set; }
     }
 
@@ -345,6 +414,11 @@ namespace EGM.Application.DTOs
         public string? Iletisim { get; set; }
         public string? Tur { get; set; }
         public string? Aciklama { get; set; }
+        public string? Telefon { get; set; }
+        public string? Eposta { get; set; }
+        public string? SosyalMedyaHesaplari { get; set; }
+        public string? SiyasiYonelim { get; set; }
+        public string? KutukNumarasi { get; set; }
         public Guid? UstKurulusId { get; set; }
         public string? UstKurulusAd { get; set; }
         public int AltKurulusSayisi { get; set; }

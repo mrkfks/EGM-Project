@@ -255,7 +255,7 @@
       <div class="form-group" style="margin-top:16px">
         <label>Yeni Rol <span class="zorunlu">*</span></label>
         <div class="rol-secici">
-          <button *ngFor="let r of roller" class="rol-secici-btn"
+          <button *ngFor="let r of atanabilirRoller" class="rol-secici-btn"
                   [class.rol-secici-aktif]="yeniRol === r.value"
                   [style.background]="yeniRol === r.value ? rolRenk(r.value).bg : ''"
                   [style.color]="yeniRol === r.value ? rolRenk(r.value).color : ''"

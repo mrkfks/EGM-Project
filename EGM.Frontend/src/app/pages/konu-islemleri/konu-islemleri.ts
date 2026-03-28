@@ -1,7 +1,15 @@
 ﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { timer } from 'rxjs';
+import { environment } from '../../../environments/environment';
+
+interface KategoriKaydi {
+  id: string;
+  ad: string | null;
+}
 
 interface KonuKaydi {
   id: string;
@@ -22,9 +30,11 @@ interface KonuKaydi {
   styleUrls: ['./konu-islemleri.css'],
 })
 export class KonuIslemleri implements OnInit {
-  private readonly apiBase = 'http://localhost:5117/api/organizator/konu';
+  private readonly apiRoot = `${environment.apiUrl}/api/organizator`;
+  private readonly konuApiBase = `${this.apiRoot}/konu`;
+  private readonly kategoriApiBase = `${this.apiRoot}/kategori`;
 
-  aktifSekme: 'liste' | 'ekle' = 'liste';
+  aktifSekme: 'liste' | 'ekle' = 'ekle';
 
   tumKonular: KonuKaydi[] = [];
   filtrelenmis: KonuKaydi[] = [];
@@ -44,12 +54,13 @@ export class KonuIslemleri implements OnInit {
 
   // Form
   formAd = '';
-  formTur = 'Ana Konu';
+  formTur: string[] = ['Ana Konu'];
   formAciklama = '';
   formUstKonuId: string | null = null;
   ekleniyor = false;
+  kategoriler: KategoriKaydi[] = [];
 
-  readonly turler = [
+  readonly varsayilanTurler = [
     'Ana Konu',
     'Ekonomik ve Sosyal Haklar',
     'Isci Haklari Eylemleri',
@@ -79,17 +90,79 @@ export class KonuIslemleri implements OnInit {
     'Diger':                         { bg: '#f0f3f4', color: '#7f8c8d', border: '#d5d8dc' },
   };
 
-  constructor(private http: HttpClient) {}
+  private kategoriRetryCount = 0;
+  private konuRetryCount = 0;
+  private readonly maxRetry = 3;
+
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
+    this.kategorileriGetir();
     this.konulariGetir();
+  }
+
+  kategorileriGetir(tercihEdilenId?: string | null, tercihEdilenAd?: string): void {
+    this.http.get<KategoriKaydi[]>(this.kategoriApiBase).subscribe({
+      next: (data) => {
+        this.kategoriRetryCount = 0;
+        this.kategoriler = this.kategorileriSirala(data.filter(k => !!k.ad?.trim()));
+
+        this.kategoriSeciminiEsitle(tercihEdilenId, tercihEdilenAd);
+      },
+      error: (err) => {
+        if (this.kategoriRetryCount < this.maxRetry) {
+          this.kategoriRetryCount++;
+          timer(1000 * this.kategoriRetryCount).subscribe(() => this.kategorileriGetir(tercihEdilenId, tercihEdilenAd));
+        } else {
+          this.hataMesaji = this.hataMetni(err, 'Kategoriler yuklenemedi.');
+          this.kategoriRetryCount = 0;
+        }
+      },
+    });
+  }
+
+  private kategoriSeciminiEsitle(tercihEdilenId?: string | null, tercihEdilenAd?: string): void {
+    console.log('Tercih Edilen ID:', tercihEdilenId);
+    console.log('Tercih Edilen Ad:', tercihEdilenAd);
+    const secilecek = this.kategoriler.find(k => k.id === tercihEdilenId) ??
+      this.kategoriler.find(k => (k.ad ?? '') === tercihEdilenAd) ??
+      this.kategoriler[0] ??
+      null;
+
+    this.formTur = secilecek?.ad ? [secilecek.ad] : [];
+    console.log('Form Tür:', this.formTur);
+    this.seciliKategoriId = secilecek?.id ?? null;
+  }
+
+  private kategorileriSirala(kategoriler: KategoriKaydi[]): KategoriKaydi[] {
+    return [...kategoriler].sort((sol, sag) => {
+      const solAd = sol.ad ?? '';
+      const sagAd = sag.ad ?? '';
+      const solIndex = this.varsayilanTurler.indexOf(solAd);
+      const sagIndex = this.varsayilanTurler.indexOf(sagAd);
+
+      if (solIndex !== -1 && sagIndex !== -1) {
+        return solIndex - sagIndex;
+      }
+
+      if (solIndex !== -1) {
+        return -1;
+      }
+
+      if (sagIndex !== -1) {
+        return 1;
+      }
+
+      return solAd.localeCompare(sagAd, 'tr');
+    });
   }
 
   konulariGetir(): void {
     this.yukleniyor = true;
     this.hataMesaji = '';
-    this.http.get<KonuKaydi[]>(this.apiBase).subscribe({
+    this.http.get<KonuKaydi[]>(this.konuApiBase).subscribe({
       next: (data) => {
+        this.konuRetryCount = 0;
         this.tumKonular = data;
         this.filtrele();
         this.yukleniyor = false;
@@ -99,8 +172,14 @@ export class KonuIslemleri implements OnInit {
         }
       },
       error: (err) => {
-        this.hataMesaji = err?.error ?? 'Konular yuklenemedi.';
-        this.yukleniyor = false;
+        if (this.konuRetryCount < this.maxRetry) {
+          this.konuRetryCount++;
+          timer(1000 * this.konuRetryCount).subscribe(() => this.konulariGetir());
+        } else {
+          this.hataMesaji = this.hataMetni(err, 'Konular yuklenemedi.');
+          this.yukleniyor = false;
+          this.konuRetryCount = 0;
+        }
       },
     });
   }
@@ -148,7 +227,7 @@ export class KonuIslemleri implements OnInit {
   }
 
   formGecerliMi(): boolean {
-    return !!(this.formAd.trim() && this.formTur);
+    return !!this.formAd.trim() && !!this.seciliTur;
   }
 
   konuEkle(): void {
@@ -158,20 +237,17 @@ export class KonuIslemleri implements OnInit {
     this.basariMesaji = '';
     const body = {
       ad: this.formAd.trim(),
-      tur: this.formTur,
+      tur: this.seciliTur,
       aciklama: this.formAciklama.trim() || null,
       ustKonuId: this.formUstKonuId || null,
     };
-    this.http.post<KonuKaydi>(this.apiBase, body).subscribe({
-      next: (yeni) => {
-        this.basariMesaji = `"${yeni.ad}" basariyla eklendi.`;
+    this.http.post<KonuKaydi>(this.konuApiBase, body).subscribe({
+      next: () => {
         this.ekleniyor = false;
-        this.formuSifirla();
-        this.aktifSekme = 'liste';
-        this.konulariGetir();
+        this.router.navigate(['/konular']);
       },
       error: (err) => {
-        this.hataMesaji = err?.error ?? 'Konu eklenemedi.';
+        this.hataMesaji = this.hataMetni(err, 'Konu eklenemedi.');
         this.ekleniyor = false;
       },
     });
@@ -179,7 +255,7 @@ export class KonuIslemleri implements OnInit {
 
   private formuSifirla(): void {
     this.formAd = '';
-    this.formTur = 'Ana Konu';
+    this.kategoriSeciminiEsitle(undefined, 'Ana Konu');
     this.formAciklama = '';
     this.formUstKonuId = null;
   }
@@ -193,7 +269,7 @@ export class KonuIslemleri implements OnInit {
   konuSil(): void {
     if (!this.silinecek) return;
     this.siliyor = true;
-    this.http.delete(`${this.apiBase}/${this.silinecek.id}`).subscribe({
+    this.http.delete(`${this.konuApiBase}/${this.silinecek.id}`).subscribe({
       next: () => {
         this.basariMesaji = 'Konu silindi.';
         if (this.secilenKonu?.id === this.silinecek!.id) this.panelKapat();
@@ -203,7 +279,7 @@ export class KonuIslemleri implements OnInit {
         this.konulariGetir();
       },
       error: (err) => {
-        this.hataMesaji = err?.error ?? 'Konu silinemedi.';
+        this.hataMesaji = this.hataMetni(err, 'Konu silinemedi.');
         this.siliyor = false;
         this.silModalAcik = false;
       },
@@ -235,5 +311,189 @@ export class KonuIslemleri implements OnInit {
   tarihFormat(tarih: string): string {
     if (!tarih) return '-';
     try { return new Date(tarih).toLocaleDateString('tr-TR'); } catch { return tarih; }
+  }
+
+  seciliKategoriId: string | null = null;
+  kategoriGirisiAcik = false;
+  yeniKategori = '';
+  kategoriDuzenlemeAcik = false;
+  duzenlenenKategoriId: string | null = null;
+  duzenlenenKategoriAdi = '';
+
+  get seciliTur(): string {
+    return this.formTur[0] ?? '';
+  }
+
+  get turler(): string[] {
+    return this.kategoriler.map(k => k.ad ?? '').filter(Boolean);
+  }
+
+  kategoriSec(tur: string): void {
+    const kategori = this.kategoriler.find(k => k.ad === tur);
+    if (!kategori) {
+      return;
+    }
+
+    this.formTur = [tur];
+    this.seciliKategoriId = kategori.id;
+  }
+
+  kategoriDuzenlenebilir(tur: string): boolean {
+    return !!this.kategoriler.find(k => k.ad === tur);
+  }
+
+  kategoriSil(tur: string, event: Event): void {
+    event.stopPropagation();
+
+    const kategori = this.kategoriler.find(k => k.ad === tur);
+    if (!kategori) {
+      return;
+    }
+
+    this.http.delete(`${this.kategoriApiBase}/${kategori.id}`).subscribe({
+      next: () => {
+        const sonrakiId = this.seciliKategoriId === kategori.id
+          ? this.kategoriler.find(item => item.id !== kategori.id)?.id ?? null
+          : this.seciliKategoriId;
+
+        this.kategorileriGetir(sonrakiId);
+        if (this.duzenlenenKategoriId === kategori.id) {
+          this.kategoriDuzenlemeyiKapat();
+        }
+      },
+      error: (err) => {
+        this.hataMesaji = this.hataMetni(err, 'Kategori silinemedi.');
+      },
+    });
+  }
+
+  kategoriGirisiAc(): void {
+    this.kategoriGirisiAcik = true;
+    this.kategoriDuzenlemeyiKapat();
+    this.yeniKategori = '';
+  }
+
+  kategoriGirisiKapat(): void {
+    this.kategoriGirisiAcik = false;
+    this.yeniKategori = '';
+  }
+
+  kategoriEkle(): void {
+    const yeniDeger = this.yeniKategori.trim();
+    if (!yeniDeger) return;
+
+    const mevcut = this.kategoriler.find(t => (t.ad ?? '').toLocaleLowerCase('tr-TR') === yeniDeger.toLocaleLowerCase('tr-TR'));
+    if (mevcut) {
+      this.kategoriSec(mevcut.ad ?? '');
+      this.kategoriGirisiKapat();
+      return;
+    }
+
+    this.http.post<KategoriKaydi>(this.kategoriApiBase, JSON.stringify(yeniDeger), {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }).subscribe({
+      next: (kategori) => {
+        this.turRenkleri[yeniDeger] = this.turRenkleri['Diger'];
+        this.kategoriGirisiKapat();
+        this.kategorileriGetir(kategori.id, kategori.ad ?? yeniDeger);
+      },
+      error: (err) => {
+        this.hataMesaji = this.hataMetni(err, 'Kategori eklenemedi.');
+      },
+    });
+  }
+
+  kategoriDuzenlemeAc(tur: string, event: Event): void {
+    event.stopPropagation();
+
+    const kategori = this.kategoriler.find(k => k.ad === tur);
+    if (!kategori) {
+      return;
+    }
+
+    this.kategoriGirisiAcik = false;
+    this.kategoriDuzenlemeAcik = true;
+    this.duzenlenenKategoriId = kategori.id;
+    this.duzenlenenKategoriAdi = kategori.ad ?? '';
+  }
+
+  kategoriDuzenlemeyiKapat(): void {
+    this.kategoriDuzenlemeAcik = false;
+    this.duzenlenenKategoriId = null;
+    this.duzenlenenKategoriAdi = '';
+  }
+
+  kategoriGuncelle(): void {
+    const yeniAd = this.duzenlenenKategoriAdi.trim();
+    if (!this.duzenlenenKategoriId || !yeniAd) {
+      return;
+    }
+
+    const ayniIsimleBaskaKategoriVar = this.kategoriler.some(k =>
+      k.id !== this.duzenlenenKategoriId &&
+      (k.ad ?? '').toLocaleLowerCase('tr-TR') === yeniAd.toLocaleLowerCase('tr-TR')
+    );
+
+    if (ayniIsimleBaskaKategoriVar) {
+      this.hataMesaji = 'Ayni isimde baska bir kategori zaten mevcut.';
+      return;
+    }
+
+    this.http.put(`${this.kategoriApiBase}/${this.duzenlenenKategoriId}`, JSON.stringify(yeniAd), {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }).subscribe({
+      next: () => {
+        this.kategoriDuzenlemeyiKapat();
+        this.kategorileriGetir(this.duzenlenenKategoriId, yeniAd);
+      },
+      error: (err) => {
+        this.hataMesaji = this.hataMetni(err, 'Kategori guncellenemedi.');
+      },
+    });
+  }
+
+  private hataMetni(err: unknown, varsayilan: string): string {
+    if (!(err instanceof HttpErrorResponse)) {
+      return varsayilan;
+    }
+
+    const payload = err.error;
+
+    if (typeof payload === 'string' && payload.trim()) {
+      return payload;
+    }
+
+    if (payload && typeof payload === 'object') {
+      const obj = payload as Record<string, unknown>;
+      if (typeof obj['message'] === 'string' && obj['message'].trim()) {
+        return obj['message'];
+      }
+
+      if (typeof obj['title'] === 'string' && obj['title'].trim()) {
+        return obj['title'];
+      }
+
+      if (Array.isArray(obj['errors'])) {
+        const ilk = obj['errors'].find(item => typeof item === 'string' && item.trim());
+        if (typeof ilk === 'string') {
+          return ilk;
+        }
+      }
+
+      if (obj['errors'] && typeof obj['errors'] === 'object') {
+        const detay = Object.values(obj['errors'] as Record<string, unknown>)
+          .flatMap(v => Array.isArray(v) ? v : [v])
+          .find(v => typeof v === 'string' && v.trim());
+        if (typeof detay === 'string') {
+          return detay;
+        }
+      }
+    }
+
+    if (typeof err.message === 'string' && err.message.trim()) {
+      return err.message;
+    }
+
+    return varsayilan;
   }
 }

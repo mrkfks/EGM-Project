@@ -91,6 +91,11 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
   readonly OLAY_TURLERI = OLAY_TURLERI;
   readonly IL_LISTESI   = IL_LISTESI;
 
+  userPlans: any[] = [];
+  completedEvents: any[] = [];
+
+  activeForm: 'planned' | 'completed' = 'planned';
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -104,6 +109,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.decodeToken();
     this.buildForm();
     this.loadLookups();
+    this.loadCompletedEvents(); // Load completed events on initialization
 
     this.riskSub = this.riskSubject.pipe(debounceTime(600)).subscribe(() => this.fetchRisk());
   }
@@ -137,13 +143,11 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
   // ── Form ────────────────────────────────────────────────────────────
   private buildForm(): void {
     this.form = this.fb.group({
-      baslik:           ['', [Validators.required, Validators.maxLength(250)]],
+      baslik:           ['', Validators.maxLength(250)],
       olayTuru:         ['', Validators.required],
       organizatorId:    ['', Validators.required],
       konuId:           ['', Validators.required],
       tarih:            ['', Validators.required],
-      baslangicSaati:   [''],
-      bitisSaati:       [''],
       il:               ['', Validators.required],
       ilce:             ['', Validators.maxLength(100)],
       mekan:            ['', Validators.maxLength(250)],
@@ -155,6 +159,11 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       aciklama:         ['', Validators.maxLength(1000)],
       kaynakKurum:      ['', Validators.maxLength(250)],
       cityId:           [this.tokenCityId],
+      bitisTarihi:      [''],
+      gerceklesenKatilimciSayisi: [null, Validators.min(0)],
+      sehitSayisi:      [null, Validators.min(0)],
+      oluSayisi:        [null, Validators.min(0)],
+      gozaltiSayisi:    [null, Validators.min(0)],
     });
 
     if (this.isCityScoped && this.tokenCityId) {
@@ -228,64 +237,94 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
 
   // ── Kaydet ──────────────────────────────────────────────────────────
   save(): void {
-    this.form.markAllAsTouched();
     if (this.form.invalid) {
-      this.formError = 'Lütfen tüm zorunlu alanları doldurunuz.';
+      this.formError = 'Lütfen tüm zorunlu alanları doldurun.';
       return;
     }
-    if (this.isCityScoped && this.tokenCityId) {
-      const cityId = +this.form.getRawValue().cityId;
-      if (cityId !== this.tokenCityId) {
-        this.formError = 'Yalnızca kendi yetkili olduğunuz il için veri girişi yapabilirsiniz.';
-        return;
-      }
+    this.isSaving = true;
+    const newPlan = this.form.value;
+    this.userPlans.push(newPlan);
+    this.formSuccess = 'Plan başarıyla eklendi.';
+    this.isSaving = false;
+    this.form.reset();
+  }
+
+  saveToPlanned(): void {
+    if (this.form.invalid) {
+      this.formError = 'Lütfen tüm zorunlu alanları doldurun.';
+      return;
     }
+    const newPlan = this.form.value;
+    this.userPlans.push(newPlan);
+    this.formSuccess = 'Planlananlara başarıyla kaydedildi.';
+    this.form.reset();
+  }
 
-    this.isSaving  = true;
+  saveToCompleted(): void {
+    if (this.form.invalid) {
+      this.formError = 'Lütfen tüm zorunlu alanları doldurun.';
+      return;
+    }
+    const newEvent = this.form.value;
+    this.completedEvents.push(newEvent);
+    this.formSuccess = 'Gerçekleşenlere başarıyla kaydedildi.';
+    this.form.reset();
+  }
+
+  cancel(): void {
+    this.form.reset();
     this.formError = null;
-    const raw = this.form.getRawValue();
+    this.formSuccess = null;
+  }
 
-    const payload: Record<string, unknown> = {
-      baslik:           raw.baslik,
-      olayTuru:         raw.olayTuru,
-      organizatorId:    raw.organizatorId,
-      konuId:           raw.konuId,
-      tarih:            raw.tarih,
-      baslangicSaati:   raw.baslangicSaati  || null,
-      bitisSaati:       raw.bitisSaati      || null,
-      il:               raw.il,
-      ilce:             raw.ilce            || null,
-      mekan:            raw.mekan           || null,
-      latitude:         raw.latitude        ? +raw.latitude  : null,
-      longitude:        raw.longitude       ? +raw.longitude : null,
-      katilimciSayisi:  raw.katilimciSayisi ? +raw.katilimciSayisi : null,
-      aciklama:         raw.aciklama        || null,
-      kaynakKurum:      raw.kaynakKurum     || null,
-      hassasiyet:       +raw.hassasiyet,
-      cityId:           raw.cityId          ? +raw.cityId : null,
-    };
-
-    this.http.post(`${API}/olay`, payload).subscribe({
-      next: () => {
-        this.isSaving    = false;
-        this.formSuccess = 'Olay başarıyla kaydedildi.';
-        this.form.reset({ hassasiyet: 0, sosyalSignalSkoru: 0 });
-        if (this.isCityScoped && this.tokenCityId) {
-          const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
-          this.form.get('il')!.setValue(ilAdi);
-          this.form.get('cityId')!.setValue(this.tokenCityId);
-        }
-        this.riskPreview = null;
-        this.isHighRisk  = false;
-        setTimeout(() => { this.formSuccess = null; }, 3000);
-      },
-      error: err => {
-        this.isSaving  = false;
-        const detail   = err?.error?.title ?? err?.error ?? null;
-        this.formError = typeof detail === 'string' ? detail : 'İşlem sırasında bir hata oluştu.';
-      },
-    });
+  editPlan(plan: any): void {
+    this.form.patchValue(plan);
   }
 
   goBack(): void { this.router.navigate(['/olay']); }
+
+  // Example function to load completed events (replace with actual API call)
+  loadCompletedEvents(): void {
+    this.http.get<any[]>(`${API}/sokak-olay/completed`).subscribe({
+      next: res => { this.completedEvents = res; },
+      error: () => {},
+    });
+  }
+
+  switchToPlannedForm(): void {
+    this.activeForm = 'planned';
+    this.formError = null;
+    this.formSuccess = null;
+    this.form.get('baslik')?.clearValidators();
+    this.form.get('baslik')?.updateValueAndValidity();
+  }
+
+  switchToCompletedForm(): void {
+    this.activeForm = 'completed';
+    this.formError = null;
+    this.formSuccess = null;
+  }
+
+  kaydet(): void {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.formError = 'Lütfen tüm zorunlu alanları doldurun.';
+      return;
+    }
+    if (this.activeForm === 'planned') {
+      const newPlan = this.form.getRawValue();
+      this.userPlans.push(newPlan);
+      this.formSuccess = 'Planlananlara başarıyla kaydedildi.';
+    } else {
+      const newEvent = this.form.getRawValue();
+      this.completedEvents.push(newEvent);
+      this.formSuccess = 'Gerçekleşenlere başarıyla kaydedildi.';
+    }
+    this.formError = null;
+    this.form.reset();
+    if (this.isCityScoped && this.tokenCityId) {
+      const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+      this.form.get('il')!.setValue(ilAdi);
+    }
+  }
 }

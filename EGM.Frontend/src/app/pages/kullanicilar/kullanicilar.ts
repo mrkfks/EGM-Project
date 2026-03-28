@@ -59,6 +59,7 @@ export class Kullanicilar implements OnInit {
     { value: 'IlYoneticisi',        label: 'Il Yoneticisi' },
     { value: 'BaskanlikPersoneli',  label: 'Baskanlik Personeli' },
     { value: 'BaskanlikYoneticisi', label: 'Baskanlik Yoneticisi' },
+    { value: 'Yetkili',             label: 'Yetkili' },
   ];
 
   readonly iller: { kod: number; ad: string }[] = [
@@ -91,6 +92,8 @@ export class Kullanicilar implements OnInit {
     { kod: 79, ad: 'Kilis' }, { kod: 80, ad: 'Osmaniye' }, { kod: 81, ad: 'Duzce' },
   ];
 
+  yetkiliSayisi = 0;
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -116,6 +119,7 @@ export class Kullanicilar implements OnInit {
       next: (data) => {
         this.kullanicilar = data;
         this.filtrele();
+        this.yetkiliSayisi = this.kullanicilar.filter(k => k.role === 'Yetkili').length; // Calculate Yetkili count
         this.yukleniyor = false;
       },
       error: (err) => {
@@ -244,9 +248,9 @@ export class Kullanicilar implements OnInit {
 
   alertKapat(): void { this.hataMesaji = ''; this.basariMesaji = ''; }
 
-  get baskanlikYoneticisi(): boolean { return this.mevcutRol === 'BaskanlikYoneticisi'; }
+  get baskanlikYoneticisi(): boolean { return ['BaskanlikYoneticisi', 'Yetkili'].includes(this.mevcutRol); }
   get ilYoneticisiVeyaUstu(): boolean {
-    return ['IlYoneticisi', 'BaskanlikPersoneli', 'BaskanlikYoneticisi'].includes(this.mevcutRol);
+    return ['IlYoneticisi', 'BaskanlikPersoneli', 'BaskanlikYoneticisi', 'Yetkili'].includes(this.mevcutRol);
   }
 
   rolRenk(rol: string): { bg: string; color: string; border: string } {
@@ -256,6 +260,7 @@ export class Kullanicilar implements OnInit {
       case 'IlYoneticisi':        return { bg: '#e8f8f5', color: '#16a085', border: '#a2d9ce' };
       case 'BaskanlikPersoneli':  return { bg: '#f5eef8', color: '#8e44ad', border: '#d2b4de' };
       case 'BaskanlikYoneticisi': return { bg: '#fef9e7', color: '#d68910', border: '#f9e79f' };
+      case 'Yetkili':             return { bg: '#fdf2f8', color: '#c0392b', border: '#f1948a' };
       default:                    return { bg: '#f8f9fa', color: '#495057', border: '#dee2e6' };
     }
   }
@@ -263,6 +268,30 @@ export class Kullanicilar implements OnInit {
   rolEtiket(rol: string): string {
     const buldu = this.roller.find(r => r.value === rol);
     return buldu ? buldu.label : rol;
+  }
+
+  // Hiyerarşi sırası
+  private readonly rolSirasi = [
+    'Izleyici', 'IlPersoneli', 'IlYoneticisi',
+    'BaskanlikPersoneli', 'BaskanlikYoneticisi', 'Yetkili'
+  ];
+
+  /**
+   * Mevcut kullanıcının atayabileceği rollerin listesi.
+   * İl Yöneticisi: yalnızca IlPersoneli
+   * Başkanlık Yöneticisi: kendi altındaki roller
+   * Yetkili: tüm roller
+   */
+  get atanabilirRoller(): { value: string; label: string }[] {
+    if (this.mevcutRol === 'Yetkili') return this.roller;
+    const mevcutIndex = this.rolSirasi.indexOf(this.mevcutRol);
+    if (this.mevcutRol === 'IlYoneticisi') {
+      return this.roller.filter(r => r.value === 'IlPersoneli');
+    }
+    return this.roller.filter(r => {
+      const idx = this.rolSirasi.indexOf(r.value);
+      return idx >= 0 && idx < mevcutIndex;
+    });
   }
 
   rolSayisi(rol: string): number {

@@ -1,0 +1,139 @@
+﻿<div class="org-container">
+
+  <!-- Alerts -->
+  <div *ngIf="hataMesaji" class="alert alert-hata">
+    <span>&#9888;</span> {{ hataMesaji }}
+    <button class="alert-kapat" (click)="alertKapat()">&#10005;</button>
+  </div>
+  <div *ngIf="basariMesaji" class="alert alert-basari">
+    <span>&#10003;</span> {{ basariMesaji }}
+    <button class="alert-kapat" (click)="alertKapat()">&#10005;</button>
+  </div>
+
+  <!-- Ozet Bar -->
+  <div class="ozet-bar">
+    <div class="ozet-kart" *ngFor="let tur of turler">
+      <span class="ozet-sayi">{{ turSayisi(tur) }}</span>
+      <span class="ozet-etiket" [style.color]="turRenk(tur).color">{{ tur }}</span>
+    </div>
+  </div>
+
+  <!-- Filtre Araclari -->
+  <div class="filtre-bar">
+    <div class="arama-kutu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" class="arama-ikon"
+           width="16" height="16">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input type="text" placeholder="Kurulus adi, faaliyet alani, kutuk no ara..."
+             [(ngModel)]="aramaMetni" (ngModelChange)="filtrele()" />
+    </div>
+    <select class="tur-filtre" [(ngModel)]="turFiltresi" (ngModelChange)="filtrele()">
+      <option value="">Tum Turler</option>
+      <option *ngFor="let t of turler" [value]="t">{{ t }}</option>
+    </select>
+    <select class="tur-filtre" [(ngModel)]="yonelimFiltresi" (ngModelChange)="filtrele()"
+            *ngIf="mevcutYonelimler.length > 0">
+      <option value="">Tum Yonelimler</option>
+      <option *ngFor="let y of mevcutYonelimler" [value]="y">{{ y }}</option>
+    </select>
+    <button class="btn-yenile" (click)="kuruluslariGetir()" title="Yenile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      Yenile
+    </button>
+  </div>
+
+  <!-- Ana İçerik: Kartlar -->
+  <div class="kartlar-bolum">
+
+      <div *ngIf="yukleniyor" class="yukleniyor">
+        <div class="spinner-buyuk"></div>
+        <p>Kuruluslar yukleniyor...</p>
+      </div>
+
+      <div *ngIf="!yukleniyor && filtrelenmis.length === 0" class="bos-durum">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c8d0d8" stroke-width="1.5"
+             width="48" height="48">
+          <rect x="2" y="7" width="6" height="10" rx="1"/>
+          <rect x="16" y="7" width="6" height="10" rx="1"/>
+          <rect x="9" y="2" width="6" height="6" rx="1"/>
+        </svg>
+        <p>Kayitli kurulus bulunamadi.</p>
+        <button class="btn-ekle" (click)="navigateToEkle()">Kurulus Ekle</button>
+      </div>
+
+      <div *ngIf="!yukleniyor && filtrelenmis.length > 0" class="kurulus-grid">
+        <div class="kurulus-karti" *ngFor="let k of filtrelenmis"
+             [class.secili]="secilenKurulus?.id === k.id"
+             (click)="kurulusSec(k)">
+          <div class="kart-ust">
+            <img *ngIf="orgLogolari[k.id]"
+                 [src]="orgLogolari[k.id]"
+                 class="kart-logo"
+                 [alt]="k.ad" />
+            <span class="tur-rozet"
+                  [style.background]="turRenk(k.tur).bg"
+                  [style.color]="turRenk(k.tur).color"
+                  [style.border-color]="turRenk(k.tur).border">
+              {{ k.tur || 'Diger' }}
+            </span>
+            <div class="kart-aksiyon">
+              <span *ngIf="k.altKurulusSayisi > 0" class="alt-sayi-badge">
+                {{ k.altKurulusSayisi }} alt
+              </span>
+              <button class="btn-sil-kucuk" (click)="silModalAc(k, $event)" title="Sil">&#128465;</button>
+            </div>
+          </div>
+          <h3 class="kart-ad">{{ k.ad }}</h3>
+          <div class="kart-meta" *ngIf="k.ustKurulusAd">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round" width="12" height="12">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            {{ k.ustKurulusAd }}
+          </div>
+          <div class="kart-faaliyet" *ngIf="k.faaliyetAlani">{{ k.faaliyetAlani }}</div>
+          <div class="kart-tarih">Kurulus: {{ tarihFormat(k.kurulusTarihi) }}</div>
+        </div>
+      </div>
+    </div>
+
+  <!-- Sil Onay Modal -->
+  <div class="modal-overlay" *ngIf="silModalAcik" (click)="modalKapat()">
+    <div class="modal-icerik" (click)="$event.stopPropagation()">
+      <div class="modal-baslik">
+        <h3>Kurulus Sil</h3>
+        <button class="modal-kapat" (click)="modalKapat()">&#10005;</button>
+      </div>
+      <div class="modal-govde" *ngIf="silinecek">
+        <div class="uyari-kutu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+            <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+          <p>
+            <strong>{{ silinecek.ad }}</strong> kalici olarak silinecektir.
+            <span *ngIf="silinecek.altKurulusSayisi > 0" class="uyari-alt">
+              Bu kurulusun {{ silinecek.altKurulusSayisi }} alt kurulusu vardir.
+            </span>
+          </p>
+        </div>
+      </div>
+      <div class="modal-alt">
+        <button class="btn-iptal" (click)="modalKapat()">Vazgec</button>
+        <button class="btn-sil-modal" (click)="kurulusSil()" [disabled]="siliyor">
+          <span *ngIf="!siliyor">Evet, Sil</span>
+          <span *ngIf="siliyor" class="spinner"></span>
+          <span *ngIf="siliyor">Siliniyor...</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

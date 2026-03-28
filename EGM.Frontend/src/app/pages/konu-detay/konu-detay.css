@@ -1,0 +1,349 @@
+:host {
+  display: block;
+  padding: 8px 12px;
+  overflow-y: auto;
+}
+
+.page-wrap {
+  width: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Başlık ─────────────────────────── */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fff;
+  border: 1px solid #dbe5ee;
+  border-radius: 10px;
+  padding: 14px 18px;
+}
+
+.btn-geri {
+  padding: 7px 14px;
+  border: 1px solid #c5d2df;
+  border-radius: 8px;
+  background: #fff;
+  color: #1b2f55;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.btn-geri:hover { background: #f0f4f8; }
+
+.konu-baslik-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.konu-baslik {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #153047;
+}
+
+/* ── Bilgi Kartı ─────────────────────── */
+.bilgi-kart {
+  background: #fff;
+  border: 1px solid #dbe5ee;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bilgi-row {
+  display: flex;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.bilgi-etiket {
+  min-width: 140px;
+  font-weight: 600;
+  color: #4f6478;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  padding-top: 1px;
+}
+
+.bilgi-deger {
+  color: #153047;
+}
+
+/* ── İstatistik Kartları ─────────────── */
+.stats-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #dbe5ee;
+  border-radius: 8px;
+  padding: 8px 16px;
+  min-width: 110px;
+}
+
+.stat-card--blue {
+  background: #1b2f55;
+  border-color: #1b2f55;
+}
+.stat-card--blue .stat-value,
+.stat-card--blue .stat-label { color: #fff; }
+.stat-card--blue .stat-label { color: #c5d8f0; }
+
+.stat-card--green {
+  background: #f0faf5;
+  border-color: #86efac;
+}
+.stat-card--green .stat-value { color: #166534; }
+.stat-card--green .stat-label { color: #4ade80; }
+
+.stat-card--red {
+  background: #fff1f2;
+  border-color: #fca5a5;
+}
+.stat-card--red .stat-value { color: #b91c1c; }
+.stat-card--red .stat-label { color: #f87171; }
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #153047;
+}
+.stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b8299;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ── Bölüm Başlığı ───────────────────── */
+.bolum-baslik {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1b2f55;
+  padding: 6px 0 0;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 2px solid #dbe5ee;
+  padding-bottom: 6px;
+}
+
+/* ── Filtre Çubuğu ───────────────────── */
+.filter-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: #fff;
+  border: 1px solid #dbe5ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #4f6478;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.filter-input {
+  border: 1px solid #c5d2df;
+  border-radius: 6px;
+  padding: 5px 9px;
+  font-size: 13px;
+  color: #153047;
+  background: #fff;
+  min-width: 180px;
+}
+.filter-input:focus {
+  outline: none;
+  border-color: #0f6fa3;
+}
+
+.filter-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: #6b8299;
+  align-self: flex-end;
+  padding-bottom: 2px;
+}
+
+/* ── Yükleniyor / Hata / Boş ─────────── */
+.loading-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  color: #6b8299;
+  font-size: 13px;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 4px solid #d1dce8;
+  border-top-color: #1b2f55;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-box {
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+.empty-box {
+  padding: 32px;
+  text-align: center;
+  color: #9ab0c4;
+  font-style: italic;
+  font-size: 13px;
+  background: #fff;
+  border: 1px solid #dbe5ee;
+  border-radius: 8px;
+}
+
+/* ── Olay Listesi ────────────────────── */
+.olay-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.olay-kart {
+  background: #fff;
+  border: 1px solid #dbe5ee;
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow 0.15s;
+}
+.olay-kart:hover {
+  box-shadow: 0 2px 10px rgba(27,47,85,0.1);
+}
+
+.olay-kart-ust {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.olay-kart-sol {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.olay-baslik {
+  font-size: 14px;
+  font-weight: 700;
+  color: #153047;
+}
+
+.olay-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.olay-meta-item {
+  font-size: 12px;
+  color: #4f6478;
+}
+
+.olay-kart-sag {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-end;
+}
+
+.badge-kucuk {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.olay-kart-alt {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid #f0f4f8;
+  padding-top: 8px;
+}
+
+.olay-istat {
+  font-size: 12px;
+  color: #4f6478;
+}
+
+.olay-tur-badge {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: #1b2f55;
+  background: #eef4fb;
+  padding: 3px 9px;
+  border-radius: 10px;
+}
+
+.olay-aciklama {
+  font-size: 12px;
+  color: #6b8299;
+  border-top: 1px solid #f0f4f8;
+  padding-top: 6px;
+  font-style: italic;
+}

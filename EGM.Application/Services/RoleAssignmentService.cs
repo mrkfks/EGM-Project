@@ -38,12 +38,14 @@ namespace EGM.Application.Services
             if (!Roles.IsValidRole(newRole))
                 throw new InvalidOperationException($"'{newRole}' geçerli bir sistem rolü değildir.");
 
-            // Yalnızca İl Yöneticisi ve Başkanlık Yöneticisi rol atayabilir
-            if (assignerRole != Roles.IlYoneticisi && assignerRole != Roles.BaskanlikYoneticisi)
+            // Yalnızca İl Yöneticisi, Başkanlık Yöneticisi ve Yetkili rol atayabilir
+            if (assignerRole != Roles.IlYoneticisi
+                && assignerRole != Roles.BaskanlikYoneticisi
+                && assignerRole != Roles.Yetkili)
                 throw new UnauthorizedAccessException("Rol atama yetkisine sahip değilsiniz.");
 
-            // Atanan rol, atayan rolden daha yüksek olamaz
-            if (!Roles.IsAbove(assignerRole, newRole))
+            // Atanan rol, atayan rolden daha yüksek olamaz (Yetkili her rolü atayabilir)
+            if (assignerRole != Roles.Yetkili && !Roles.IsAbove(assignerRole, newRole))
                 throw new UnauthorizedAccessException(
                     $"'{assignerRole}' rolü '{newRole}' rolünü atayamaz; hiyerarşi ihlali.");
 

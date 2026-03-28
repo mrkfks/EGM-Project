@@ -1,0 +1,15 @@
+<section class="bultenler-wrap">
+
+  <div class="kart-grid">
+    @for (bulten of bultenler; track bulten.route) {
+      <button class="bulten-kart" [class]="bulten.renk" type="button" (click)="git(bulten.route)">
+        <span class="kart-icon">{{ bulten.icon }}</span>
+        <div class="kart-icerik">
+          <span class="kart-baslik">{{ bulten.baslik }}</span>
+          <span class="kart-aciklama">{{ bulten.aciklama }}</span>
+        </div>
+        <span class="kart-ok">›</span>
+      </button>
+    }
+  </div>
+</section>

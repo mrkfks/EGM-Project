@@ -40,6 +40,9 @@ namespace EGM.API.Controllers
                 Ad = dto.Ad, KurulusTarihi = dto.KurulusTarihi,
                 FaaliyetAlani = dto.FaaliyetAlani, Iletisim = dto.Iletisim,
                 Tur = dto.Tur, Aciklama = dto.Aciklama,
+                Telefon = dto.Telefon, Eposta = dto.Eposta,
+                SosyalMedyaHesaplari = dto.SosyalMedyaHesaplari,
+                SiyasiYonelim = dto.SiyasiYonelim, KutukNumarasi = dto.KutukNumarasi,
                 UstKurulusId = dto.UstKurulusId
             };
             var created = await _service.CreateAsync(entity);
@@ -55,6 +58,9 @@ namespace EGM.API.Controllers
                 Ad = dto.Ad, KurulusTarihi = dto.KurulusTarihi,
                 FaaliyetAlani = dto.FaaliyetAlani, Iletisim = dto.Iletisim,
                 Tur = dto.Tur, Aciklama = dto.Aciklama,
+                Telefon = dto.Telefon, Eposta = dto.Eposta,
+                SosyalMedyaHesaplari = dto.SosyalMedyaHesaplari,
+                SiyasiYonelim = dto.SiyasiYonelim, KutukNumarasi = dto.KutukNumarasi,
                 UstKurulusId = dto.UstKurulusId
             };
             return await _service.UpdateAsync(id, updated) ? NoContent() : NotFound();
@@ -74,6 +80,11 @@ namespace EGM.API.Controllers
         [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
         public async Task<IActionResult> CreateKategori([FromBody] string ad)
             => Ok(await _service.CreateKategoriAsync(ad));
+
+        [HttpPut("kategori/{id}")]
+        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
+        public async Task<IActionResult> UpdateKategori(Guid id, [FromBody] string ad)
+            => await _service.UpdateKategoriAsync(id, ad) ? NoContent() : NotFound();
 
         [HttpDelete("kategori/{id}")]
         [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
@@ -124,6 +135,9 @@ namespace EGM.API.Controllers
             Id = o.Id, Ad = o.Ad, KurulusTarihi = o.KurulusTarihi,
             FaaliyetAlani = o.FaaliyetAlani, Iletisim = o.Iletisim,
             Tur = o.Tur, Aciklama = o.Aciklama,
+            Telefon = o.Telefon, Eposta = o.Eposta,
+            SosyalMedyaHesaplari = o.SosyalMedyaHesaplari,
+            SiyasiYonelim = o.SiyasiYonelim, KutukNumarasi = o.KutukNumarasi,
             UstKurulusId = o.UstKurulusId,
             UstKurulusAd = o.UstKurulus?.Ad,
             AltKurulusSayisi = o.AltKuruluslar?.Count ?? 0
