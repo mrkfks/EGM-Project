@@ -93,8 +93,10 @@ namespace EGM.Application.Services
         public async Task<Olay> CreateOlayAsync(Olay olay)
         {
             olay.CreatedByUserId = _currentUser.UserId;
-            olay.Durum           = OlayDurum.Planlandi;
-            olay.RiskPuani       = CalculateRisk(olay);
+            // Durum, controller'dan dto.Durum ile set edilir; sadece Planlandi(0) ise varsayılan kalır
+            if (olay.Durum != OlayDurum.Gerceklesti)
+                olay.Durum = OlayDurum.Planlandi;
+            olay.RiskPuani = CalculateRisk(olay);
 
             // İl personeli → CityId otomatik atanır
             if (Roles.IsCityScoped(_currentUser.Role) && _currentUser.CityId.HasValue)
@@ -154,6 +156,7 @@ namespace EGM.Application.Services
             existing.KaynakKurum    = updated.KaynakKurum;
             existing.EvrakNumarasi  = updated.EvrakNumarasi;
             existing.Hassasiyet     = updated.Hassasiyet;
+            existing.Durum          = updated.Durum;
             existing.RiskPuani      = CalculateRisk(existing);
 
             await _olayRepository.UpdateAsync(existing);

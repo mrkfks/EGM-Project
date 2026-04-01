@@ -1,0 +1,14 @@
+{
+  "/api": {
+    "target": "http://localhost:5117",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/hubs": {
+    "target": "http://localhost:5117",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

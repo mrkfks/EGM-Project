@@ -55,6 +55,9 @@ namespace EGM.Infrastructure
         // Bildirimler
         public DbSet<Notification> Bildirimler { get; set; } = null!;
 
+        public DbSet<OlayTuru> OlayTurleri { get; set; } = null!;
+        public DbSet<GerceklesmeSekli> GerceklesmeSekilleri { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -264,6 +267,13 @@ namespace EGM.Infrastructure
                     }
                 }
             }
+
+            // OlayTuru - GerceklesmeSekli ilişkisi
+            modelBuilder.Entity<OlayTuru>()
+                .HasMany(o => o.GerceklesmeSekilleri)
+                .WithOne(g => g.OlayTuru)
+                .HasForeignKey(g => g.OlayTuruId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

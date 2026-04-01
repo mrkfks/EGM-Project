@@ -1,19 +1,43 @@
 <div class="ekle-page">
-  <div class="user-plans">
-    <h3>Planlanan Olaylar</h3>
-    <div *ngIf="userPlans.length === 0" class="no-plans">
+  <!-- ── Sol Panel: Planlanan Olaylar ───────────────────────── -->
+  <div class="side-panel">
+    <h3 class="side-panel-title">
+      <span class="side-dot planned"></span> Planlanan Olaylar
+      <span class="side-count">{{ userPlans.length }}</span>
+    </h3>
+    <div *ngIf="isLoadingPlanned" class="side-loading">Yükleniyor…</div>
+    <div *ngIf="!isLoadingPlanned && userPlans.length === 0" class="side-empty">
       Henüz bir planlama eklenmedi.
     </div>
-    <div *ngFor="let plan of userPlans" class="plan-item">
-      <h4>{{ plan.baslik }}</h4>
-      <p><strong>Olay Türü:</strong> {{ plan.olayTuru }}</p>
-      <p><strong>Tarih:</strong> {{ plan.tarih | date:'dd.MM.yyyy' }}</p>
-      <p><strong>Hassasiyet:</strong> {{ plan.hassasiyet }}</p>
-      <button (click)="editPlan(plan)">Düzenle</button>
+    <div *ngFor="let plan of userPlans"
+         class="side-card"
+         [class.side-card-selected]="selectedPlanId === plan.id"
+         (click)="selectPlanForCompletion(plan)"
+         title="Gerçekleşenler formuna yükle">
+      <div class="side-card-header">
+        <span class="side-card-tur">{{ plan.olayTuru || '—' }}</span>
+        <span class="side-card-il">{{ plan.il }}</span>
+      </div>
+      <div class="side-card-baslik">{{ plan.baslik || (plan.olayTuru + ' – ' + plan.il) }}</div>
+      <div class="side-card-meta">
+        <span>{{ plan.tarih | date:'dd.MM.yyyy' }}</span>
+        <span *ngIf="plan.katilimciSayisi">· {{ plan.katilimciSayisi | number }} kişi</span>
+      </div>
+      <div class="side-card-hint">Gerçekleşti olarak işaretle →</div>
     </div>
   </div>
 
   <div class="content" [formGroup]="form">
+    <!-- Hangi planın doldurulduğunu gösteren bilgi bandı -->
+    <div class="selected-plan-banner" *ngIf="selectedPlanId">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      Planlanan olay gerçekleşenler formuna yüklendi. Bilgileri tamamlayıp kaydedin.
+      <button type="button" class="banner-iptal" (click)="switchToCompletedForm()">İptal</button>
+    </div>
+
     <!-- Buttons above Temel Bilgiler -->
     <div class="form-switch-buttons">
       <button type="button"
@@ -35,9 +59,18 @@
           <label>Olay Türü <span class="req">*</span></label>
           <select formControlName="olayTuru" [class.is-invalid]="fieldError('olayTuru')">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let t of OLAY_TURLERI" [value]="t">{{ t }}</option>
+            <option *ngFor="let t of olayTurleri" [value]="t.id">{{ t.name }}</option>
           </select>
           <div class="field-error" *ngIf="fieldError('olayTuru')">Olay türü zorunludur.</div>
+        </div>
+
+        <div class="form-field">
+          <label>Olayın Gerçekleşme Şekli <span class="req">*</span></label>
+          <select formControlName="olayinGerceklesmeSekli" [class.is-invalid]="fieldError('olayinGerceklesmeSekli')">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let sekil of filtreliGerceklesmeSekilleri" [value]="sekil.id">{{ sekil.name }}</option>
+          </select>
+          <div class="field-error" *ngIf="fieldError('olayinGerceklesmeSekli')">Olayın gerçekleşme şekli zorunludur.</div>
         </div>
 
         <div class="form-field">
@@ -135,147 +168,34 @@
 
     <!-- Alt buton -->
     <div class="form-actions">
-      <button type="button" class="btn btn-primary" (click)="kaydet()">Kaydet</button>
+      <button type="button" class="btn btn-danger" *ngIf="selectedPlanId" (click)="iptalEt()" [disabled]="isSaving">İptal Edildi</button>
+      <button type="button" class="btn btn-primary" (click)="kaydet()" [disabled]="isSaving">Kaydet</button>
     </div>
 
   </div>
 
-  <div class="completed-events">
-    <h3>Gerçekleşen Olaylar</h3>
-    <div *ngIf="completedEvents.length === 0" class="no-events">
+  <!-- ── Sağ Panel: Gerçekleşen Olaylar ───────────────────────── -->
+  <div class="side-panel">
+    <h3 class="side-panel-title">
+      <span class="side-dot completed"></span> Gerçekleşen Olaylar
+      <span class="side-count">{{ completedEvents.length }}</span>
+    </h3>
+    <div *ngIf="isLoadingCompleted" class="side-loading">Yükleniyor…</div>
+    <div *ngIf="!isLoadingCompleted && completedEvents.length === 0" class="side-empty">
       Henüz gerçekleşen bir olay yok.
     </div>
-    <div *ngFor="let event of completedEvents" class="event-item">
-      <h4>{{ event.baslik }}</h4>
-      <p><strong>Olay Türü:</strong> {{ event.olayTuru }}</p>
-      <p><strong>Tarih:</strong> {{ event.tarih | date:'dd.MM.yyyy' }}</p>
-      <p><strong>Hassasiyet:</strong> {{ event.hassasiyet }}</p>
+    <div *ngFor="let event of completedEvents" class="side-card" [class.side-card-cancelled]="event.durum === 2">
+      <div class="side-card-header">
+        <span class="side-card-tur">{{ event.olayTuru || '—' }}</span>
+        <span class="side-card-il">{{ event.il }}</span>
+      </div>
+      <div class="side-card-baslik">{{ event.baslik || (event.olayTuru + ' – ' + event.il) }}</div>
+      <div class="side-card-meta">
+        <span>{{ event.tarih | date:'dd.MM.yyyy' }}</span>
+        <span *ngIf="event.katilimciSayisi">· {{ event.katilimciSayisi | number }} kişi</span>
+      </div>
+      <span class="side-card-status cancelled" *ngIf="event.durum === 2">İptal Edildi</span>
+      <span class="side-card-status completed" *ngIf="event.durum === 1">Gerçekleşti</span>
     </div>
   </div>
 </div>
-
-<style>
-  .ekle-page {
-    display: grid;
-    grid-template-columns: 1fr 3fr 1fr; /* Left column for user plans, middle for form, right for spacing */
-    gap: 1rem; /* Add some spacing between columns */
-  }
-
-  .user-plans {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .user-plans h3 {
-    margin-bottom: 1rem;
-  }
-
-  .plan-item {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff;
-  }
-
-  .plan-item h4 {
-    margin: 0 0 0.5rem;
-  }
-
-  .plan-item button {
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .plan-item button:hover {
-    background-color: #0056b3;
-  }
-
-  .no-plans {
-    color: #6c757d;
-    font-style: italic;
-  }
-
-  .content {
-    background-color: #ffffff; /* Keep the form background white */
-  }
-
-  .empty-column {
-    background-color: #f8f9fa; /* Light gray background for visibility */
-  }
-
-  .completed-events {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  .completed-events h3 {
-    margin-bottom: 1rem;
-  }
-
-  .event-item {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    background-color: #fff;
-  }
-
-  .event-item h4 {
-    margin: 0 0 0.5rem;
-  }
-
-  .no-events {
-    color: #6c757d;
-    font-style: italic;
-  }
-
-  .form-actions {
-    display: flex;
-    justify-content: center;
-    margin-top: 1.5rem;
-  }
-
-  .form-switch-buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr; /* Two equal columns */
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .form-switch-buttons .btn {
-    padding: 0.75rem 1rem;
-    font-size: 1rem;
-    text-align: center;
-    border: none;
-    border-radius: 4px;
-    background-color: #e9ecef;
-    color: #495057;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
-    width: 100%;
-  }
-
-  .form-switch-buttons .btn.active {
-    background-color: #1a1a2e;
-    color: #fff;
-  }
-
-  .form-switch-buttons .btn:not(.active):hover {
-    background-color: #ced4da;
-  }
-
-  .form-actions {
-    display: flex;
-    justify-content: center;
-    margin-top: 1.5rem;
-  }
-</style>

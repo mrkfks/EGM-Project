@@ -21,6 +21,7 @@ import { KonuIslemleri } from './pages/konu-islemleri/konu-islemleri';
 import { Konular } from './pages/konular/konular';
 import { SokakOlayEkle } from './pages/sokak-olay-ekle/sokak-olay-ekle';
 import { VeriYonetimi } from './pages/veri-yonetimi/veri-yonetimi';
+import { FaaliyetYonetimiComponent } from './pages/faaliyet-yonetimi/faaliyet-yonetimi';
 import { KurulusDetay } from './pages/kurulus-detay/kurulus-detay';
 import { KonuDetay } from './pages/konu-detay/konu-detay';
 import { authGuard, roleGuard, ROLES } from './guards/auth.guard';
@@ -62,6 +63,7 @@ export const routes: Routes = [
     { path: 'vip',             component: VIP,           canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
     { path: 'organizasyon',    component: Organizasyon,  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
     { path: 'konu-islemleri',  component: KonuIslemleri, canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'faaliyet-yonetimi', component: FaaliyetYonetimiComponent, canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
     { path: 'kullanicilar',    component: Kullanicilar,  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
     { path: 'olu',             component: Olu,           canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
     { path: 'supheli',         component: Supheli,       canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },

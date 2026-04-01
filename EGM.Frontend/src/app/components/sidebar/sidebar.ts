@@ -56,14 +56,14 @@ export class Sidebar implements OnInit, OnDestroy {
       ]
     },
     {
-      title: 'Formlar',
+      title: 'Olay Bildirim Formları',
       items: [
         // İl Personeli ve üzeri
         { label: 'Sokak Olayları',         route: '/sokak-olay-ekle', icon: 'alert',  roles: IL_P_VE_UZERI },
         { label: 'Sosyal Medya Olayları',  route: '/socialmedia',     icon: 'share',  roles: IL_P_VE_UZERI },
         { label: 'Seçim Olayları',         route: '/secim',           icon: 'vote',   roles: IL_P_VE_UZERI },
         // İl Yöneticisi ve üzeri
-        { label: 'Ziyaretçi',             route: '/vip',             icon: 'star',   roles: IL_Y_VE_UZERI },
+        { label: 'Ziyaretçi Olayları',     route: '/vip',             icon: 'star',   roles: IL_Y_VE_UZERI },
       ]
     },
     {
@@ -71,8 +71,9 @@ export class Sidebar implements OnInit, OnDestroy {
       items: [
         // İl Yöneticisi ve üzeri
         { label: 'Kullanıcı Yönetimi', route: '/kullanicilar',   icon: 'users',    roles: IL_Y_VE_UZERI },
-        { label: 'Kuruluş İşlemleri', route: '/organizasyon',   icon: 'org',      roles: IL_Y_VE_UZERI },
-        { label: 'Konu İşlemleri',    route: '/konu-islemleri', icon: 'activity', roles: IL_Y_VE_UZERI },
+        { label: 'Kuruluş Yönetimi', route: '/organizasyon',   icon: 'org',      roles: IL_Y_VE_UZERI },
+        { label: 'Konu Yönetimi',    route: '/konu-islemleri', icon: 'activity', roles: IL_Y_VE_UZERI },
+        { label: 'Faaliyet Yönetimi', route: '/faaliyet-yonetimi', icon: 'briefcase', roles: IL_Y_VE_UZERI },
         // Başkanlık Yöneticisi ve Yetkili
         { label: 'Veri Yönetimi',     route: '/veri-yonetimi',  icon: 'database', roles: HQ_Y_VE_UZERI },
       ]

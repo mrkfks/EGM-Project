@@ -70,7 +70,7 @@ export class VeriYonetimi implements OnInit {
       this.sayiGetir('/api/sosyalmedyaolay', 2),
       this.sayiGetir('/api/secim', 3),
       this.sayiGetir('/api/vipziyaret', 4),
-      this.sayiGetir('/api/organizator/organizasyon', 5),
+      this.sayiGetir('/api/organizator', 5),
       this.sayiGetir('/api/organizator/konu', 6),
       this.sayiGetir('/api/user', 7),
     ];

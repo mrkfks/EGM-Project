@@ -136,7 +136,8 @@ namespace EGM.API.Controllers
                 KaynakKurum = dto.KaynakKurum,
                 EvrakNumarasi = dto.EvrakNumarasi,
                 Hassasiyet = dto.Hassasiyet,
-                CityId = dto.CityId
+                CityId = dto.CityId,
+                Durum = dto.Durum
             };
             // CreatedByUserId ve CityId otomatik atama OlayService içinde yapılır
             var created = await _olayService.CreateOlayAsync(olay);
@@ -175,7 +176,8 @@ namespace EGM.API.Controllers
                 Aciklama = dto.Aciklama,
                 KaynakKurum = dto.KaynakKurum,
                 EvrakNumarasi = dto.EvrakNumarasi,
-                Hassasiyet = dto.Hassasiyet
+                Hassasiyet = dto.Hassasiyet,
+                Durum = dto.Durum
             };
             var (success, error) = await _olayService.UpdateOlayAsync(id, updated);
             if (!success && error != null) return Forbid();

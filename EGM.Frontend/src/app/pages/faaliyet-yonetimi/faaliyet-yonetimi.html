@@ -1,0 +1,56 @@
+<section class="faaliyet-yonetimi">
+  <div *ngIf="errorMessage" class="error-banner" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="panels-wrap">
+    <div class="left-panel">
+      <h2>Olay Türü Yönetimi</h2>
+      <form (ngSubmit)="addOlayTuru()" class="inline-form">
+        <label for="olayTuru">Olay Türü:</label>
+        <input id="olayTuru" [(ngModel)]="newOlayTuru" name="olayTuru" placeholder="Yeni olay türü" />
+        <button type="submit">Ekle</button>
+      </form>
+      <div class="list-title">Mevcut Olay Türleri</div>
+      <ul>
+        <li *ngFor="let olay of olayTurleri" [class.selected]="selectedOlayTuruId === olay.id">
+          <div class="item-main" (click)="selectOlayTuru(olay.id)">
+            {{ olay.name }}
+          </div>
+          <div class="item-actions">
+            <button class="btn-secondary" (click)="editOlayTuru(olay)">Düzenle</button>
+            <button class="btn-danger" (click)="deleteOlayTuru(olay.id)">Sil</button>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="right-panel">
+      <h2>Gerçekleşme Şekli Yönetimi</h2>
+
+      <div class="selected-info" *ngIf="selectedOlayTuruId">
+        Seçili Olay Türü: <strong>{{ olayTurleri.find(item => item.id === selectedOlayTuruId)?.name }}</strong>
+      </div>
+      <div class="selected-info warning" *ngIf="!selectedOlayTuruId">
+        Bir olay türü seçin veya ekleyin, ardından gerçekleşme şekli yönetimine devam edebilirsiniz.
+      </div>
+
+      <form (ngSubmit)="addGerceklesmeSekli()" class="inline-form">
+        <label for="gerceklesmeSekli">Gerçekleşme Şekli:</label>
+        <input id="gerceklesmeSekli" [(ngModel)]="newGerceklesmeSekli" name="gerceklesmeSekli" placeholder="Yeni gerçekleşme şekli" [disabled]="!selectedOlayTuruId" />
+        <button type="submit" [disabled]="!selectedOlayTuruId">Ekle</button>
+      </form>
+
+      <div class="list-title">Gerçekleşme Şekilleri</div>
+      <ul>
+        <li *ngFor="let sekil of getFilteredGerceklesmeSekilleri()">
+          <div class="item-main">{{ sekil.name }}</div>
+          <div class="item-actions">
+            <button class="btn-secondary" (click)="editGerceklesmeSekli(sekil)">Düzenle</button>
+            <button class="btn-danger" (click)="deleteGerceklesmeSekli(sekil.id)">Sil</button>
+          </div>
+        </li>
+        <li *ngIf="selectedOlayTuruId && getFilteredGerceklesmeSekilleri().length === 0" class="empty-state">
+          Bu olay türü için henüz gerçekleşme şekli yok.
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>

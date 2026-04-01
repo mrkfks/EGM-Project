@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Subject, Subscription, debounceTime } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { OlayTuruService, OlayTuru as OlayTuruDto } from '../../services/olay-turu.service';
+import { GerceklesmeSekliService, GerceklesmeSekli as GerceklesmeSekliDto } from '../../services/gerceklesme-sekli.service';
 
 const API = environment.apiUrl + '/api';
 
@@ -15,11 +17,7 @@ const HASSASIYET = [
   { value: 3, label: 'Kritik', color: '#8e44ad', shadow: '0 0 12px rgba(142,68,173,0.45)' },
 ];
 
-const OLAY_TURLERI = [
-  'Gösteri', 'Yürüyüş', 'Miting',
-  'Terör Olayı', 'Silahlı Çatışma', 'Provokasyon',
-  'Basın Açıklaması', 'Diğer',
-];
+
 
 const IL_LISTESI: { id: number; ad: string }[] = [
   {id:1,ad:'Adana'},{id:2,ad:'Adıyaman'},{id:3,ad:'Afyonkarahisar'},{id:4,ad:'Ağrı'},
@@ -45,12 +43,26 @@ const IL_LISTESI: { id: number; ad: string }[] = [
   {id:81,ad:'Düzce'},
 ];
 
+
+
 interface OrganizatorOption { id: string; ad: string; }
 interface KonuOption        { id: string; ad: string; }
 interface RiskPreview {
   riskPuaniRaw: number;
   riskPuaniNormalized: number;
   seviye: string;
+}
+interface OlayListItem {
+  id: string;
+  baslik?: string;
+  olayTuru?: string;
+  il?: string;
+  ilce?: string;
+  tarih: string;
+  hassasiyet: number;
+  katilimciSayisi?: number;
+  organizatorAd?: string;
+  durum: number;
 }
 
 @Component({
@@ -80,6 +92,9 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
   // Lookup listeleri
   organizatorler: OrganizatorOption[] = [];
   konular: KonuOption[]               = [];
+  olayTurleri: OlayTuruDto[] = [];
+  tumGerceklesmeSekilleri: GerceklesmeSekliDto[] = [];
+  filtreliGerceklesmeSekilleri: GerceklesmeSekliDto[] = [];
 
   // Token
   tokenRole:   string | null = null;
@@ -87,12 +102,16 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
   tokenUserId: string | null = null;
   readonly isBrowser: boolean;
 
-  readonly HASSASIYET   = HASSASIYET;
-  readonly OLAY_TURLERI = OLAY_TURLERI;
-  readonly IL_LISTESI   = IL_LISTESI;
+  readonly HASSASIYET = HASSASIYET;
+  readonly IL_LISTESI = IL_LISTESI;
 
-  userPlans: any[] = [];
-  completedEvents: any[] = [];
+  userPlans: OlayListItem[] = [];
+  completedEvents: OlayListItem[] = [];
+  isLoadingPlanned  = false;
+  isLoadingCompleted = false;
+
+  /** Gerçekleşenler formuna yüklenen planlanan olayın id'si (null = yeni kayıt) */
+  selectedPlanId: string | null = null;
 
   activeForm: 'planned' | 'completed' = 'planned';
 
@@ -100,6 +119,8 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private http: HttpClient,
     private router: Router,
+    private olayTuruService: OlayTuruService,
+    private gerceklesmeSekliService: GerceklesmeSekliService,
     @Inject(PLATFORM_ID) platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -109,7 +130,8 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.decodeToken();
     this.buildForm();
     this.loadLookups();
-    this.loadCompletedEvents(); // Load completed events on initialization
+    this.loadPlannedEvents();
+    this.loadCompletedEvents();
 
     this.riskSub = this.riskSubject.pipe(debounceTime(600)).subscribe(() => this.fetchRisk());
   }
@@ -145,6 +167,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.form = this.fb.group({
       baslik:           ['', Validators.maxLength(250)],
       olayTuru:         ['', Validators.required],
+      olayinGerceklesmeSekli: ['', Validators.required],
       organizatorId:    ['', Validators.required],
       konuId:           ['', Validators.required],
       tarih:            ['', Validators.required],
@@ -202,6 +225,28 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.http.get<any[]>(`${API}/organizator/konu`).subscribe({
       next: res => this.konular = res.map(k => ({ id: k.id, ad: k.ad })),
       error: () => {},
+    });
+    this.olayTuruService.getAll().subscribe({
+      next: res => this.olayTurleri = res,
+      error: () => {},
+    });
+    this.gerceklesmeSekliService.getAll().subscribe({
+      next: res => {
+        this.tumGerceklesmeSekilleri = res;
+        this.filtreliGerceklesmeSekilleri = res;
+      },
+      error: () => {},
+    });
+
+    this.form.get('olayTuru')!.valueChanges.subscribe((secilenId: string) => {
+      this.form.get('olayinGerceklesmeSekli')!.setValue('');
+      if (secilenId) {
+        this.filtreliGerceklesmeSekilleri = this.tumGerceklesmeSekilleri.filter(
+          s => s.olayTuruId === secilenId
+        );
+      } else {
+        this.filtreliGerceklesmeSekilleri = this.tumGerceklesmeSekilleri;
+      }
     });
   }
 
@@ -271,60 +316,230 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.form.reset();
   }
 
-  cancel(): void {
-    this.form.reset();
-    this.formError = null;
-    this.formSuccess = null;
-  }
-
-  editPlan(plan: any): void {
-    this.form.patchValue(plan);
-  }
-
   goBack(): void { this.router.navigate(['/olay']); }
 
-  // Example function to load completed events (replace with actual API call)
   loadCompletedEvents(): void {
-    this.http.get<any[]>(`${API}/sokak-olay/completed`).subscribe({
-      next: res => { this.completedEvents = res; },
-      error: () => {},
+    this.isLoadingCompleted = true;
+    this.http.get<any>(`${API}/olay?durum=1&sayfaBoyutu=100`).subscribe({
+      next: res => {
+        this.completedEvents = res?.items ?? res ?? [];
+        this.isLoadingCompleted = false;
+      },
+      error: () => { this.isLoadingCompleted = false; }
+    });
+  }
+
+  loadPlannedEvents(): void {
+    this.isLoadingPlanned = true;
+    this.http.get<any>(`${API}/olay?durum=0&sayfaBoyutu=100`).subscribe({
+      next: res => {
+        this.userPlans = res?.items ?? res ?? [];
+        this.isLoadingPlanned = false;
+      },
+      error: () => { this.isLoadingPlanned = false; }
     });
   }
 
   switchToPlannedForm(): void {
     this.activeForm = 'planned';
+    this.selectedPlanId = null;
     this.formError = null;
     this.formSuccess = null;
+    this.form.reset();
+    if (this.isCityScoped && this.tokenCityId) {
+      const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+      this.form.get('il')!.setValue(ilAdi);
+    }
     this.form.get('baslik')?.clearValidators();
     this.form.get('baslik')?.updateValueAndValidity();
   }
 
   switchToCompletedForm(): void {
     this.activeForm = 'completed';
+    this.selectedPlanId = null;
     this.formError = null;
     this.formSuccess = null;
-  }
-
-  kaydet(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      this.formError = 'Lütfen tüm zorunlu alanları doldurun.';
-      return;
-    }
-    if (this.activeForm === 'planned') {
-      const newPlan = this.form.getRawValue();
-      this.userPlans.push(newPlan);
-      this.formSuccess = 'Planlananlara başarıyla kaydedildi.';
-    } else {
-      const newEvent = this.form.getRawValue();
-      this.completedEvents.push(newEvent);
-      this.formSuccess = 'Gerçekleşenlere başarıyla kaydedildi.';
-    }
-    this.formError = null;
     this.form.reset();
     if (this.isCityScoped && this.tokenCityId) {
       const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
       this.form.get('il')!.setValue(ilAdi);
     }
+  }
+
+  /** Planlanan olayı gerçekleşenler formuna yükler */
+  selectPlanForCompletion(plan: OlayListItem): void {
+    this.selectedPlanId = plan.id;
+    this.activeForm = 'completed';
+    this.formError = null;
+    this.formSuccess = null;
+
+    // API'den tam detayı çek (organizatorId, konuId gibi alanlar için)
+    this.http.get<any>(`${API}/olay/${plan.id}`).subscribe({
+      next: detail => {
+        this.form.patchValue({
+          baslik:           detail.baslik ?? '',
+          olayTuru:         detail.olayTuru ?? '',
+          organizatorId:    detail.organizatorId ?? '',
+          konuId:           detail.konuId ?? '',
+          tarih:            detail.tarih ? detail.tarih.substring(0, 16) : '',
+          il:               detail.il ?? '',
+          ilce:             detail.ilce ?? '',
+          mekan:            detail.mekan ?? '',
+          katilimciSayisi:  detail.katilimciSayisi ?? null,
+          hassasiyet:       detail.hassasiyet ?? 0,
+          aciklama:         detail.aciklama ?? '',
+          kaynakKurum:      detail.kaynakKurum ?? '',
+        });
+        // İl personeli ise il kilidi koru
+        if (this.isCityScoped) {
+          this.form.get('il')!.disable();
+        }
+      },
+      error: () => {
+        // Detay çekilemezse mevcut özet veriyle doldur
+        this.form.patchValue({
+          olayTuru:        plan.olayTuru ?? '',
+          il:              plan.il ?? '',
+          tarih:           plan.tarih ? plan.tarih.substring(0, 16) : '',
+          katilimciSayisi: plan.katilimciSayisi ?? null,
+          hassasiyet:      plan.hassasiyet ?? 0,
+        });
+      }
+    });
+  }
+
+  /** Seçili planlanan olayı iptal olarak işaretle (durum=2) */
+  iptalEt(): void {
+    if (!this.selectedPlanId) return;
+    const planId = this.selectedPlanId;
+    this.isSaving = true;
+    this.formError = null;
+    const v = this.form.getRawValue();
+    const payload = {
+      baslik:          v.baslik || null,
+      olayTuru:        v.olayTuru,
+      organizatorId:   v.organizatorId,
+      konuId:          v.konuId,
+      tarih:           v.tarih,
+      il:              v.il,
+      ilce:            v.ilce || null,
+      mekan:           v.mekan || null,
+      latitude:        v.latitude ?? null,
+      longitude:       v.longitude ?? null,
+      katilimciSayisi: v.katilimciSayisi ?? null,
+      gozaltiSayisi:   v.gozaltiSayisi ?? null,
+      sehitOluSayisi:  null,
+      aciklama:        v.aciklama || null,
+      kaynakKurum:     v.kaynakKurum || null,
+      hassasiyet:      +v.hassasiyet,
+      cityId:          v.cityId ?? null,
+      durum:           2
+    };
+    this.http.put<void>(`${API}/olay/${planId}`, payload).subscribe({
+      next: () => {
+        this.isSaving = false;
+        this.formSuccess = 'Etkinlik iptal edildi.';
+        const plan = this.userPlans.find(p => p.id === planId);
+        this.userPlans = this.userPlans.filter(p => p.id !== planId);
+        if (plan) {
+          const cancelled: OlayListItem = { ...plan, durum: 2 };
+          this.completedEvents = [cancelled, ...this.completedEvents];
+        }
+        this.selectedPlanId = null;
+        this.form.reset();
+        if (this.isCityScoped && this.tokenCityId) {
+          const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+          this.form.get('il')!.setValue(ilAdi);
+        }
+      },
+      error: () => {
+        this.isSaving = false;
+        this.formError = 'İptal işlemi sırasında bir hata oluştu.';
+      }
+    });
+  }
+
+  kaydet(): void {    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.formError = 'Lütfen tüm zorunlu alanları doldurun.';
+      return;
+    }
+    this.isSaving = true;
+    this.formError = null;
+    const v = this.form.getRawValue();
+    const durum = this.activeForm === 'planned' ? 0 : 1;
+    const payload = {
+      baslik:          v.baslik || null,
+      olayTuru:        v.olayTuru,
+      organizatorId:   v.organizatorId,
+      konuId:          v.konuId,
+      tarih:           v.tarih,
+      il:              v.il,
+      ilce:            v.ilce || null,
+      mekan:           v.mekan || null,
+      latitude:        v.latitude ?? null,
+      longitude:       v.longitude ?? null,
+      katilimciSayisi: v.katilimciSayisi ?? null,
+      gozaltiSayisi:   v.gozaltiSayisi ?? null,
+      sehitOluSayisi:  (v.sehitSayisi ?? 0) + (v.oluSayisi ?? 0) || null,
+      aciklama:        v.aciklama || null,
+      kaynakKurum:     v.kaynakKurum || null,
+      hassasiyet:      +v.hassasiyet,
+      cityId:          v.cityId ?? null,
+      durum
+    };
+
+    // Planlanan olay gerçekleşenlere taşınıyorsa → PUT
+    if (this.selectedPlanId && this.activeForm === 'completed') {
+      const planId = this.selectedPlanId;
+      this.http.put<void>(`${API}/olay/${planId}`, payload).subscribe({
+        next: () => {
+          this.isSaving = false;
+          this.formSuccess = 'Olay gerçekleşenlere taşındı.';
+          // Sol panelden kaldır, sağ panele ekle
+          const plan = this.userPlans.find(p => p.id === planId);
+          this.userPlans = this.userPlans.filter(p => p.id !== planId);
+          if (plan) {
+            const updated: OlayListItem = { ...plan, ...payload, id: planId };
+            this.completedEvents = [updated, ...this.completedEvents];
+          }
+          this.selectedPlanId = null;
+          this.form.reset();
+          if (this.isCityScoped && this.tokenCityId) {
+            const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+            this.form.get('il')!.setValue(ilAdi);
+          }
+        },
+        error: () => {
+          this.isSaving = false;
+          this.formError = 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+        }
+      });
+      return;
+    }
+
+    // Yeni kayıt → POST
+    this.http.post<OlayListItem>(`${API}/olay`, payload).subscribe({
+      next: created => {
+        this.isSaving = false;
+        this.formSuccess = this.activeForm === 'planned'
+          ? 'Olay planlananlara kaydedildi.'
+          : 'Olay gerçekleşenlere kaydedildi.';
+        this.form.reset();
+        if (this.isCityScoped && this.tokenCityId) {
+          const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+          this.form.get('il')!.setValue(ilAdi);
+        }
+        if (this.activeForm === 'planned') {
+          this.userPlans = [created, ...this.userPlans];
+        } else {
+          this.completedEvents = [created, ...this.completedEvents];
+        }
+      },
+      error: () => {
+        this.isSaving = false;
+        this.formError = 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+      }
+    });
   }
 }

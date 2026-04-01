@@ -131,6 +131,8 @@ namespace EGM.Application.DTOs
         public Hassasiyet Hassasiyet { get; set; }
         /// <summary>Başkanlık personeli bu alanı göndererek il belirtir. İl personeli için servis otomatik atar.</summary>
         public int? CityId { get; set; }
+        /// <summary>Olay durumu: 0=Planlandi (varsayılan), 1=Gerceklesti</summary>
+        public OlayDurum Durum { get; set; } = OlayDurum.Planlandi;
     }
 
     public class OlayResponseDto
