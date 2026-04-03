@@ -1,0 +1,107 @@
+<div class="page">
+
+  <!-- ── Filtreler ──────────────────────────────────────── -->
+  <div class="filtre-bar">
+    <div class="filtre-group">
+      <label>Müşahit</label>
+      <input type="text" [(ngModel)]="filtreMusahit" placeholder="Müşahit adı..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>İl</label>
+      <input type="text" [(ngModel)]="filtreIl" placeholder="İl adı..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>İlçe</label>
+      <input type="text" [(ngModel)]="filtreIlce" placeholder="İlçe adı..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Mahalle</label>
+      <input type="text" [(ngModel)]="filtreMahalle" placeholder="Mahalle..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Okul</label>
+      <input type="text" [(ngModel)]="filtreOkul" placeholder="Okul adı..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Sandık No</label>
+      <input type="text" [(ngModel)]="filtreSandikNo" placeholder="Sandık no..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Konu</label>
+      <input type="text" [(ngModel)]="filtreKonu" placeholder="Konu ara..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Olay Kategorisi</label>
+      <input type="text" [(ngModel)]="filtreKategori" placeholder="Kategori..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Başlangıç Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih1" (change)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Bitiş Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih2" (change)="filtrele()" />
+    </div>
+  </div>
+
+  <div class="durum-mesaj" *ngIf="yukleniyor">Yükleniyor...</div>
+  <div class="durum-mesaj hata" *ngIf="hata">{{ hata }}</div>
+
+  <!-- ── Tablo ─────────────────────────────────────────────── -->
+  <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
+    <table class="tablo">
+      <thead>
+        <tr>
+          <th>Müşahit</th>
+          <th>İl</th>
+          <th>İlçe</th>
+          <th>Mahalle</th>
+          <th>Okul</th>
+          <th>Sandık No</th>
+          <th>Kategori</th>
+          <th>Tarih</th>
+          <th>Saat</th>
+          <th>Konu</th>
+          <th class="sayi">Katılımcı</th>
+          <th class="sayi">Gözaltı</th>
+          <th class="sayi">Ölü</th>
+          <th class="sayi">Şehit</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of sayfaKayitlari">
+          <td>{{ s.musahitAdi || '—' }}</td>
+          <td>{{ s.il || '—' }}</td>
+          <td>{{ s.ilce || '—' }}</td>
+          <td>{{ s.mahalle || '—' }}</td>
+          <td>{{ s.okul || '—' }}</td>
+          <td>{{ s.sandikNo || '—' }}</td>
+          <td><span class="kategori-badge">{{ s.olayKategorisi || '—' }}</span></td>
+          <td class="tarih-cell">{{ s.tarih ? (s.tarih | date:'dd.MM.yyyy') : '—' }}</td>
+          <td class="saat-cell">{{ s.olaySaati || '—' }}</td>
+          <td class="ozet-cell">{{ s.konu || '—' }}</td>
+          <td class="sayi">{{ s.katilimciSayisi ?? '—' }}</td>
+          <td class="sayi">{{ s.gozaltiSayisi ?? '—' }}</td>
+          <td class="sayi">{{ s.oluSayisi ?? '—' }}</td>
+          <td class="sayi">{{ s.sehitSayisi ?? '—' }}</td>
+        </tr>
+        <tr *ngIf="sayfaKayitlari.length === 0">
+          <td colspan="14" class="bos-satir">Kayıt bulunamadı.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Sayfalama ─────────────────────────────────────────── -->
+  <div class="sayfalama" *ngIf="toplamSayfa > 1 && !yukleniyor">
+    <button class="sayfa-btn" (click)="oncekiSayfa()" [disabled]="mevcutSayfa === 1">‹</button>
+    <button
+      class="sayfa-btn"
+      *ngFor="let p of sayfaNumaralari"
+      [class.aktif]="p === mevcutSayfa"
+      (click)="sayfayaGit(p)">{{ p }}</button>
+    <button class="sayfa-btn" (click)="sonrakiSayfa()" [disabled]="mevcutSayfa === toplamSayfa">›</button>
+    <span class="sayfa-bilgi">{{ mevcutSayfa }} / {{ toplamSayfa }}</span>
+  </div>
+
+</div>

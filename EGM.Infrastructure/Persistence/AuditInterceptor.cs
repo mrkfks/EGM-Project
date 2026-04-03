@@ -61,6 +61,13 @@ namespace EGM.Infrastructure.Persistence
 
             foreach (var entry in entries)
             {
+                // Yeni eklenen her kayıtta CreatedByUserId otomatik doldur
+                if (entry.State == EntityState.Added
+                    && string.IsNullOrEmpty(entry.Entity.CreatedByUserId))
+                {
+                    entry.Entity.CreatedByUserId = userId;
+                }
+
                 var action = entry.State switch
                 {
                     EntityState.Added    => AuditAction.Create,

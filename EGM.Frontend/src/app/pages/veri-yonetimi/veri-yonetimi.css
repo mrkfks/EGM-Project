@@ -105,3 +105,111 @@
 .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
 .spinner-kucuk { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(0,0,0,0.1); border-top-color: currentColor; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- VERİ GİRİŞLERİ TABLO BLOĞU --- */
+.tablo-blok {
+  background: #fff;
+  border: 1.5px solid #e8edf2;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 28px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.tablo-ust {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  border-bottom: 1.5px solid #e8edf2;
+  flex-wrap: wrap;
+}
+.arama-kutusu {
+  margin-left: auto;
+  padding: 7px 14px;
+  border: 1.5px solid #d1d9e0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  outline: none;
+  min-width: 240px;
+  transition: border-color 0.15s;
+}
+.arama-kutusu:focus { border-color: #2c5f8a; }
+.tablo-sarici { overflow-x: auto; }
+.tablo-yukle {
+  padding: 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.veri-tablo {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+.veri-tablo thead tr {
+  background: #f7f9fb;
+  border-bottom: 2px solid #e8edf2;
+}
+.veri-tablo th {
+  padding: 11px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #6b7280;
+  white-space: nowrap;
+}
+.veri-tablo tbody tr {
+  border-bottom: 1px solid #f0f4f8;
+  transition: background 0.1s;
+}
+.veri-tablo tbody tr:hover { background: #f7f9fb; }
+.veri-tablo td {
+  padding: 10px 16px;
+  color: #374151;
+  vertical-align: middle;
+}
+.sicil-rozet {
+  display: inline-block;
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 2px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.3px;
+}
+.ad-hucre { font-weight: 600; color: #1a3a5c; }
+.birim-hucre { color: #6b7280; font-size: 0.84rem; }
+.tarih-hucre { color: #6b7280; font-size: 0.82rem; white-space: nowrap; }
+.faaliyet-rozet {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.bos-satir {
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px !important;
+  font-size: 0.88rem;
+}
+
+.kaynak-rozet {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 12px;
+  white-space: nowrap;
+  background: #eef2ff;
+  color: #3730a3;
+  border: 1px solid #c7d2fe;
+}

@@ -49,6 +49,7 @@ namespace EGM.Application.Services
             existing.Hassasiyet = updated.Hassasiyet;
             existing.GuvenlikSeviyesi = updated.GuvenlikSeviyesi;
             existing.GozlemNoktalari = updated.GozlemNoktalari;
+            existing.ZiyaretDurumu = updated.ZiyaretDurumu;
 
             await _vipRepository.UpdateAsync(existing);
             return true;
@@ -65,32 +66,22 @@ namespace EGM.Application.Services
 
         // Hassasiyet seviyesine göre filtrele
         public async Task<IReadOnlyList<VIPZiyaret>> GetByHassasiyetAsync(Hassasiyet hassasiyet)
-        {
-            var all = await _vipRepository.ListAllAsync();
-            return all.Where(v => v.Hassasiyet == hassasiyet).ToList();
-        }
+            => await _vipRepository.FindAsync(v => v.Hassasiyet == hassasiyet);
 
         // İle göre filtrele
         public async Task<IReadOnlyList<VIPZiyaret>> GetByIlAsync(string il)
-        {
-            var all = await _vipRepository.ListAllAsync();
-            return all.Where(v => v.Il == il).ToList();
-        }
+            => await _vipRepository.FindAsync(v => v.Il == il);
 
         // Aktif ziyaretler (şu an devam eden)
         public async Task<IReadOnlyList<VIPZiyaret>> GetAktifZiyaretlerAsync()
         {
             var now = DateTime.UtcNow;
-            var all = await _vipRepository.ListAllAsync();
-            return all.Where(v => v.BaslangicTarihi <= now && v.BitisTarihi >= now).ToList();
+            return await _vipRepository.FindAsync(v => v.BaslangicTarihi <= now && v.BitisTarihi >= now);
         }
 
         // Tarih aralığına göre filtrele
         public async Task<IReadOnlyList<VIPZiyaret>> GetByTarihAraligiAsync(DateTime baslangic, DateTime bitis)
-        {
-            var all = await _vipRepository.ListAllAsync();
-            return all.Where(v => v.BaslangicTarihi >= baslangic && v.BitisTarihi <= bitis).ToList();
-        }
+            => await _vipRepository.FindAsync(v => v.BaslangicTarihi >= baslangic && v.BitisTarihi <= bitis);
 
         // ── Güvenlik Planı CRUD ──────────────────────────────────────────
 

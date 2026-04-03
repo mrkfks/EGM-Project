@@ -1,4 +1,4 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -22,7 +22,8 @@ interface VIPZiyaretRecord {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './vip.html',
-  styleUrls: ['./vip.css']
+  styleUrls: ['./vip.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VIP implements OnInit {
   private apiBase = 'http://localhost:5117/api';
@@ -37,6 +38,7 @@ export class VIP implements OnInit {
   baslangicTarihi = new Date().toISOString().substring(0, 16);
   bitisTarihi = new Date().toISOString().substring(0, 16);
   il = '';
+  hassasiyet = 0;
 
   // UI durumu
   kayitlar: VIPZiyaretRecord[] = [];
@@ -44,9 +46,9 @@ export class VIP implements OnInit {
   hata = '';
   basari = '';
   yukleniyor = true;
-  secilenKayit: VIPZiyaretRecord | null = null;
-  modalAcik = false;
-  aktifSekme: 'form' | 'liste' = 'form';
+
+  activeForm: 'planned' | 'completed' = 'planned';
+  selectedPlanId: string | null = null;
 
   readonly unvanlar = [
     'Bakan',
@@ -84,7 +86,80 @@ export class VIP implements OnInit {
     'Kilis','Osmaniye','Duzce'
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+
+  get planlananlar(): VIPZiyaretRecord[] {
+    return this.kayitlar.filter(k => k.ziyaretDurumu === 0);
+  }
+
+  get gerceklesen(): VIPZiyaretRecord[] {
+    return this.kayitlar.filter(k => k.ziyaretDurumu !== 0);
+  }
+
+  switchToPlannedForm(): void {
+    this.activeForm = 'planned';
+    this.selectedPlanId = null;
+    this.hata = '';
+    this.basari = '';
+    this.formuSifirla();
+    this.ziyaretDurumu = 0;
+  }
+
+  switchToCompletedForm(): void {
+    this.activeForm = 'completed';
+    this.selectedPlanId = null;
+    this.hata = '';
+    this.basari = '';
+    this.formuSifirla();
+    this.ziyaretDurumu = 1;
+  }
+
+  selectPlanForCompletion(kayit: VIPZiyaretRecord): void {
+    this.selectedPlanId = kayit.id;
+    this.activeForm = 'completed';
+    this.hata = '';
+    this.basari = '';
+    this.ziyaretEdenAdSoyad = kayit.ziyaretEdenAdSoyad;
+    this.unvan = kayit.unvan;
+    this.il = kayit.il;
+    this.mekan = kayit.mekan;
+    this.hassasiyet = kayit.hassasiyet;
+    this.guvenlikSeviyesi = kayit.guvenlikSeviyesi;
+    this.gozlemNoktalari = kayit.gozlemNoktalari ?? '';
+    this.baslangicTarihi = kayit.baslangicTarihi ? kayit.baslangicTarihi.substring(0, 16) : this.baslangicTarihi;
+    this.bitisTarihi = kayit.bitisTarihi ? kayit.bitisTarihi.substring(0, 16) : this.bitisTarihi;
+    this.ziyaretDurumu = 1;
+  }
+
+  iptalEt(): void {
+    if (!this.selectedPlanId) return;
+    this.gonderiliyor = true;
+    this.hata = '';
+    const payload = {
+      ziyaretEdenAdSoyad: this.ziyaretEdenAdSoyad.trim(),
+      unvan: this.unvan,
+      baslangicTarihi: new Date(this.baslangicTarihi).toISOString(),
+      bitisTarihi: new Date(this.bitisTarihi).toISOString(),
+      il: this.il,
+      mekan: this.mekan.trim(),
+      hassasiyet: this.hassasiyet,
+      guvenlikSeviyesi: this.guvenlikSeviyesi,
+      gozlemNoktalari: this.gozlemNoktalari.trim(),
+      ziyaretDurumu: 3
+    };
+    this.http.put<VIPZiyaretRecord>(`${this.apiBase}/vipziyaret/${this.selectedPlanId}`, payload, { headers: this.getHeaders() })
+      .subscribe({
+        next: (guncellenen) => {
+          const idx = this.kayitlar.findIndex(k => k.id === this.selectedPlanId);
+          if (idx !== -1) this.kayitlar[idx] = guncellenen;
+          this.basari = 'Ziyaret iptal olarak işaretlendi.';
+          this.gonderiliyor = false;
+          this.switchToPlannedForm();
+          this.cdr.markForCheck();
+        },
+        error: () => { this.hata = 'İptal işlemi başarısız.'; this.gonderiliyor = false; this.cdr.markForCheck(); }
+      });
+  }
 
   ngOnInit(): void {
     this.kayitlariYukle();
@@ -99,8 +174,8 @@ export class VIP implements OnInit {
     this.yukleniyor = true;
     this.http.get<VIPZiyaretRecord[]>(`${this.apiBase}/vipziyaret`, { headers: this.getHeaders() })
       .subscribe({
-        next: (data) => { this.kayitlar = data; this.yukleniyor = false; },
-        error: () => { this.hata = 'Kayitlar yuklenemedi.'; this.yukleniyor = false; }
+        next: (data) => { this.kayitlar = data; this.yukleniyor = false; this.cdr.markForCheck(); },
+        error: () => { this.hata = 'Kayitlar yuklenemedi.'; this.yukleniyor = false; this.cdr.markForCheck(); }
       });
   }
 
@@ -130,49 +205,50 @@ export class VIP implements OnInit {
       bitisTarihi: bitis.toISOString(),
       il: this.il,
       mekan: this.mekan.trim(),
-      hassasiyet: 0,
+      hassasiyet: this.hassasiyet,
       guvenlikSeviyesi: this.guvenlikSeviyesi,
       gozlemNoktalari: this.gozlemNoktalari.trim(),
       ziyaretDurumu: this.ziyaretDurumu
     };
 
-    this.http.post<VIPZiyaretRecord>(`${this.apiBase}/vipziyaret`, payload, { headers: this.getHeaders() })
-      .subscribe({
-        next: (yeni) => {
-          this.kayitlar.unshift(yeni);
-          this.formuSifirla();
-          this.basari = 'Ziyaret kaydi basariyla olusturuldu.';
-          this.gonderiliyor = false;
-          this.aktifSekme = 'liste';
-        },
-        error: (err) => {
-          this.hata = err.error?.message || 'Kayit sirasinda hata olustu.';
-          this.gonderiliyor = false;
-        }
-      });
+    if (this.selectedPlanId) {
+      // Planlananı gerçekleşen olarak güncelle
+      this.http.put<VIPZiyaretRecord>(`${this.apiBase}/vipziyaret/${this.selectedPlanId}`, payload, { headers: this.getHeaders() })
+        .subscribe({
+          next: (guncellenen) => {
+            const idx = this.kayitlar.findIndex(k => k.id === this.selectedPlanId);
+            if (idx !== -1) this.kayitlar[idx] = guncellenen;
+            this.basari = 'Ziyaret gerçekleşti olarak kaydedildi.';
+            this.gonderiliyor = false;
+            this.switchToPlannedForm();
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            this.hata = err.error?.message || 'Güncelleme sırasında hata oluştu.';
+            this.gonderiliyor = false;
+            this.cdr.markForCheck();
+          }
+        });
+    } else {
+      this.http.post<VIPZiyaretRecord>(`${this.apiBase}/vipziyaret`, payload, { headers: this.getHeaders() })
+        .subscribe({
+          next: (yeni) => {
+            this.kayitlar.unshift(yeni);
+            this.formuSifirla();
+            this.basari = 'Ziyaret kaydi basariyla olusturuldu.';
+            this.gonderiliyor = false;
+            this.cdr.markForCheck();
+          },
+          error: (err) => {
+            this.hata = err.error?.message || 'Kayit sirasinda hata olustu.';
+            this.gonderiliyor = false;
+            this.cdr.markForCheck();
+          }
+        });
+    }
   }
 
-  kayitDetay(kayit: VIPZiyaretRecord): void {
-    this.secilenKayit = kayit;
-    this.modalAcik = true;
-  }
 
-  modalKapat(): void {
-    this.secilenKayit = null;
-    this.modalAcik = false;
-  }
-
-  kayitSil(id: string): void {
-    if (!confirm('Bu kaydi silmek istediginizden emin misiniz?')) return;
-    this.http.delete(`${this.apiBase}/vipziyaret/${id}`, { headers: this.getHeaders() })
-      .subscribe({
-        next: () => {
-          this.kayitlar = this.kayitlar.filter(k => k.id !== id);
-          if (this.secilenKayit?.id === id) this.modalKapat();
-        },
-        error: () => { this.hata = 'Silme islemi basarisiz oldu.'; }
-      });
-  }
 
   private formuSifirla(): void {
     this.ziyaretEdenAdSoyad = '';
@@ -180,22 +256,12 @@ export class VIP implements OnInit {
     this.mekan = '';
     this.il = '';
     this.ziyaretDurumu = 0;
+    this.hassasiyet = 0;
     this.guvenlikSeviyesi = 'Normal';
     this.gozlemNoktalari = '';
     this.baslangicTarihi = new Date().toISOString().substring(0, 16);
     this.bitisTarihi = new Date().toISOString().substring(0, 16);
   }
 
-  getDurumBilgi(val: number) {
-    return this.durumlar.find(d => d.value === val) ?? this.durumlar[0];
-  }
-
-  tarihFormat(dateStr: string): string {
-    if (!dateStr) return '';
-    return new Date(dateStr).toLocaleString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-
-  durumSayisi(val: number): number {
-    return this.kayitlar.filter(k => k.ziyaretDurumu === val).length;
-  }
+  trackById(_index: number, item: { id: string }): string { return item.id; }
 }

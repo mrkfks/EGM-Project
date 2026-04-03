@@ -1,9 +1,10 @@
 ﻿import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { timer } from 'rxjs';
+import { timer, Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 interface KategoriKaydi {
@@ -28,8 +29,10 @@ interface KonuKaydi {
   imports: [CommonModule, FormsModule],
   templateUrl: './konu-islemleri.html',
   styleUrls: ['./konu-islemleri.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KonuIslemleri implements OnInit {
+export class KonuIslemleri implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   private readonly apiRoot = `${environment.apiUrl}/api/organizator`;
   private readonly konuApiBase = `${this.apiRoot}/konu`;
   private readonly kategoriApiBase = `${this.apiRoot}/kategori`;
@@ -94,7 +97,7 @@ export class KonuIslemleri implements OnInit {
   private konuRetryCount = 0;
   private readonly maxRetry = 3;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.kategorileriGetir();
@@ -108,14 +111,16 @@ export class KonuIslemleri implements OnInit {
         this.kategoriler = this.kategorileriSirala(data.filter(k => !!k.ad?.trim()));
 
         this.kategoriSeciminiEsitle(tercihEdilenId, tercihEdilenAd);
+        this.cdr.markForCheck();
       },
       error: (err) => {
         if (this.kategoriRetryCount < this.maxRetry) {
           this.kategoriRetryCount++;
-          timer(1000 * this.kategoriRetryCount).subscribe(() => this.kategorileriGetir(tercihEdilenId, tercihEdilenAd));
+          timer(1000 * this.kategoriRetryCount).pipe(takeUntil(this.destroy$)).subscribe(() => this.kategorileriGetir(tercihEdilenId, tercihEdilenAd));
         } else {
           this.hataMesaji = this.hataMetni(err, 'Kategoriler yuklenemedi.');
           this.kategoriRetryCount = 0;
+          this.cdr.markForCheck();
         }
       },
     });
@@ -170,15 +175,17 @@ export class KonuIslemleri implements OnInit {
           const guncellenmis = data.find(k => k.id === this.secilenKonu!.id);
           if (guncellenmis) this.konuSecHazirla(guncellenmis);
         }
+        this.cdr.markForCheck();
       },
       error: (err) => {
         if (this.konuRetryCount < this.maxRetry) {
           this.konuRetryCount++;
-          timer(1000 * this.konuRetryCount).subscribe(() => this.konulariGetir());
+          timer(1000 * this.konuRetryCount).pipe(takeUntil(this.destroy$)).subscribe(() => this.konulariGetir());
         } else {
           this.hataMesaji = this.hataMetni(err, 'Konular yuklenemedi.');
           this.yukleniyor = false;
           this.konuRetryCount = 0;
+          this.cdr.markForCheck();
         }
       },
     });
@@ -249,6 +256,7 @@ export class KonuIslemleri implements OnInit {
       error: (err) => {
         this.hataMesaji = this.hataMetni(err, 'Konu eklenemedi.');
         this.ekleniyor = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -282,6 +290,7 @@ export class KonuIslemleri implements OnInit {
         this.hataMesaji = this.hataMetni(err, 'Konu silinemedi.');
         this.siliyor = false;
         this.silModalAcik = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -363,6 +372,7 @@ export class KonuIslemleri implements OnInit {
       },
       error: (err) => {
         this.hataMesaji = this.hataMetni(err, 'Kategori silinemedi.');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -399,6 +409,7 @@ export class KonuIslemleri implements OnInit {
       },
       error: (err) => {
         this.hataMesaji = this.hataMetni(err, 'Kategori eklenemedi.');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -448,6 +459,7 @@ export class KonuIslemleri implements OnInit {
       },
       error: (err) => {
         this.hataMesaji = this.hataMetni(err, 'Kategori guncellenemedi.');
+        this.cdr.markForCheck();
       },
     });
   }
@@ -495,5 +507,10 @@ export class KonuIslemleri implements OnInit {
     }
 
     return varsayilan;
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

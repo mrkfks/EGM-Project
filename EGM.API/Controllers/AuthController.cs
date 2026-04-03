@@ -47,22 +47,35 @@ namespace EGM.API.Controllers
         }
 
         /// <summary>
-        /// Sisteme yeni personel kaydeder. Varsayılan rol: Izleyici.
-        /// Rol ve CityId atama işlemi için /api/user/{sicil}/rol-ata kullanılmalıdır.
+        /// Sisteme yeni personel kaydeder.
+        /// Kimlik doğrulaması yapılmış yöneticiler (IlYoneticisi, BaskanlikYoneticisi, Yetkili)
+        /// istedikleri rolü atayabilir. Diğer durumlarda rol Izleyici olarak atanır.
         /// </summary>
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterRequest request)
         {
+            // Yalnızca yönetici rolleri özel rol atayabilir
+            var rol = Roles.Izleyici;
+            if (!string.IsNullOrWhiteSpace(request.Role)
+                && User.Identity?.IsAuthenticated == true
+                && (User.IsInRole(Roles.IlAdmin)
+                    || User.IsInRole(Roles.BaskanlikAdmin)
+                    || User.IsInRole(Roles.Yonetici)))
+            {
+                rol = request.Role;
+            }
+
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
             var user = new User
             {
                 Sicil        = request.Sicil,
                 PasswordHash = hashedPassword,
-                Role         = Roles.Izleyici,
+                Role         = rol,
                 GSM          = request.GSM,
                 FullName     = request.FullName,
                 Email        = request.Email,
-                CityId       = null
+                CityId       = null,
+                Birim        = request.Birim
             };
 
             await _userService.RegisterUserAsync(user);

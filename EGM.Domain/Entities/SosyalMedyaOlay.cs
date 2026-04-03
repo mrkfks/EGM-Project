@@ -9,13 +9,15 @@ namespace EGM.Domain.Entities
         public Olay? Olay { get; set; }
 
         public string? Platform { get; set; }
+        public string? Konu { get; set; }
         public string? PaylasimLinki { get; set; }
         public DateTime PaylasimTarihi { get; set; }
         public string? IcerikOzeti { get; set; }
         public string? IlgiliKisiKurum { get; set; }
+        public string? Il { get; set; }
+        public string? Ilce { get; set; }
         public string? EkranGoruntusu { get; set; }
 
         public Hassasiyet Hassasiyet { get; set; }
-        public double SosyalSignalSkoru { get; set; }
     }
 }

@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 const API = environment.apiUrl;
@@ -44,8 +46,10 @@ interface OlayOzet {
   imports: [CommonModule, FormsModule],
   templateUrl: './konu-detay.html',
   styleUrls: ['./konu-detay.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KonuDetay implements OnInit {
+export class KonuDetay implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   konuId: string | null = null;
   konu: KonuKaydi | null = null;
   olaylar: OlayOzet[] = [];
@@ -96,11 +100,12 @@ export class KonuDetay implements OnInit {
   constructor(
     private http: HttpClient,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.konuId = params.get('id');
       if (this.konuId) {
         this.konuYukle();
@@ -118,8 +123,8 @@ export class KonuDetay implements OnInit {
     this.yukleniyor = true;
     this.http.get<KonuKaydi>(`${API}/api/organizator/konu/${this.konuId}`, { headers: this.getHeaders() })
       .subscribe({
-        next: (k) => { this.konu = k; this.yukleniyor = false; },
-        error: () => { this.hataMesaji = 'Konu bilgisi yüklenemedi.'; this.yukleniyor = false; }
+        next: (k) => { this.konu = k; this.yukleniyor = false; this.cdr.markForCheck(); },
+        error: () => { this.hataMesaji = 'Konu bilgisi yüklenemedi.'; this.yukleniyor = false; this.cdr.markForCheck(); }
       });
   }
 
@@ -131,8 +136,9 @@ export class KonuDetay implements OnInit {
           this.olaylar = data;
           this.filtrele();
           this.olayYukleniyor = false;
+          this.cdr.markForCheck();
         },
-        error: () => { this.olayYukleniyor = false; }
+        error: () => { this.olayYukleniyor = false; this.cdr.markForCheck(); }
       });
   }
 
@@ -169,5 +175,10 @@ export class KonuDetay implements OnInit {
 
   get toplamGozalti(): number {
     return this.filtreliOlaylar.reduce((s, o) => s + (o.gozaltiSayisi ?? 0), 0);
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

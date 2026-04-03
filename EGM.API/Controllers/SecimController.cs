@@ -144,12 +144,18 @@ namespace EGM.API.Controllers
                 Il = dto.Il,
                 Ilce = dto.Ilce,
                 Mahalle = dto.Mahalle,
+                Okul = dto.Okul,
+                Konu = dto.Konu,
                 SandikNo = dto.SandikNo,
                 OlayKategorisi = dto.OlayKategorisi,
                 OlaySaati = dto.OlaySaati,
                 Aciklama = dto.Aciklama,
                 KanitDosyasi = dto.KanitDosyasi,
-                Tarih = dto.Tarih
+                Tarih = dto.Tarih,
+                KatilimciSayisi = dto.KatilimciSayisi,
+                SehitSayisi = dto.SehitSayisi,
+                OluSayisi = dto.OluSayisi,
+                GozaltiSayisi = dto.GozaltiSayisi
             };
             var created = await _service.CreateSandikOlayAsync(entity);
             return CreatedAtAction(nameof(GetSandikOlayById), new { id = created.Id }, MapSandikToResponse(created));
@@ -170,9 +176,11 @@ namespace EGM.API.Controllers
         private static SandikOlayResponseDto MapSandikToResponse(SandikOlay s) => new()
         {
             Id = s.Id, MusahitAdi = s.MusahitAdi, Il = s.Il, Ilce = s.Ilce,
-            Mahalle = s.Mahalle, SandikNo = s.SandikNo, OlayKategorisi = s.OlayKategorisi,
+            Mahalle = s.Mahalle, Okul = s.Okul, Konu = s.Konu, SandikNo = s.SandikNo, OlayKategorisi = s.OlayKategorisi,
             OlaySaati = s.OlaySaati, Aciklama = s.Aciklama, KanitDosyasi = s.KanitDosyasi,
-            Tarih = s.Tarih, CreatedAt = s.CreatedAt
+            Tarih = s.Tarih, CreatedAt = s.CreatedAt,
+            KatilimciSayisi = s.KatilimciSayisi, SehitSayisi = s.SehitSayisi,
+            OluSayisi = s.OluSayisi, GozaltiSayisi = s.GozaltiSayisi
         };
     }
 }

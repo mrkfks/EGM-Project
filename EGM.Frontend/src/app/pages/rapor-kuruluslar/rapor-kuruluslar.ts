@@ -1,5 +1,5 @@
 ﻿import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -28,6 +28,7 @@ interface KurulusKaydi {
   imports: [CommonModule, FormsModule],
   templateUrl: './rapor-kuruluslar.html',
   styleUrls: ['./rapor-kuruluslar.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RaporKuruluslar implements OnInit {
   private readonly apiBase = `${environment.apiUrl}/api/organizator`;
@@ -72,7 +73,7 @@ export class RaporKuruluslar implements OnInit {
     3: { ad: 'Iptal Edildi', bg: '#f8d7da', color: '#721c24' },
   };
 
-  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+  constructor(private http: HttpClient, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
 
   private acilacakKurulusId: string | null = null;
 
@@ -108,11 +109,13 @@ export class RaporKuruluslar implements OnInit {
         this.filtrele();
         this.yukleniyor = false;
         this.acilacakKurulusId = null;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         const e = err?.error;
         this.hataMesaji = typeof e === 'string' ? e : (e?.title ?? e?.message ?? (`Hata ${err?.status ?? ''}: Kuruluslar yuklenemedi.`).trim());
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       },
     });
   }

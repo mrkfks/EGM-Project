@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
@@ -59,6 +59,7 @@ interface GunlukBultenDto {
   imports: [CommonModule, FormsModule],
   templateUrl: './raporlar.html',
   styleUrls: ['./raporlar.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Raporlar implements OnInit {
   className = 'LEGAL GUNLUK BULTEN';
@@ -74,7 +75,7 @@ export class Raporlar implements OnInit {
   beklenenDetaylar: BeklenenDetay[] = [];
   operasyonelFaaliyetler: OperasyonelDetay[] = [];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.setToday();
@@ -148,10 +149,12 @@ export class Raporlar implements OnInit {
         }));
 
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.errorMessage = 'Bülten verisi yüklenemedi. Bağlantıyı kontrol edin.';
         this.isLoading = false;
+        this.cdr.markForCheck();
       }
     });
   }

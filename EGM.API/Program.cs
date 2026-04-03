@@ -100,7 +100,13 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddHttpContextAccessor();
 
 // ── SignalR ──────────────────────────────────────────────────────────────
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.MaximumReceiveMessageSize = 64 * 1024; // 64 KB
+    options.KeepAliveInterval         = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval     = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout          = TimeSpan.FromSeconds(5);
+});
 
 // ── Encryption Servisi ───────────────────────────────────────────────────
 builder.Services.AddSingleton<IEncryptionService, AesEncryptionService>();
@@ -113,6 +119,9 @@ builder.Services.AddDbContext<EGMDbContext>((serviceProvider, options) =>
 {
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
     options.AddInterceptors(serviceProvider.GetRequiredService<AuditInterceptor>());
+    if (builder.Environment.IsDevelopment())
+        options.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Warning)
+               .EnableSensitiveDataLogging();
 });
 
 // ── Generic Repository ───────────────────────────────────────────────────
@@ -145,11 +154,12 @@ builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>(
 // ── Rate Limiting ────────────────────────────────────────────────────────
 builder.Services.AddRateLimiter(options =>
 {
-    // Login endpoint: 15 dakikada en fazla 5 deneme
+    // Login endpoint: development'ta sınırsız, production'da 15 dakikada 5 deneme
+    var isDev = builder.Environment.IsDevelopment();
     options.AddFixedWindowLimiter("login", opt =>
     {
-        opt.PermitLimit = 5;
-        opt.Window = TimeSpan.FromMinutes(15);
+        opt.PermitLimit = isDev ? 1000 : 5;
+        opt.Window = TimeSpan.FromMinutes(isDev ? 1 : 15);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 0;
     });
@@ -165,10 +175,25 @@ var allowedOrigins = builder.Configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins(allowedOrigins)
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .AllowCredentials());
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            // Geliştirme modunda herhangi bir localhost/IP:4200 origin'e izin ver
+            policy.SetIsOriginAllowed(origin =>
+                Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
+                (uri.Port == 4200 || uri.Port == 4201))
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+        else
+        {
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+    });
 });
 
 // ── Health Checks ────────────────────────────────────────────────────────
@@ -233,9 +258,12 @@ app.Use(async (context, next) =>
 
     await next();
 });
-app.UseHttpsRedirection();
-app.UseHsts();
 app.UseCors("AllowFrontend");
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+    app.UseHsts();
+}
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseRateLimiter();
 app.UseAuthentication();
@@ -279,5 +307,5 @@ using (var scope = app.Services.CreateScope())
         throw new InvalidOperationException("Veritabanına bağlanılamadı. Bağlantı dizesini kontrol edin.");
 }
 
-app.Run();
+app.Run("http://0.0.0.0:5117");
 

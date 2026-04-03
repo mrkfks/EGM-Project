@@ -43,7 +43,8 @@ namespace EGM.API.Controllers
                 Telefon = dto.Telefon, Eposta = dto.Eposta,
                 SosyalMedyaHesaplari = dto.SosyalMedyaHesaplari,
                 SiyasiYonelim = dto.SiyasiYonelim, KutukNumarasi = dto.KutukNumarasi,
-                UstKurulusId = dto.UstKurulusId
+                UstKurulusId = dto.UstKurulusId,
+                Logo = dto.Logo
             };
             var created = await _service.CreateAsync(entity);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, MapToResponse(created));
@@ -61,7 +62,8 @@ namespace EGM.API.Controllers
                 Telefon = dto.Telefon, Eposta = dto.Eposta,
                 SosyalMedyaHesaplari = dto.SosyalMedyaHesaplari,
                 SiyasiYonelim = dto.SiyasiYonelim, KutukNumarasi = dto.KutukNumarasi,
-                UstKurulusId = dto.UstKurulusId
+                UstKurulusId = dto.UstKurulusId,
+                Logo = dto.Logo
             };
             return await _service.UpdateAsync(id, updated) ? NoContent() : NotFound();
         }
@@ -140,7 +142,8 @@ namespace EGM.API.Controllers
             SiyasiYonelim = o.SiyasiYonelim, KutukNumarasi = o.KutukNumarasi,
             UstKurulusId = o.UstKurulusId,
             UstKurulusAd = o.UstKurulus?.Ad,
-            AltKurulusSayisi = o.AltKuruluslar?.Count ?? 0
+            AltKurulusSayisi = o.AltKuruluslar?.Count ?? 0,
+            Logo = o.Logo
         };
     }
 }

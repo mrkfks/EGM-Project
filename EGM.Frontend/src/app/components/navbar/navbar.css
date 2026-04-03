@@ -33,6 +33,23 @@
   gap: 10px;
 }
 
+.nb-page-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: #f0f4f8;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.nb-page-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: #1a3a5c;
+}
+
 .nb-logo {
   width: 32px;
   height: 32px;

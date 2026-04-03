@@ -25,12 +25,12 @@ namespace EGM.Infrastructure.Persistence
 
         public async Task<IReadOnlyList<T>> ListAllAsync()
         {
-            return await _dbContext.Set<T>().ToListAsync();
+            return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
         }
 
         public async Task<IReadOnlyList<T>> FindAsync(Expression<Func<T, bool>> predicate)
         {
-            return await _dbContext.Set<T>().Where(predicate).ToListAsync();
+            return await _dbContext.Set<T>().AsNoTracking().Where(predicate).ToListAsync();
         }
 
         public async Task<(IReadOnlyList<T> Items, int TotalCount)> PageAsync(
@@ -57,6 +57,18 @@ namespace EGM.Infrastructure.Persistence
             _dbContext.Set<T>().Add(entity);
             await _dbContext.SaveChangesAsync();
             return entity;
+        }
+
+        public async Task AddRangeAsync(IEnumerable<T> entities)
+        {
+            var now = DateTime.UtcNow;
+            foreach (var entity in entities)
+            {
+                entity.CreatedAt = now;
+                entity.UpdatedAt = now;
+            }
+            await _dbContext.Set<T>().AddRangeAsync(entities);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(T entity)

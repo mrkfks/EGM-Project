@@ -1,7 +1,10 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { OlayTuruService, OlayTuru } from '../../services/olay-turu.service';
+import { GerceklesmeSekliService, GerceklesmeSekli } from '../../services/gerceklesme-sekli.service';
+import { KonuService, Konu } from '../../services/konu.service';
 
 interface SandikOlayRecord {
   id: string;
@@ -9,6 +12,7 @@ interface SandikOlayRecord {
   il: string;
   ilce: string;
   mahalle: string;
+  okul: string;
   sandikNo: number;
   olayKategorisi: string;
   olaySaati: string;
@@ -23,7 +27,8 @@ interface SandikOlayRecord {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './secim.html',
-  styleUrls: ['./secim.css']
+  styleUrls: ['./secim.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Secim implements OnInit {
   private apiBase = 'http://localhost:5117/api';
@@ -33,13 +38,33 @@ export class Secim implements OnInit {
   il = '';
   ilce = '';
   mahalle = '';
+  okul = '';
+  konu = '';
   sandikNo: number | null = null;
   olayKategorisi = '';
-  olaySaati = '';
+  olayTarihi = new Date().toISOString().slice(0, 16);
   aciklama = '';
   kanitDosyasiBase64: string | null = null;
   kanitDosyasiAd = '';
-  tarih = new Date().toISOString().substring(0, 10);
+  katilimciSayisi: number | null = null;
+  sehitSayisi: number | null = null;
+  oluSayisi: number | null = null;
+  gozaltiSayisi: number | null = null;
+
+  // Konu listesi
+  konular: Konu[] = [];
+  konularYukleniyor = false;
+
+  // Olay Turu / Gerceklesme Sekli
+  olayTurleri: OlayTuru[] = [];
+  gerceklesmeSekilleri: GerceklesmeSekli[] = [];
+  filtreliGerceklesmeSekilleri: GerceklesmeSekli[] = [];
+  secilenOlayTuruId = '';
+  secilenOlayTuruAdi = '';
+  secilenGerceklesmeSekliId = '';
+  secilenGerceklesmeSekliAdi = '';
+  turlerYukleniyor = true;
+  turlerHata = false;
 
   // UI durumu
   kayitlar: SandikOlayRecord[] = [];
@@ -73,10 +98,26 @@ export class Secim implements OnInit {
     'Kilis','Osmaniye','Duzce'
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,
+              private olayTuruService: OlayTuruService,
+              private gerceklesmeSekliService: GerceklesmeSekliService,
+              private konuService: KonuService,
+              private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.kayitlariYukle();
+    this.konuService.getAll().subscribe({
+      next: res => { this.konular = res; this.cdr.markForCheck(); },
+      error: () => {}
+    });
+    this.olayTuruService.getAll().subscribe({
+      next: res => { this.olayTurleri = res; this.turlerYukleniyor = false; this.cdr.markForCheck(); },
+      error: () => { this.turlerYukleniyor = false; this.turlerHata = true; this.cdr.markForCheck(); }
+    });
+    this.gerceklesmeSekliService.getAll().subscribe({
+      next: res => { this.gerceklesmeSekilleri = res; this.cdr.markForCheck(); },
+      error: () => {}
+    });
   }
 
   private getHeaders(): HttpHeaders {
@@ -88,13 +129,32 @@ export class Secim implements OnInit {
     this.yukleniyor = true;
     this.http.get<SandikOlayRecord[]>(`${this.apiBase}/secim/sandik-olay`, { headers: this.getHeaders() })
       .subscribe({
-        next: (data) => { this.kayitlar = data; this.yukleniyor = false; },
-        error: () => { this.hata = 'Kayitlar yuklenemedi.'; this.yukleniyor = false; }
+        next: (data) => { this.kayitlar = data; this.yukleniyor = false; this.cdr.markForCheck(); },
+        error: () => { this.hata = 'Kayitlar yuklenemedi.'; this.yukleniyor = false; this.cdr.markForCheck(); }
       });
   }
 
   kategoriSec(k: string): void {
     this.olayKategorisi = this.olayKategorisi === k ? '' : k;
+  }
+
+  olayTuruIdDegisti(id: string): void {
+    const tur = this.olayTurleri.find(t => t.id === id);
+    this.secilenOlayTuruAdi = tur?.name ?? '';
+    this.secilenGerceklesmeSekliId = '';
+    this.secilenGerceklesmeSekliAdi = '';
+    this.filtreliGerceklesmeSekilleri = id
+      ? this.gerceklesmeSekilleri.filter(s => s.olayTuruId === id)
+      : [];
+    this.olayKategorisi = this.secilenOlayTuruAdi;
+  }
+
+  gerceklesmeSekliIdDegisti(id: string): void {
+    const sekli = this.filtreliGerceklesmeSekilleri.find(s => s.id === id);
+    this.secilenGerceklesmeSekliAdi = sekli?.name ?? '';
+    this.olayKategorisi = this.secilenGerceklesmeSekliAdi
+      ? `${this.secilenOlayTuruAdi} / ${this.secilenGerceklesmeSekliAdi}`
+      : this.secilenOlayTuruAdi;
   }
 
   dosyaSec(event: Event): void {
@@ -120,8 +180,8 @@ export class Secim implements OnInit {
 
   formGecerliMi(): boolean {
     return this.musahitAdi.trim().length >= 3 &&
-      !!this.il && !!this.ilce.trim() && !!this.olayKategorisi &&
-      !!this.olaySaati && this.aciklama.trim().length > 0 &&
+      !!this.il && !!this.ilce.trim() && !!this.secilenOlayTuruId && !!this.secilenGerceklesmeSekliId &&
+      !!this.olayTarihi && this.aciklama.trim().length > 0 &&
       (this.sandikNo !== null && this.sandikNo > 0);
   }
 
@@ -137,11 +197,17 @@ export class Secim implements OnInit {
       ilce: this.ilce.trim(),
       mahalle: this.mahalle.trim(),
       sandikNo: this.sandikNo,
+      konu: this.konu || null,
       olayKategorisi: this.olayKategorisi,
-      olaySaati: this.olaySaati + ':00',
+      olaySaati: this.olayTarihi.slice(11) + ':00',
+      okul: this.okul.trim() || null,
       aciklama: this.aciklama.trim(),
       kanitDosyasi: this.kanitDosyasiBase64,
-      tarih: new Date(this.tarih).toISOString()
+      tarih: new Date(this.olayTarihi).toISOString(),
+      katilimciSayisi: this.katilimciSayisi ?? 0,
+      sehitSayisi: this.sehitSayisi ?? 0,
+      oluSayisi: this.oluSayisi ?? 0,
+      gozaltiSayisi: this.gozaltiSayisi ?? 0
     };
 
     this.http.post<SandikOlayRecord>(`${this.apiBase}/secim/sandik-olay`, payload, { headers: this.getHeaders() })
@@ -151,10 +217,12 @@ export class Secim implements OnInit {
           this.formuSifirla();
           this.basari = 'Sandik olayi basariyla kaydedildi.';
           this.gonderiliyor = false;
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.hata = err.error?.message || 'Kayit sirasinda hata olustu.';
           this.gonderiliyor = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -176,8 +244,9 @@ export class Secim implements OnInit {
         next: () => {
           this.kayitlar = this.kayitlar.filter(k => k.id !== id);
           if (this.secilenKayit?.id === id) this.modalKapat();
+          this.cdr.markForCheck();
         },
-        error: () => { this.hata = 'Silme islemi basarisiz oldu.'; }
+        error: () => { this.hata = 'Silme islemi basarisiz oldu.'; this.cdr.markForCheck(); }
       });
   }
 
@@ -188,11 +257,17 @@ export class Secim implements OnInit {
     this.mahalle = '';
     this.sandikNo = null;
     this.olayKategorisi = '';
-    this.olaySaati = '';
+    this.secilenOlayTuruId = '';
+    this.secilenOlayTuruAdi = '';
+    this.secilenGerceklesmeSekliId = '';
+    this.secilenGerceklesmeSekliAdi = '';
+    this.filtreliGerceklesmeSekilleri = [];
+    this.okul = '';
+    this.konu = '';
+    this.olayTarihi = new Date().toISOString().slice(0, 16);
     this.aciklama = '';
     this.kanitDosyasiBase64 = null;
     this.kanitDosyasiAd = '';
-    this.tarih = new Date().toISOString().substring(0, 10);
   }
 
   tarihFormat(dateStr: string): string {
@@ -201,7 +276,7 @@ export class Secim implements OnInit {
   }
 
   kategoriSayisi(k: string): number {
-    return this.kayitlar.filter(r => r.olayKategorisi === k).length;
+    return this.kayitlar.filter(r => r.olayKategorisi?.startsWith(k)).length;
   }
 
   kategoriRenk(k: string): string {
@@ -212,6 +287,10 @@ export class Secim implements OnInit {
       'Sayim Hatasi': '#8e44ad',
       'Diger': '#7f8c8d'
     };
-    return renkler[k] || '#7f8c8d';
+    if (renkler[k]) return renkler[k];
+    const palette = ['#2980b9','#27ae60','#8e44ad','#e74c3c','#e67e22','#16a085','#d35400','#2c3e50'];
+    let hash = 0;
+    for (let i = 0; i < k.length; i++) hash = k.charCodeAt(i) + ((hash << 5) - hash);
+    return palette[Math.abs(hash) % palette.length];
   }
 }

@@ -35,7 +35,8 @@ namespace EGM.API.Controllers
             var users = (await _userService.GetAllUsersAsync()).Select(u => new UserResponseDto
             {
                 Id = u.Id, Sicil = u.Sicil, Role = u.Role,
-                FullName = u.FullName, Email = u.Email, GSM = u.GSM
+                FullName = u.FullName, Email = u.Email, GSM = u.GSM,
+                CityId = u.CityId, Birim = u.Birim
             });
             return Ok(users);
         }
@@ -59,6 +60,24 @@ namespace EGM.API.Controllers
         {
             await _roleAssignmentService.AssignRoleAsync(sicil, dto.YeniRol, dto.CityId);
             return Ok(new { Mesaj = $"Sicil {sicil} kullanıcısına '{dto.YeniRol}' rolü atandı." });
+        }
+
+        [HttpPut("{sicil}")]
+        [Authorize(Policy = "CityManagerOrAbove")]
+        public async Task<IActionResult> Update(int sicil, [FromBody] UserGuncelleDto dto)
+        {
+            var user = await _userService.GetBySicilAsync(sicil);
+            if (user == null) return NotFound("Kullanıcı bulunamadı.");
+
+            user.FullName = dto.FullName;
+            user.Email    = dto.Email;
+            user.GSM      = dto.GSM;
+            user.Birim    = dto.Birim;
+            user.Role     = dto.Role;
+            user.CityId   = dto.CityId;
+
+            await _userService.UpdateUserAsync(user);
+            return Ok(new { Mesaj = "Kullanıcı güncellendi." });
         }
     }
 }

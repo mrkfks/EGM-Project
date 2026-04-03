@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-operasyonel',
@@ -7,5 +7,6 @@ import { Component } from '@angular/core';
   imports: [CommonModule],
   templateUrl: './operasyonel.html',
   styleUrls: ['./operasyonel.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Operasyonel {}

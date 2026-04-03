@@ -384,6 +384,12 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<DateTime?>("GercekBitisTarihi")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("GerceklesenKatilimciSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("GerceklesmeSekliId")
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("GozaltiSayisi")
                         .HasColumnType("INTEGER");
 
@@ -417,6 +423,9 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<string>("Mekan")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("OlayBitisTarihi")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("OlayTuru")
                         .HasColumnType("TEXT");
 
@@ -442,6 +451,8 @@ namespace EGM.Infrastructure.Migrations
                     b.HasIndex("CreatedByUserId");
 
                     b.HasIndex("Durum");
+
+                    b.HasIndex("GerceklesmeSekliId");
 
                     b.HasIndex("KonuId");
 
@@ -594,6 +605,9 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<string>("KutukNumarasi")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Logo")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("SiyasiYonelim")
                         .HasColumnType("TEXT");
 
@@ -662,6 +676,9 @@ namespace EGM.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("GozaltiSayisi")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Il")
                         .HasColumnType("TEXT");
 
@@ -674,10 +691,19 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<string>("KanitDosyasi")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("KatilimciSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Konu")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Mahalle")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MusahitAdi")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Okul")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("OlayKategorisi")
@@ -686,7 +712,13 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<TimeSpan>("OlaySaati")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("OluSayisi")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("SandikNo")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SehitSayisi")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Tarih")
@@ -854,11 +886,20 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<string>("IcerikOzeti")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Il")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ilce")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("IlgiliKisiKurum")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Konu")
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("OlayId")
                         .HasColumnType("TEXT");
@@ -871,9 +912,6 @@ namespace EGM.Infrastructure.Migrations
 
                     b.Property<string>("Platform")
                         .HasColumnType("TEXT");
-
-                    b.Property<double>("SosyalSignalSkoru")
-                        .HasColumnType("REAL");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -934,6 +972,10 @@ namespace EGM.Infrastructure.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Birim")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("CityId")
@@ -1154,6 +1196,11 @@ namespace EGM.Infrastructure.Migrations
 
             modelBuilder.Entity("EGM.Domain.Entities.Olay", b =>
                 {
+                    b.HasOne("EGM.Domain.Entities.GerceklesmeSekli", "GerceklesmeSekli")
+                        .WithMany()
+                        .HasForeignKey("GerceklesmeSekliId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("EGM.Domain.Entities.Konu", "Konu")
                         .WithMany("Olaylar")
                         .HasForeignKey("KonuId")
@@ -1165,6 +1212,8 @@ namespace EGM.Infrastructure.Migrations
                         .HasForeignKey("OrganizatorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("GerceklesmeSekli");
 
                     b.Navigation("Konu");
 

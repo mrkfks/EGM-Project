@@ -34,8 +34,10 @@
             "polyfills": ["@angular/localize/init"]
           },
           "configurations": {
-            "production": {
-              "budgets": [
+            "production": {              "optimization": true,
+              "buildOptimizer": true,
+              "sourceMap": false,
+              "namedChunks": false,              "budgets": [
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",

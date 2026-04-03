@@ -30,6 +30,10 @@ namespace EGM.Application.DTOs
 
         /// <summary>İl plaka kodu. IlPersoneli / IlYoneticisi için zorunlu; başkanlık rolleri için null.</summary>
         public int? CityId { get; set; }
+
+        /// <summary>Kullanıcının çalıştığı birim / şube adı.</summary>
+        [StringLength(250)]
+        public string Birim { get; set; } = string.Empty;
     }
 
     public class LoginRequest

@@ -1,6 +1,8 @@
 using EGM.Application.Services;
+using EGM.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace EGM.API.Controllers
 {
@@ -10,22 +12,100 @@ namespace EGM.API.Controllers
     public class RaporlarController : ControllerBase
     {
         private readonly RaporlarService _raporlarService;
+        private readonly EGMDbContext    _context;
 
-        public RaporlarController(RaporlarService raporlarService)
+        public RaporlarController(RaporlarService raporlarService, EGMDbContext context)
         {
             _raporlarService = raporlarService;
+            _context         = context;
         }
 
-        /// <summary>
-        /// Belirtilen tarihe ait günlük bülten verisini döner.
-        /// </summary>
-        /// <param name="tarih">Rapor tarihi (yyyy-MM-dd). Boş bırakılırsa bugün kullanılır.</param>
         [HttpGet("gunluk-bulten")]
         public async Task<IActionResult> GetGunlukBulten([FromQuery] DateTime? tarih)
         {
             var raporTarihi = tarih.HasValue ? tarih.Value.Date : DateTime.Today;
             var bulten = await _raporlarService.GetGunlukBultenAsync(raporTarihi);
             return Ok(bulten);
+        }
+
+        [HttpGet("veri-girisler")]
+        [Authorize(Policy = "CityManagerOrAbove")]
+        public async Task<IActionResult> GetVeriGirisler([FromQuery] int limit = 500)
+        {
+            // (UserId, Tarih, Konu, Faaliyet, Kaynak)
+            var rows = new List<(string? UserId, DateTime Tarih, string? Konu, string? Faaliyet, string Kaynak)>();
+
+            // ── Sokak Olayları ────────────────────────────────────────────
+            rows.AddRange((await _context.Olaylar
+                .OrderByDescending(o => o.CreatedAt).Take(limit)
+                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Baslik, o.OlayTuru })
+                .ToListAsync())
+                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.Baslik, o.OlayTuru, "Sokak Olayı")));
+
+            // ── Sosyal Medya Olayları ─────────────────────────────────────
+            rows.AddRange((await _context.SosyalMedyaOlaylar
+                .OrderByDescending(o => o.CreatedAt).Take(limit)
+                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Konu, o.Platform })
+                .ToListAsync())
+                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.Konu, o.Platform, "Sosyal Medya Olayı")));
+
+            // ── VIP Ziyaret Olayları ──────────────────────────────────────
+            rows.AddRange((await _context.VIPZiyaretler
+                .OrderByDescending(o => o.CreatedAt).Take(limit)
+                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.ZiyaretEdenAdSoyad, o.Unvan })
+                .ToListAsync())
+                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.ZiyaretEdenAdSoyad, o.Unvan, "VIP Ziyaret")));
+
+            // ── Sandık Olayları ───────────────────────────────────────────
+            rows.AddRange((await _context.SandikOlaylar
+                .OrderByDescending(o => o.CreatedAt).Take(limit)
+                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Konu, o.OlayKategorisi })
+                .ToListAsync())
+                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.Konu, o.OlayKategorisi, "Sandık Olayı")));
+
+            // ── Konu Tanımları ────────────────────────────────────────────
+            rows.AddRange((await _context.Konular
+                .OrderByDescending(k => k.CreatedAt).Take(limit)
+                .Select(k => new { k.CreatedByUserId, k.CreatedAt, k.Ad, k.Tur })
+                .ToListAsync())
+                .Select(k => (k.CreatedByUserId, k.CreatedAt, k.Ad, k.Tur, "Konu Tanımı")));
+
+            // ── Gerçekleşme Şekilleri ─────────────────────────────────────
+            rows.AddRange((await _context.GerceklesmeSekilleri
+                .Include(g => g.OlayTuru)
+                .OrderByDescending(g => g.CreatedAt).Take(limit)
+                .ToListAsync())
+                .Select(g => (g.CreatedByUserId, g.CreatedAt,
+                    g.OlayTuru != null ? g.OlayTuru.Name : "-", (string?)g.Name, "Gerçekleşme Şekli")));
+
+            // ── Kullanıcı haritası ────────────────────────────────────────
+            var sicilSet = rows.Select(r => r.UserId)
+                .Where(s => !string.IsNullOrEmpty(s)).ToHashSet();
+
+            var userMap = await _context.Users
+                .Where(u => sicilSet.Contains(u.Sicil.ToString()))
+                .Select(u => new { Key = u.Sicil.ToString(), u.FullName, u.Birim })
+                .ToDictionaryAsync(u => u.Key, u => new { u.FullName, u.Birim });
+
+            var result = rows
+                .OrderByDescending(r => r.Tarih)
+                .Take(limit)
+                .Select(r =>
+                {
+                    userMap.TryGetValue(r.UserId ?? "", out var u);
+                    return new
+                    {
+                        sicil    = int.TryParse(r.UserId, out var s) ? s : 0,
+                        adSoyad  = u?.FullName ?? "-",
+                        birim    = u?.Birim    ?? "-",
+                        tarih    = r.Tarih,
+                        kaynak   = r.Kaynak,
+                        konu     = r.Konu     ?? "-",
+                        faaliyet = r.Faaliyet ?? "-",
+                    };
+                });
+
+            return Ok(result);
         }
     }
 }

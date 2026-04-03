@@ -6,9 +6,15 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, firstValueFrom } from 'rxjs';
 import { NotificationService } from '../../services/notification.service';
 import type * as LeafletType from 'leaflet';
+import * as _leafletRef from 'leaflet';
+
+// markercluster UMD factory'si bare global 'L' arar; modül yüklenirken set et
+if (typeof window !== 'undefined') {
+  (window as any).L = (_leafletRef as any).default ?? _leafletRef;
+}
 
 // ── Türkiye coğrafi sınırları ─────────────────────────────────────────────
 const TURKEY_SW: [number, number] = [35.5, 25.5];
@@ -79,7 +85,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   private resizeTimer?: number;
   private streetTile?: LeafletType.TileLayer;
   private satTile?: LeafletType.TileLayer;
-  private markersGroup?: LeafletType.FeatureGroup;
+  private markersGroup?: any;
+  private rotaLayer?: any;
   private heatLayer?: any;
 
   // Pulse map: olayId → CircleMarker SVG path elementi
@@ -89,6 +96,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   currentLayer: 'street' | 'satellite' | 'heatmap' = 'street';
   durumFilter = 'tum';
   zamanFilter = 'tum';
+  hassFilter  = 'tum';
+  ilFilter    = 'tum';
   isLoading   = false;
   errorMsg: string | null = null;
 
@@ -102,7 +111,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
   tokenRole:   string | null = null;
 
   // Data
-  private olaylar: OlayMapItem[] = [];
+  olaylar: OlayMapItem[] = [];
   private destroy$ = new Subject<void>();
 
   // Template sabitleri
@@ -139,6 +148,8 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     await this.loadTurkeyGeoJSON();
     await this.loadOlaylar();
     this.notifSvc.connect();
+    (window as any)['egmNavigate'] = (id: string) => this.router.navigate(['/olay', id]);
+    (window as any)['egmShowRota'] = (id: string) => this.showRota(id);
 
     // Harita pulse animasyonu
     this.notifSvc.pulse$.pipe(takeUntil(this.destroy$)).subscribe(({ olayId }) => {
@@ -162,6 +173,9 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     this.resizeObserver?.disconnect();
     if (this.resizeTimer)  window.clearTimeout(this.resizeTimer);
     if (this.notifTimer)   window.clearTimeout(this.notifTimer);
+    delete (window as any)['egmNavigate'];
+    delete (window as any)['egmShowRota'];
+    this.rotaLayer?.remove();
     this.map?.remove();
     this.destroy$.next();
     this.destroy$.complete();
@@ -177,6 +191,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     const L = ((leafletModule as any).default ?? leafletModule) as typeof LeafletType;
     console.log('[EGM] leaflet namespace resolved, L.map type:', typeof L.map);
     this.L = L;
+    await import('leaflet.markercluster');
 
     L.Icon.Default.mergeOptions({
       iconUrl:       'assets/marker-icon.png',
@@ -205,7 +220,10 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       { attribution: '© Esri', maxZoom: 19 }
     );
     this.streetTile.addTo(this.map);
-    this.markersGroup = L.featureGroup().addTo(this.map);
+    this.markersGroup = (L as any).markerClusterGroup({
+      chunkedLoading: true, maxClusterRadius: 55, spiderfyOnMaxZoom: true
+    }).addTo(this.map);
+    L.control.scale({ imperial: false }).addTo(this.map);
     console.log('[EGM] Leaflet map initialized');
 
     const container = this.map.getContainer();
@@ -320,7 +338,16 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       this.heatLayer = undefined;
     }
 
-    const items = this.olaylar.filter(o => o.latitude != null && o.longitude != null);
+    if (this.rotaLayer) {
+      this.map?.removeLayer(this.rotaLayer);
+      this.rotaLayer = undefined;
+    }
+
+    const items = this.olaylar.filter(o =>
+      o.latitude != null && o.longitude != null
+      && (this.hassFilter === 'tum' || o.hassasiyet === +this.hassFilter)
+      && (this.ilFilter   === 'tum' || o.il === this.ilFilter)
+    );
 
     if (this.currentLayer === 'heatmap') {
       this.renderHeatmap(items);
@@ -414,6 +441,10 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     <div class="pr"><span>Durum</span><span>${dl}</span></div>
     ${kp}${rp}
   </div>
+  <div class="egm-pop-footer">
+    <button class="egm-pop-btn" onclick="window['egmNavigate']('${item.id}')">Detayı Gör →</button>
+    <button class="egm-pop-btn egm-pop-btn-sec" onclick="window['egmShowRota']('${item.id}')">Rotayı Göster</button>
+  </div>
 </div>`;
   }
 
@@ -494,6 +525,61 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
       this.tokenRole   = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
                       ?? payload.role ?? null;
     } catch { /* Geçersiz token formatı — yoksay */ }
+  }
+
+  onHassChange(e: Event): void {
+    this.hassFilter = (e.target as HTMLSelectElement).value;
+    this.renderMarkers();
+  }
+
+  onIlChange(e: Event): void {
+    this.ilFilter = (e.target as HTMLSelectElement).value;
+    this.renderMarkers();
+  }
+
+  get ilListesi(): string[] {
+    return [...new Set(this.olaylar.map(o => o.il).filter((il): il is string => !!il))].sort();
+  }
+
+  get koordinatsiziSayisi(): number {
+    return this.olaylar.filter(o => !o.latitude || !o.longitude).length;
+  }
+
+  get statsVisible(): boolean {
+    return !this.isLoading && this.olaylar.length > 0;
+  }
+
+  get statsGosterilen(): number {
+    return this.olaylar.filter(o =>
+      o.latitude != null && o.longitude != null
+      && (this.hassFilter === 'tum' || o.hassasiyet === +this.hassFilter)
+      && (this.ilFilter   === 'tum' || o.il === this.ilFilter)
+    ).length;
+  }
+
+  hassCount(k: number): number {
+    return this.olaylar.filter(o => o.hassasiyet === k).length;
+  }
+
+  private async showRota(olayId: string): Promise<void> {
+    if (!this.map || !this.L) return;
+    if (this.rotaLayer) {
+      this.map.removeLayer(this.rotaLayer);
+      this.rotaLayer = undefined;
+    }
+    try {
+      const pts = await firstValueFrom(this.http.get<any[]>(`${this.apiBase}/api/olay/${olayId}/rota`));
+      if (!pts?.length) { console.info('[EGM] Rota noktası bulunamadı'); return; }
+      const latLngs = pts
+        .sort((a, b) => a.siraNo - b.siraNo)
+        .map(p => [p.latitude, p.longitude] as [number, number]);
+      this.rotaLayer = this.L.polyline(latLngs, {
+        color: '#3498db', weight: 3, dashArray: '8 4'
+      }).addTo(this.map);
+      this.map.fitBounds(this.rotaLayer.getBounds(), { padding: [40, 40] });
+    } catch (err) {
+      console.warn('[EGM] Rota yüklenemedi', err);
+    }
   }
 
   get markerCount(): number {

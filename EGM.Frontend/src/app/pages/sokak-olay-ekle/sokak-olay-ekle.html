@@ -9,7 +9,7 @@
     <div *ngIf="!isLoadingPlanned && userPlans.length === 0" class="side-empty">
       Henüz bir planlama eklenmedi.
     </div>
-    <div *ngFor="let plan of userPlans"
+    <div *ngFor="let plan of userPlans; trackBy: trackById"
          class="side-card"
          [class.side-card-selected]="selectedPlanId === plan.id"
          (click)="selectPlanForCompletion(plan)"
@@ -59,7 +59,7 @@
           <label>Olay Türü <span class="req">*</span></label>
           <select formControlName="olayTuru" [class.is-invalid]="fieldError('olayTuru')">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let t of olayTurleri" [value]="t.id">{{ t.name }}</option>
+            <option *ngFor="let t of olayTurleri; trackBy: trackById" [value]="t.id">{{ t.name }}</option>
           </select>
           <div class="field-error" *ngIf="fieldError('olayTuru')">Olay türü zorunludur.</div>
         </div>
@@ -68,7 +68,7 @@
           <label>Olayın Gerçekleşme Şekli <span class="req">*</span></label>
           <select formControlName="olayinGerceklesmeSekli" [class.is-invalid]="fieldError('olayinGerceklesmeSekli')">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let sekil of filtreliGerceklesmeSekilleri" [value]="sekil.id">{{ sekil.name }}</option>
+            <option *ngFor="let sekil of filtreliGerceklesmeSekilleri; trackBy: trackById" [value]="sekil.id">{{ sekil.name }}</option>
           </select>
           <div class="field-error" *ngIf="fieldError('olayinGerceklesmeSekli')">Olayın gerçekleşme şekli zorunludur.</div>
         </div>
@@ -84,7 +84,7 @@
           <label>Organizatör <span class="req">*</span></label>
           <select formControlName="organizatorId" [class.is-invalid]="fieldError('organizatorId')">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let o of organizatorler" [value]="o.id">{{ o.ad }}</option>
+            <option *ngFor="let o of organizatorler; trackBy: trackById" [value]="o.id">{{ o.ad }}</option>
           </select>
           <div class="field-error" *ngIf="fieldError('organizatorId')">Organizatör zorunludur.</div>
         </div>
@@ -93,7 +93,7 @@
           <label>Konu <span class="req">*</span></label>
           <select formControlName="konuId" [class.is-invalid]="fieldError('konuId')">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let k of konular" [value]="k.id">{{ k.ad }}</option>
+            <option *ngFor="let k of konular; trackBy: trackById" [value]="k.id">{{ k.ad }}</option>
           </select>
           <div class="field-error" *ngIf="fieldError('konuId')">Konu zorunludur.</div>
         </div>
@@ -184,7 +184,7 @@
     <div *ngIf="!isLoadingCompleted && completedEvents.length === 0" class="side-empty">
       Henüz gerçekleşen bir olay yok.
     </div>
-    <div *ngFor="let event of completedEvents" class="side-card" [class.side-card-cancelled]="event.durum === 2">
+    <div *ngFor="let event of completedEvents; trackBy: trackById" class="side-card" [class.side-card-cancelled]="event.durum === 2">
       <div class="side-card-header">
         <span class="side-card-tur">{{ event.olayTuru || '—' }}</span>
         <span class="side-card-il">{{ event.il }}</span>

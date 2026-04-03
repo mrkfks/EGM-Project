@@ -44,6 +44,9 @@ namespace EGM.Application.Services
         public async Task UpdateUserAsync(User user)
             => await _userRepository.UpdateAsync(user);
 
+        public async Task<User?> GetBySicilAsync(int sicil)
+            => await _userRepository.GetBySicilAsync(sicil);
+
         public async Task DeleteUserAsync(int sicil)
             => await _userRepository.DeleteAsync(sicil);
 

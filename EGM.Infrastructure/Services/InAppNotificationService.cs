@@ -14,6 +14,10 @@ namespace EGM.Infrastructure.Services
         // RiskPuani > 0 → şehir yöneticileri; RiskPuani >= 20 → merkez yöneticileri de
         private const double CriticalRiskThreshold = 20.0;
 
+        // Aynı olay için 30 saniye içinde tekrar bildirim gönderilmesini engelle
+        private static readonly Dictionary<string, DateTime> _rateLimitMap = new();
+        private static readonly TimeSpan _rateLimitWindow = TimeSpan.FromSeconds(30);
+
         private readonly EGMDbContext                 _context;
         private readonly IHubContext<NotificationHub> _hub;
         private readonly ICurrentUserService          _currentUser;
@@ -32,6 +36,16 @@ namespace EGM.Infrastructure.Services
         public async Task NotifyOlayRiskAsync(Olay olay, bool isSelfCorrection = false)
         {
             if (olay.RiskPuani <= 0 && !isSelfCorrection) return;
+
+            // Rate limiting: aynı olay için 30 sn içinde tekrar bildirim gönderme
+            var rateLimitKey = $"{olay.Id}_{(isSelfCorrection ? "correction" : "risk")}";
+            lock (_rateLimitMap)
+            {
+                if (_rateLimitMap.TryGetValue(rateLimitKey, out var lastSent)
+                    && DateTime.UtcNow - lastSent < _rateLimitWindow)
+                    return;
+                _rateLimitMap[rateLimitKey] = DateTime.UtcNow;
+            }
 
             var isCritical = olay.RiskPuani >= CriticalRiskThreshold;
 

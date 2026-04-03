@@ -28,6 +28,9 @@ namespace EGM.Domain.Entities
         /// <summary>Resmi kutuk / sicil kayit numarasi</summary>
         public string? KutukNumarasi { get; set; }
 
+        /// <summary>Kuruluş logosu (base64 encoded resim). İsteğe bağlı.</summary>
+        public string? Logo { get; set; }
+
         /// <summary>Ust kurulusun Id'si (hiyerarsi icin). Null ise ust duzeyde bagimsiz kurulustur.</summary>
         public Guid? UstKurulusId { get; set; }
         public Organizator? UstKurulus { get; set; }

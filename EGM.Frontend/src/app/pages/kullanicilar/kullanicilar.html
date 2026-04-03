@@ -11,38 +11,41 @@
   </div>
 
   <!-- Sekme Bar -->
-  <div class="sekme-bar">
-    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'liste'"
-            (click)="aktifSekme = 'liste'">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
-        <line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5"/>
-        <circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/>
-      </svg>
-      Kullanici Listesi
-      <span class="sekme-sayac">{{ kullanicilar.length }}</span>
-    </button>
-    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'ekle'"
-            (click)="aktifSekme = 'ekle'">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="8"/>
-        <line x1="20.5" y1="5.5" x2="20.5" y2="10.5"/>
-      </svg>
-      Yeni Kullanici Ekle
-    </button>
-  </div>
+  <div class="ust-satir">
+    <!-- Sekmeler -->
+    <div class="sekme-bar">
+      <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'liste'"
+              (click)="aktifSekme = 'liste'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5"/>
+          <circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/>
+        </svg>
+        Kullanici Listesi
+        <span class="sekme-sayac">{{ kullanicilar.length }}</span>
+      </button>
+      <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'ekle'"
+              (click)="aktifSekme = 'ekle'">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="8"/>
+          <line x1="20.5" y1="5.5" x2="20.5" y2="10.5"/>
+        </svg>
+        Yeni Kullanici Ekle
+      </button>
+    </div>
 
-  <!-- ─────────────────── LISTE SEKMESI ──────────────────────────── -->
-  <div *ngIf="aktifSekme === 'liste'">
-
-    <!-- Ozet Kartlar -->
-    <div class="ozet-bar">
+    <!-- Ozet Kartlar (sadece liste sekmesin de) -->
+    <div class="ozet-bar" *ngIf="aktifSekme === 'liste'">
       <div class="ozet-kart">
         <span class="ozet-sayi">{{ kullanicilar.length }}</span>
         <span class="ozet-etiket">Toplam</span>
+      </div>
+      <div class="ozet-kart" style="--accent:#c0392b">
+        <span class="ozet-sayi">{{ rolSayisi('Yetkili') }}</span>
+        <span class="ozet-etiket">Yetkili</span>
       </div>
       <div class="ozet-kart" style="--accent:#27ae60">
         <span class="ozet-sayi">{{ rolSayisi('IlPersoneli') + rolSayisi('IlYoneticisi') }}</span>
@@ -58,26 +61,32 @@
       </div>
     </div>
 
+    <!-- Arama + Yenile (sadece liste sekmesin de) -->
+    <div class="tablo-ust" *ngIf="aktifSekme === 'liste'">
+      <div class="arama-kutu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" class="arama-ikon">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" placeholder="Ad, e-posta veya sicil ile ara..."
+               [(ngModel)]="aramaMetni" (ngModelChange)="filtrele()" />
+      </div>
+      <button class="btn-yenile" (click)="kullanicilariGetir()" title="Yenile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        Yenile
+      </button>
+    </div>
+  </div>
+
+  <!-- ─────────────────── LISTE SEKMESI ──────────────────────────── -->
+  <div *ngIf="aktifSekme === 'liste'">
+
     <!-- Arama + Tablo Paneli -->
     <div class="tablo-panel">
-      <div class="tablo-ust">
-        <div class="arama-kutu">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round" class="arama-ikon">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input type="text" placeholder="Ad, e-posta veya sicil ile ara..."
-                 [(ngModel)]="aramaMetni" (ngModelChange)="filtrele()" />
-        </div>
-        <button class="btn-yenile" (click)="kullanicilariGetir()" title="Yenile">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-            <polyline points="23 4 23 10 17 10"/>
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-          </svg>
-          Yenile
-        </button>
-      </div>
 
       <!-- Yukleniyor -->
       <div *ngIf="yukleniyor" class="yukleniyor">
@@ -94,6 +103,7 @@
               <th>Ad Soyad</th>
               <th>E-posta</th>
               <th>GSM</th>
+              <th>Birim</th>
               <th>Rol</th>
               <th>Islemler</th>
             </tr>
@@ -104,6 +114,7 @@
               <td class="ad-hucre">{{ k.fullName }}</td>
               <td class="email-hucre">{{ k.email }}</td>
               <td>{{ k.gsm || '-' }}</td>
+              <td>{{ k.birim || '-' }}</td>
               <td>
                 <span class="rol-rozet"
                       [style.background]="rolRenk(k.role).bg"
@@ -114,9 +125,9 @@
               </td>
               <td>
                 <div class="islem-grup">
-                  <button class="btn-rol" (click)="rolModalAc(k)"
-                          *ngIf="ilYoneticisiVeyaUstu" title="Rol Ata">
-                    Rol Ata
+                  <button class="btn-rol" (click)="duzenleModalAc(k)"
+                          *ngIf="ilYoneticisiVeyaUstu" title="Düzenle">
+                    Düzenle
                   </button>
                   <button class="btn-sil-kucuk" (click)="silModalAc(k)"
                           *ngIf="baskanlikYoneticisi" title="Sil">
@@ -178,6 +189,15 @@
         </div>
 
         <div class="form-group">
+          <label>Calıştığı Birim</label>
+          <select [(ngModel)]="formBirim">
+            <option value="">-- Birim Seçin --</option>
+            <option *ngFor="let b of birimler" [value]="b">{{ b }}</option>
+          </select>
+          <span class="alan-aciklama">Kullanıcının görev yaptığı il müdürlüğü veya başkanlık.</span>
+        </div>
+
+        <div class="form-group">
           <label>Il (Opsiyonel)</label>
           <select [(ngModel)]="formCityId">
             <option [ngValue]="null">-- Baskanlik (il bagi yok) --</option>
@@ -186,6 +206,14 @@
             </option>
           </select>
           <span class="alan-aciklama">Il personeli icin gereklidir. Baskanlik rolleri icin bos birakin.</span>
+        </div>
+
+        <div class="form-group" *ngIf="mevcutRol === 'IlYoneticisi' || mevcutRol === 'BaskanlikYoneticisi' || mevcutRol === 'Yetkili'">
+          <label>Rol</label>
+          <select [(ngModel)]="formRol">
+            <option *ngFor="let r of roller" [value]="r.value">{{ r.label }}</option>
+          </select>
+          <span class="alan-aciklama">Yalnizca yoneticiler kayit sirasinda rol atayabilir.</span>
         </div>
 
         <button class="btn-kaydet" (click)="kullaniciEkle()"
@@ -226,11 +254,11 @@
 
 </div>
 
-<!-- ─── ROL ATAMA MODAL ─────────────────────────────────────────────── -->
-<div class="modal-overlay" *ngIf="rolModalAcik" (click)="modalKapat()">
+<!-- ─── DÜZENLE MODAL ─────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="duzenleModalAcik" (click)="modalKapat()">
   <div class="modal-icerik" (click)="$event.stopPropagation()">
     <div class="modal-baslik">
-      <h3>Rol Ata</h3>
+      <h3>Personel Güncelle</h3>
       <button class="modal-kapat" (click)="modalKapat()">&#10005;</button>
     </div>
     <div class="modal-govde" *ngIf="secilenKullanici">
@@ -242,35 +270,50 @@
         </div>
       </div>
 
-      <div class="form-group">
-        <label>Mevcut Rol</label>
-        <span class="rol-rozet"
-              [style.background]="rolRenk(secilenKullanici.role).bg"
-              [style.color]="rolRenk(secilenKullanici.role).color"
-              [style.border-color]="rolRenk(secilenKullanici.role).border">
-          {{ rolEtiket(secilenKullanici.role) }}
-        </span>
+      <div class="form-row" style="display:flex;gap:12px;margin-top:16px">
+        <div class="form-group" style="flex:1">
+          <label>Ad Soyad <span class="zorunlu">*</span></label>
+          <input type="text" [(ngModel)]="duzenleFullName" placeholder="Ad Soyad" />
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>E-posta</label>
+          <input type="email" [(ngModel)]="duzenleEmail" placeholder="ornek@egm.gov.tr" />
+        </div>
       </div>
 
-      <div class="form-group" style="margin-top:16px">
-        <label>Yeni Rol <span class="zorunlu">*</span></label>
+      <div class="form-row" style="display:flex;gap:12px;margin-top:12px">
+        <div class="form-group" style="flex:1">
+          <label>GSM</label>
+          <input type="text" [(ngModel)]="duzenleGsm" placeholder="05xxxxxxxxx" />
+        </div>
+        <div class="form-group" style="flex:1">
+          <label>Birim</label>
+          <select [(ngModel)]="dunzleBirim" (ngModelChange)="birimDegistiDuzenle()">
+            <option value="">-- Birim Seçin --</option>
+            <option *ngFor="let b of birimler" [value]="b">{{ b }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:12px">
+        <label>Rol <span class="zorunlu">*</span></label>
         <div class="rol-secici">
-          <button *ngFor="let r of atanabilirRoller" class="rol-secici-btn"
-                  [class.rol-secici-aktif]="yeniRol === r.value"
-                  [style.background]="yeniRol === r.value ? rolRenk(r.value).bg : ''"
-                  [style.color]="yeniRol === r.value ? rolRenk(r.value).color : ''"
-                  [style.border-color]="yeniRol === r.value ? rolRenk(r.value).border : ''"
-                  (click)="yeniRol = r.value">
+          <button *ngFor="let r of duzenleAtanabilirRoller" class="rol-secici-btn"
+                  [class.rol-secici-aktif]="duzenleRol === r.value"
+                  [style.background]="duzenleRol === r.value ? rolRenk(r.value).bg : ''"
+                  [style.color]="duzenleRol === r.value ? rolRenk(r.value).color : ''"
+                  [style.border-color]="duzenleRol === r.value ? rolRenk(r.value).border : ''"
+                  (click)="duzenleRol = r.value">
             {{ r.label }}
           </button>
         </div>
       </div>
 
-      <div class="form-group" style="margin-top:16px"
-           *ngIf="yeniRol === 'IlPersoneli' || yeniRol === 'IlYoneticisi'">
-        <label>Il Plaka Kodu <span class="zorunlu">*</span></label>
-        <select [(ngModel)]="cityIdInput">
-          <option [ngValue]="null">-- Il Secin --</option>
+      <div class="form-group" style="margin-top:12px"
+           *ngIf="duzenleRol === 'IlPersoneli' || duzenleRol === 'IlYoneticisi'">
+        <label>İl <span class="zorunlu">*</span></label>
+        <select [(ngModel)]="dunzeleCityId">
+          <option [ngValue]="null">-- İl Seçin --</option>
           <option *ngFor="let il of iller" [ngValue]="il.kod">
             {{ il.kod }} - {{ il.ad }}
           </option>
@@ -278,11 +321,11 @@
       </div>
     </div>
     <div class="modal-alt">
-      <button class="btn-iptal" (click)="modalKapat()">Vazgec</button>
-      <button class="btn-kaydet-kucuk" (click)="rolAta()" [disabled]="rolAtiyor">
-        <span *ngIf="!rolAtiyor">Rolü Kaydet</span>
-        <span *ngIf="rolAtiyor" class="spinner"></span>
-        <span *ngIf="rolAtiyor">Kaydediliyor...</span>
+      <button class="btn-iptal" (click)="modalKapat()">Vazgeç</button>
+      <button class="btn-kaydet-kucuk" (click)="duzenleKaydet()" [disabled]="duzenleYapiyor">
+        <span *ngIf="!duzenleYapiyor">Kaydet</span>
+        <span *ngIf="duzenleYapiyor" class="spinner"></span>
+        <span *ngIf="duzenleYapiyor">Kaydediliyor...</span>
       </button>
     </div>
   </div>

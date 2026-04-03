@@ -36,9 +36,8 @@ namespace EGM.API.Controllers
                 _                 => 0
             };
             if (dto.OlayTuru == "Yürüyüş") raw += 15;
-            if (dto.SosyalSignalSkoru > 70)   raw += 10;
 
-            const double max = 55.0;
+            const double max = 45.0;
             var normalized = Math.Round(raw / max, 3);
             var seviye = normalized switch
             {
@@ -137,7 +136,10 @@ namespace EGM.API.Controllers
                 EvrakNumarasi = dto.EvrakNumarasi,
                 Hassasiyet = dto.Hassasiyet,
                 CityId = dto.CityId,
-                Durum = dto.Durum
+                Durum = dto.Durum,
+                OlayBitisTarihi = dto.OlayBitisTarihi,
+                GerceklesenKatilimciSayisi = dto.GerceklesenKatilimciSayisi,
+                GerceklesmeSekliId = dto.GerceklesmeSekliId
             };
             // CreatedByUserId ve CityId otomatik atama OlayService içinde yapılır
             var created = await _olayService.CreateOlayAsync(olay);
@@ -177,7 +179,11 @@ namespace EGM.API.Controllers
                 KaynakKurum = dto.KaynakKurum,
                 EvrakNumarasi = dto.EvrakNumarasi,
                 Hassasiyet = dto.Hassasiyet,
-                Durum = dto.Durum
+                CityId = dto.CityId,
+                Durum = dto.Durum,
+                OlayBitisTarihi = dto.OlayBitisTarihi,
+                GerceklesenKatilimciSayisi = dto.GerceklesenKatilimciSayisi,
+                GerceklesmeSekliId = dto.GerceklesmeSekliId
             };
             var (success, error) = await _olayService.UpdateOlayAsync(id, updated);
             if (!success && error != null) return Forbid();
@@ -246,7 +252,10 @@ namespace EGM.API.Controllers
             GercekBaslangicTarihi = o.GercekBaslangicTarihi,
             GercekBitisTarihi = o.GercekBitisTarihi,
             CreatedByUserId = o.CreatedByUserId,
-            CityId = o.CityId
+            CityId = o.CityId,
+            OlayBitisTarihi = o.OlayBitisTarihi,
+            GerceklesenKatilimciSayisi = o.GerceklesenKatilimciSayisi,
+            GerceklesmeSekliId = o.GerceklesmeSekliId
         };
     }
 }

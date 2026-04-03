@@ -41,10 +41,8 @@ namespace EGM.Application.Services
 
             // Operasyonel faaliyetler (bugünkü olaylara bağlı)
             var gerceklesenIds = gerceklesen.Select(o => o.Id).ToHashSet();
-            var tumFaaliyetler = await _faaliyetRepository.ListAllAsync();
-            var gunlukFaaliyetler = tumFaaliyetler
-                .Where(f => gerceklesenIds.Contains(f.OlayId))
-                .ToList();
+            var gunlukFaaliyetler = await _faaliyetRepository.FindAsync(
+                f => gerceklesenIds.Contains(f.OlayId));
 
             // İcmal: olay türüne göre grupla
             var icmal = gerceklesen

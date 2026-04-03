@@ -47,12 +47,19 @@ export class Sidebar implements OnInit, OnDestroy {
       title: '',
       items: [
         // İzleyici dahil tüm roller erişebilir
-        { label: 'Harita',      route: '/home',           icon: 'map' },
-        { label: 'Olaylar',     route: '/olay',           icon: 'alert' },
-        { label: 'İstatistikler', route: '/istatistikler', icon: 'activity' },
-        { label: 'Bültenler',   route: '/raporlar',       icon: 'share' },
-        { label: 'Kuruluşlar',  route: '/rapor-kuruluslar', icon: 'org' },
-        { label: 'Konular',     route: '/konular',        icon: 'activity' },
+        { label: 'Harita',    route: '/home',    icon: 'map' },
+        { label: 'Bültenler', route: '/raporlar', icon: 'file-text' },
+      ]
+    },
+    {
+      title: 'İstatistikler',
+      items: [
+        { label: 'Kuruluş İstatistikleri', route: '/rapor-kuruluslar',      icon: 'bar-chart' },
+        { label: 'Konu İstatistikleri',    route: '/konular',               icon: 'pie-chart' },
+        { label: 'Sokak Olayları İstatistikleri',      route: '/sokak-istatistik',    icon: 'trending-up' },
+        { label: 'Sosyal Medya Olayları İstatistikleri', route: '/sosyal-medya-istatistik', icon: 'hash' },
+        { label: 'Seçim Olayları İstatistikleri',          route: '/secim-istatistik',         icon: 'check-square' },
+        { label: 'Ziyaretçi Olayları İstatistikleri',       route: '/vip-istatistik',           icon: 'user-check' },
       ]
     },
     {
@@ -71,8 +78,8 @@ export class Sidebar implements OnInit, OnDestroy {
       items: [
         // İl Yöneticisi ve üzeri
         { label: 'Kullanıcı Yönetimi', route: '/kullanicilar',   icon: 'users',    roles: IL_Y_VE_UZERI },
-        { label: 'Kuruluş Yönetimi', route: '/organizasyon',   icon: 'org',      roles: IL_Y_VE_UZERI },
-        { label: 'Konu Yönetimi',    route: '/konu-islemleri', icon: 'activity', roles: IL_Y_VE_UZERI },
+        { label: 'Kuruluş Yönetimi', route: '/organizasyon',   icon: 'building',  roles: IL_Y_VE_UZERI },
+        { label: 'Konu Yönetimi',    route: '/konu-islemleri', icon: 'book',     roles: IL_Y_VE_UZERI },
         { label: 'Faaliyet Yönetimi', route: '/faaliyet-yonetimi', icon: 'briefcase', roles: IL_Y_VE_UZERI },
         // Başkanlık Yöneticisi ve Yetkili
         { label: 'Veri Yönetimi',     route: '/veri-yonetimi',  icon: 'database', roles: HQ_Y_VE_UZERI },

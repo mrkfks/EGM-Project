@@ -55,9 +55,47 @@
       </select>
     </div>
 
+    <div class="egm-filter-row">
+      <label for="hassSel">Hassasiyet</label>
+      <select id="hassSel" [value]="hassFilter" (change)="onHassChange($event)">
+        <option value="tum">Tümü</option>
+        <option value="0">Düşük</option>
+        <option value="1">Orta</option>
+        <option value="2">Yüksek</option>
+        <option value="3">Kritik</option>
+      </select>
+    </div>
+
+    <div class="egm-filter-row" *ngIf="ilListesi.length > 0">
+      <label for="ilSel">İl</label>
+      <select id="ilSel" [value]="ilFilter" (change)="onIlChange($event)">
+        <option value="tum">Tüm İller</option>
+        <option *ngFor="let il of ilListesi" [value]="il">{{ il }}</option>
+      </select>
+    </div>
+
+    <div class="egm-no-coord-warn" *ngIf="koordinatsiziSayisi > 0">
+      <small>⚠ {{ koordinatsiziSayisi }} olayın koordinatı eksik</small>
+    </div>
+
     <button class="egm-apply-btn" (click)="applyFilters()" [disabled]="isLoading">
       {{ isLoading ? 'Yükleniyor…' : 'Uygula' }}
     </button>
+  </div>
+
+  <!-- ── İstatistik paneli (sol üst) ──────────────── -->
+  <div class="egm-stats-bar" *ngIf="statsVisible">
+    <span class="egm-stat"><b>{{ olaylar.length }}</b> toplam</span>
+    <span class="egm-stat-sep">·</span>
+    <span class="egm-stat"><b>{{ statsGosterilen }}</b> haritada</span>
+    <span class="egm-stat-sep">·</span>
+    <ng-container *ngFor="let k of hassKeys">
+      <span class="egm-stat-chip"
+            [style.background]="hassColors[k] + '33'"
+            [style.color]="hassColors[k]">
+        {{ hassLabels[k] }}: {{ hassCount(k) }}
+      </span>
+    </ng-container>
   </div>
 
   <!-- ── Katman seçici (sol alt) ─────────────────── -->

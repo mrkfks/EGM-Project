@@ -12,11 +12,14 @@ interface VeriOzeti {
   route: string;
 }
 
-interface SonAktivite {
-  tip: string;
-  aciklama: string;
+interface VeriGirisi {
+  sicil: number;
+  adSoyad: string;
+  birim: string;
   tarih: string;
-  kullanici: string;
+  konu: string;
+  faaliyet: string;
+  kaynak: string;
 }
 
 @Component({
@@ -28,6 +31,7 @@ interface SonAktivite {
 })
 export class VeriYonetimi implements OnInit {
   yukleniyor = false;
+  tabloYukleniyor = false;
   hata: string | null = null;
 
   readonly baseUrl = 'http://localhost:5117';
@@ -42,6 +46,9 @@ export class VeriYonetimi implements OnInit {
     { tur: 'Konu', ikon: 'tag', renk: '#1a3a5c', sayi: 0, route: '/konu-islemleri' },
     { tur: 'Kullanıcı', ikon: 'users', renk: '#16a085', sayi: 0, route: '/kullanicilar' },
   ];
+
+  veriGirisler: VeriGirisi[] = [];
+  aramaMetni = '';
 
   readonly alanlar = [
     { baslik: 'Olay Yönetimi', aciklama: 'Tüm olay kayıtlarını görüntüle ve yönet.', route: '/olay', renk: '#e74c3c', etiket: 'Olaylar' },
@@ -78,6 +85,19 @@ export class VeriYonetimi implements OnInit {
     Promise.allSettled(istekler).then(() => {
       this.yukleniyor = false;
     });
+
+    this.tabloYukle();
+  }
+
+  tabloYukle(): void {
+    this.tabloYukleniyor = true;
+    this.http.get<VeriGirisi[]>(`${this.baseUrl}/api/raporlar/veri-girisler?limit=100`).subscribe({
+      next: data => {
+        this.veriGirisler = data;
+        this.tabloYukleniyor = false;
+      },
+      error: () => { this.tabloYukleniyor = false; }
+    });
   }
 
   private sayiGetir(endpoint: string, index: number): Promise<void> {
@@ -90,6 +110,19 @@ export class VeriYonetimi implements OnInit {
         error: () => resolve()
       });
     });
+  }
+
+  get filtrelenmis(): VeriGirisi[] {
+    if (!this.aramaMetni.trim()) return this.veriGirisler;
+    const ara = this.aramaMetni.toLowerCase();
+    return this.veriGirisler.filter(v =>
+      String(v.sicil).includes(ara) ||
+      v.adSoyad.toLowerCase().includes(ara) ||
+      v.birim.toLowerCase().includes(ara) ||
+      v.konu.toLowerCase().includes(ara) ||
+      v.faaliyet.toLowerCase().includes(ara) ||
+      v.kaynak.toLowerCase().includes(ara)
+    );
   }
 
   tarihFormat(tarih: string): string {

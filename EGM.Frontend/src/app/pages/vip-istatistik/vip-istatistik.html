@@ -1,0 +1,88 @@
+<div class="page">
+
+  <!-- ── Filtre ────────────────────────────────────────────── -->
+  <div class="filtre-bar">
+    <div class="filtre-group">
+      <label>Durum</label>
+      <select [(ngModel)]="filtreDurum" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option value="0">Planlandı</option>
+        <option value="1">Gerçekleşti</option>
+        <option value="2">İptal</option>
+      </select>
+    </div>
+    <div class="filtre-group">
+      <label>Hassasiyet</label>
+      <select [(ngModel)]="filtreHassasiyet" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option value="0">Düşük</option>
+        <option value="1">Orta</option>
+        <option value="2">Yüksek</option>
+        <option value="3">Kritik</option>
+      </select>
+    </div>
+    <div class="filtre-group">
+      <label>İl</label>
+      <input type="text" [(ngModel)]="filtreIl" placeholder="İl adı..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Başlangıç Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih1" (change)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Bitiş Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih2" (change)="filtrele()" />
+    </div>
+  </div>
+
+  <div class="durum-mesaj" *ngIf="yukleniyor">Yükleniyor...</div>
+  <div class="durum-mesaj hata" *ngIf="hata">{{ hata }}</div>
+
+  <!-- ── Tablo ─────────────────────────────────────────────── -->
+  <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
+    <table class="tablo">
+      <thead>
+        <tr>
+          <th>Ad Soyad</th>
+          <th>Ünvan</th>
+          <th>İl</th>
+          <th>Mekan</th>
+          <th>Başlangıç</th>
+          <th>Bitiş</th>
+          <th>Hassasiyet</th>
+          <th>Güvenlik Seviyesi</th>
+          <th>Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of sayfaKayitlari">
+          <td class="ad-cell">{{ v.ziyaretEdenAdSoyad || '—' }}</td>
+          <td>{{ v.unvan || '—' }}</td>
+          <td>{{ v.il || '—' }}</td>
+          <td class="mekan-cell">{{ v.mekan || '—' }}</td>
+          <td class="tarih-cell">{{ v.baslangicTarihi ? (v.baslangicTarihi | date:'dd.MM.yyyy') : '—' }}</td>
+          <td class="tarih-cell">{{ v.bitisTarihi ? (v.bitisTarihi | date:'dd.MM.yyyy') : '—' }}</td>
+          <td><span class="badge" [class]="hassasiyetClass(v.hassasiyet)">{{ hassasiyetLabel[v.hassasiyet] }}</span></td>
+          <td>{{ guvenlikLabel[v.guvenlikSeviyesi] ?? '—' }}</td>
+          <td><span class="badge" [class]="durumClass(v.ziyaretDurumu)">{{ durumLabel[v.ziyaretDurumu] }}</span></td>
+        </tr>
+        <tr *ngIf="sayfaKayitlari.length === 0">
+          <td colspan="9" class="bos-satir">Kayıt bulunamadı.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Sayfalama ─────────────────────────────────────────── -->
+  <div class="sayfalama" *ngIf="toplamSayfa > 1 && !yukleniyor">
+    <button class="sayfa-btn" (click)="oncekiSayfa()" [disabled]="mevcutSayfa === 1">‹</button>
+    <button
+      class="sayfa-btn"
+      *ngFor="let p of sayfaNumaralari"
+      [class.aktif]="p === mevcutSayfa"
+      (click)="sayfayaGit(p)">{{ p }}</button>
+    <button class="sayfa-btn" (click)="sonrakiSayfa()" [disabled]="mevcutSayfa === toplamSayfa">›</button>
+    <span class="sayfa-bilgi">{{ mevcutSayfa }} / {{ toplamSayfa }}</span>
+  </div>
+
+</div>

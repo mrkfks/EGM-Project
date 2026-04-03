@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,7 +10,8 @@ import { GerceklesmeSekliService, GerceklesmeSekli } from '../../services/gercek
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './faaliyet-yonetimi.html',
-  styleUrls: ['./faaliyet-yonetimi.css']
+  styleUrls: ['./faaliyet-yonetimi.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FaaliyetYonetimiComponent implements OnInit {
   olayTurleri: OlayTuru[] = [];
@@ -23,7 +24,8 @@ export class FaaliyetYonetimiComponent implements OnInit {
 
   constructor(
     private olayTuruService: OlayTuruService,
-    private gerceklesmeSekliService: GerceklesmeSekliService
+    private gerceklesmeSekliService: GerceklesmeSekliService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -33,15 +35,15 @@ export class FaaliyetYonetimiComponent implements OnInit {
 
   loadOlayTurleri() {
     this.olayTuruService.getAll().subscribe({
-      next: data => this.olayTurleri = data,
-      error: () => this.errorMessage = 'Olay türleri yüklenemedi.'
+      next: data => { this.olayTurleri = data; this.cdr.markForCheck(); },
+      error: () => { this.errorMessage = 'Olay türleri yüklenemedi.'; this.cdr.markForCheck(); }
     });
   }
 
   loadGerceklesmeSekilleri() {
     this.gerceklesmeSekliService.getAll().subscribe({
-      next: data => this.gerceklesmeSekilleri = data,
-      error: () => this.errorMessage = 'Gerçekleşme şekilleri yüklenemedi.'
+      next: data => { this.gerceklesmeSekilleri = data; this.cdr.markForCheck(); },
+      error: () => { this.errorMessage = 'Gerçekleşme şekilleri yüklenemedi.'; this.cdr.markForCheck(); }
     });
   }
 
@@ -49,7 +51,7 @@ export class FaaliyetYonetimiComponent implements OnInit {
     if (this.newOlayTuru.trim()) {
       this.olayTuruService.create({ name: this.newOlayTuru }).subscribe({
         next: () => { this.newOlayTuru = ''; this.loadOlayTurleri(); },
-        error: () => this.errorMessage = 'Olay türü eklenemedi.'
+        error: () => { this.errorMessage = 'Olay türü eklenemedi.'; this.cdr.markForCheck(); }
       });
     }
   }
@@ -59,7 +61,7 @@ export class FaaliyetYonetimiComponent implements OnInit {
     if (newName) {
       this.olayTuruService.update(olay.id, { name: newName }).subscribe({
         next: () => this.loadOlayTurleri(),
-        error: () => this.errorMessage = 'Olay türü güncellenemedi.'
+        error: () => { this.errorMessage = 'Olay türü güncellenemedi.'; this.cdr.markForCheck(); }
       });
     }
   }
@@ -71,7 +73,7 @@ export class FaaliyetYonetimiComponent implements OnInit {
         this.loadGerceklesmeSekilleri();
         this.selectedOlayTuruId = null;
       },
-      error: () => this.errorMessage = 'Olay türü silinemedi.'
+      error: () => { this.errorMessage = 'Olay türü silinemedi.'; this.cdr.markForCheck(); }
     });
   }
 
@@ -82,7 +84,7 @@ export class FaaliyetYonetimiComponent implements OnInit {
         olayTuruId: this.selectedOlayTuruId
       }).subscribe({
         next: () => { this.newGerceklesmeSekli = ''; this.loadGerceklesmeSekilleri(); },
-        error: () => this.errorMessage = 'Gerçekleşme şekli eklenemedi.'
+        error: () => { this.errorMessage = 'Gerçekleşme şekli eklenemedi.'; this.cdr.markForCheck(); }
       });
     } else {
       alert('Lütfen bir olay türü seçin.');
@@ -97,7 +99,7 @@ export class FaaliyetYonetimiComponent implements OnInit {
         olayTuruId: sekil.olayTuruId
       }).subscribe({
         next: () => this.loadGerceklesmeSekilleri(),
-        error: () => this.errorMessage = 'Gerçekleşme şekli güncellenemedi.'
+        error: () => { this.errorMessage = 'Gerçekleşme şekli güncellenemedi.'; this.cdr.markForCheck(); }
       });
     }
   }
@@ -105,7 +107,7 @@ export class FaaliyetYonetimiComponent implements OnInit {
   deleteGerceklesmeSekli(id: string): void {
     this.gerceklesmeSekliService.delete(id).subscribe({
       next: () => this.loadGerceklesmeSekilleri(),
-      error: () => this.errorMessage = 'Gerçekleşme şekli silinemedi.'
+      error: () => { this.errorMessage = 'Gerçekleşme şekli silinemedi.'; this.cdr.markForCheck(); }
     });
   }
 

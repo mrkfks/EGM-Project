@@ -1,281 +1,185 @@
-﻿<div class="vip-container">
+﻿<div class="ekle-page">
 
-  <!-- ── Alerts ─────────────────────────────────────────────────── -->
-  <div class="alert alert-hata" *ngIf="hata">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-    </svg>
-    {{ hata }}
-  </div>
-  <div class="alert alert-basari" *ngIf="basari">
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-    {{ basari }}
-  </div>
-
-  <!-- ── Sekme Basliklar ─────────────────────────────────────────── -->
-  <div class="sekme-bar">
-    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'form'" (click)="aktifSekme = 'form'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
-      </svg>
-      Yeni Ziyaret Kaydi
-    </button>
-    <button class="sekme-btn" [class.sekme-aktif]="aktifSekme === 'liste'" (click)="aktifSekme = 'liste'">
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
-        <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
-      </svg>
-      Kayitli Ziyaretler
-      <span class="sekme-sayac">{{ kayitlar.length }}</span>
-    </button>
-  </div>
-
-  <!-- ══════════════════════ FORM SEKMESI ══════════════════════ -->
-  <div *ngIf="aktifSekme === 'form'" class="icerik-grid">
-
-    <!-- Sol: Ana Form -->
-    <div class="form-panel">
-      <h2 class="panel-title">Ziyaretci Bilgileri</h2>
-
-      <!-- Ad Soyad -->
-      <div class="form-group">
-        <label>Ziyaretci Adi ve Soyadi <span class="zorunlu">*</span></label>
-        <input type="text" [(ngModel)]="ziyaretEdenAdSoyad" placeholder="Ad ve soyad giriniz..."
-          [class.input-gecersiz]="ziyaretEdenAdSoyad.length > 0 && ziyaretEdenAdSoyad.length < 2" />
-        <small class="dogrulama-mesaj" *ngIf="ziyaretEdenAdSoyad.length > 0 && ziyaretEdenAdSoyad.length < 2">
-          En az 2 karakter girilmeli
-        </small>
+  <!-- ── Sol Panel: Planlanan Ziyaretler ──────────────────────── -->
+  <div class="side-panel">
+    <h3 class="side-panel-title">
+      <span class="side-dot planned"></span> Planlanan Ziyaretler
+      <span class="side-count">{{ planlananlar.length }}</span>
+    </h3>
+    <div *ngIf="yukleniyor" class="side-loading">Yukleniyor...</div>
+    <div *ngIf="!yukleniyor && planlananlar.length === 0" class="side-empty">
+      Henuz planlanan ziyaret yok.
+    </div>
+    <div *ngFor="let kayit of planlananlar; trackBy: trackById" class="side-card"
+      [class.side-card-selected]="selectedPlanId === kayit.id"
+      (click)="selectPlanForCompletion(kayit)"
+      title="Gerceklesenler formuna yukle">
+      <div class="side-card-header">
+        <span class="side-card-tur">{{ kayit.unvan }}</span>
+        <span class="side-card-il">{{ kayit.il }}</span>
       </div>
+      <div class="side-card-baslik">{{ kayit.ziyaretEdenAdSoyad }}</div>
+      <div class="side-card-meta">
+        <span>{{ kayit.mekan }}</span>
+      </div>
+      <div class="side-card-hint">Gerceklesti olarak isaretle &rarr;</div>
+    </div>
+  </div>
 
-      <!-- Makam/Unvan -->
-      <div class="form-group">
-        <label>Makam / Unvan <span class="zorunlu">*</span></label>
-        <div class="chip-grup">
-          <button type="button" class="chip" *ngFor="let u of unvanlar"
-            [class.chip-aktif]="unvan === u"
-            (click)="unvan = unvan === u ? '' : u">
-            {{ u }}
-          </button>
+  <!-- ── Orta: Form ───────────────────────────────────────────── -->
+  <div class="content">
+
+    <!-- Alerts -->
+    <div class="alert alert-hata" *ngIf="hata">{{ hata }}</div>
+    <div class="alert alert-basari" *ngIf="basari">{{ basari }}</div>
+
+    <!-- Secili plan bandı -->
+    <div class="selected-plan-banner" *ngIf="selectedPlanId">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+           stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      Planlanan ziyaret gerceklesenler formuna yuklendi. Bilgileri tamamlayip kaydedin.
+      <button type="button" class="banner-iptal" (click)="switchToCompletedForm()">Iptal</button>
+    </div>
+
+    <!-- Form switch butonları -->
+    <div class="form-switch-buttons">
+      <button type="button"
+        [class.active]="activeForm === 'planned'"
+        class="btn full-width"
+        (click)="switchToPlannedForm()">Planlananlar Formu</button>
+      <button type="button"
+        [class.active]="activeForm === 'completed'"
+        class="btn full-width"
+        (click)="switchToCompletedForm()">Gerceklesenler Formu</button>
+    </div>
+
+    <!-- Ziyaretci Bilgileri -->
+    <fieldset class="form-section">
+      <legend>Ziyaretci Bilgileri</legend>
+      <div class="form-grid">
+
+        <div class="form-field span-2">
+          <label>Ziyaretci Adi ve Soyadi <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="ziyaretEdenAdSoyad" placeholder="Ad ve soyad giriniz..."
+            [class.is-invalid]="ziyaretEdenAdSoyad.length > 0 && ziyaretEdenAdSoyad.length < 2" />
+          <div class="field-error" *ngIf="ziyaretEdenAdSoyad.length > 0 && ziyaretEdenAdSoyad.length < 2">
+            En az 2 karakter girilmeli.
+          </div>
         </div>
-      </div>
 
-      <!-- Il -->
-      <div class="form-group">
-        <label>Il <span class="zorunlu">*</span></label>
-        <select [(ngModel)]="il">
-          <option value="">Il seciniz</option>
-          <option *ngFor="let i of iller" [value]="i">{{ i }}</option>
-        </select>
-      </div>
+        <div class="form-field">
+          <label>Makam / Unvan <span class="req">*</span></label>
+          <select [(ngModel)]="unvan">
+            <option value="">--- Seciniz ---</option>
+            <option *ngFor="let u of unvanlar" [value]="u">{{ u }}</option>
+          </select>
+        </div>
 
-      <!-- Ziyaret Konumu -->
-      <div class="form-group">
-        <label>Ziyaret Konumu <span class="zorunlu">*</span></label>
-        <input type="text" [(ngModel)]="mekan" placeholder="Okul adi, sandik no veya mekan..." />
-        <small class="alan-aciklama">Örn: Ataturk Ilkokulu, Sandik No: 1042, Kaymakamlık Binasi</small>
-      </div>
+        <div class="form-field">
+          <label>Guvenlik Seviyesi</label>
+          <select [(ngModel)]="guvenlikSeviyesi">
+            <option *ngFor="let g of guvenlikSeviyeleri" [value]="g.value">{{ g.ikon }} {{ g.value }}</option>
+          </select>
+        </div>
 
-      <!-- Tarihler -->
-      <div class="form-row">
-        <div class="form-group">
-          <label>Baslangic Tarihi ve Saati</label>
+        <div class="form-field">
+          <label>Hassasiyet</label>
+          <select [(ngModel)]="hassasiyet">
+            <option [value]="0">Düşük</option>
+            <option [value]="1">Orta</option>
+            <option [value]="2">Yüksek</option>
+            <option [value]="3">Kritik</option>
+          </select>
+        </div>
+
+        <div class="form-field" *ngIf="activeForm === 'completed'">
+          <label>Ziyaret Durumu</label>
+          <select [(ngModel)]="ziyaretDurumu">
+            <option *ngFor="let d of durumlar" [value]="d.value">{{ d.label }}</option>
+          </select>
+        </div>
+
+      </div>
+    </fieldset>
+
+    <!-- Konum & Zaman -->
+    <fieldset class="form-section">
+      <legend>Konum &amp; Zaman</legend>
+      <div class="form-grid">
+
+        <div class="form-field">
+          <label>Il <span class="req">*</span></label>
+          <select [(ngModel)]="il">
+            <option value="">--- Seciniz ---</option>
+            <option *ngFor="let i of iller" [value]="i">{{ i }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Ziyaret Konumu <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="mekan" placeholder="Okul adi, sandik no veya mekan..." />
+        </div>
+
+        <div class="form-field">
+          <label>Baslangic Tarihi &amp; Saati</label>
           <input type="datetime-local" [(ngModel)]="baslangicTarihi" />
         </div>
-        <div class="form-group">
-          <label>Bitis Tarihi ve Saati</label>
+
+        <div class="form-field" *ngIf="activeForm === 'completed'">
+          <label>Bitis Tarihi &amp; Saati</label>
           <input type="datetime-local" [(ngModel)]="bitisTarihi" />
         </div>
-      </div>
 
-      <!-- Ziyaret Durumu -->
-      <div class="form-group">
-        <label>Ziyaret Durumu</label>
-        <div class="durum-grup">
-          <button type="button" class="durum-btn" *ngFor="let d of durumlar"
-            [class.durum-aktif]="ziyaretDurumu === d.value"
-            [style.border-color]="ziyaretDurumu === d.value ? d.renk : ''"
-            [style.background-color]="ziyaretDurumu === d.value ? d.bg : ''"
-            [style.color]="ziyaretDurumu === d.value ? d.renk : ''"
-            (click)="ziyaretDurumu = d.value">
-            {{ d.label }}
-          </button>
+        <div class="form-field span-2">
+          <label>Gozlemler ve Onemli Gelismeler</label>
+          <textarea [(ngModel)]="gozlemNoktalari" rows="4"
+            placeholder="Ziyaret sirasinda yasanan onemli gelismeleri, diyaloglar ve gozlemleri giriniz..."
+            maxlength="2000"></textarea>
+          <small class="karakter-sayac">{{ gozlemNoktalari.length }} / 2000</small>
         </div>
-      </div>
 
-      <!-- Güvenlik Seviyesi -->
-      <div class="form-group">
-        <label>Guvenlik Seviyesi</label>
-        <div class="radio-grup">
-          <label class="radio-etiket" *ngFor="let g of guvenlikSeviyeleri"
-            [class.radio-secili]="guvenlikSeviyesi === g.value"
-            [style.border-color]="guvenlikSeviyesi === g.value ? g.renk : ''"
-            [style.background-color]="guvenlikSeviyesi === g.value ? g.renk + '15' : ''">
-            <input type="radio" [value]="g.value" [(ngModel)]="guvenlikSeviyesi" name="guvenlikSeviyesi" />
-            <span class="radio-ikon">{{ g.ikon }}</span>
-            <span [style.color]="guvenlikSeviyesi === g.value ? g.renk : ''">{{ g.value }}</span>
-          </label>
-        </div>
       </div>
+    </fieldset>
 
-      <!-- Gözlemler -->
-      <div class="form-group">
-        <label>Gozlemler ve Onemli Gelismeler</label>
-        <textarea [(ngModel)]="gozlemNoktalari" rows="5"
-          placeholder="Ziyaret sirasinda yasanan onemli gelismeleri, diyalogları ve gozlemleri giriniz..."
-          maxlength="2000"></textarea>
-        <small class="karakter-sayac-alan">{{ gozlemNoktalari.length }} / 2000</small>
-      </div>
-
-      <!-- Kaydet -->
-      <button class="btn-kaydet" (click)="kaydet()" [disabled]="!formGecerliMi() || gonderiliyor">
-        <svg *ngIf="!gonderiliyor" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
-          <polyline points="17 21 17 13 7 13 7 21"/>
-          <polyline points="7 3 7 8 15 8"/>
-        </svg>
-        <span *ngIf="gonderiliyor" class="spinner"></span>
-        {{ gonderiliyor ? 'Kaydediliyor...' : 'Ziyareti Kaydet' }}
+    <!-- Kaydet -->
+    <div class="form-actions">
+      <button type="button" class="btn-danger" *ngIf="selectedPlanId" (click)="iptalEt()" [disabled]="gonderiliyor">
+        <span *ngIf="gonderiliyor" class="spinner-sm"></span>
+        Iptal Edildi
+      </button>
+      <button type="button" class="btn-primary" (click)="kaydet()" [disabled]="!formGecerliMi() || gonderiliyor">
+        <span *ngIf="gonderiliyor" class="spinner-sm"></span>
+        {{ gonderiliyor ? 'Kaydediliyor...' : 'Kaydet' }}
       </button>
     </div>
 
-    <!-- Sag: Ozet Kutu -->
-    <div class="ozet-panel">
-      <h2 class="panel-title">Ziyaret Ozeti</h2>
+  </div>
 
-      <div class="ozet-istatistik">
-        <div class="ozet-kart">
-          <span class="ozet-sayi">{{ kayitlar.length }}</span>
-          <span class="ozet-etiket">Toplam Kayit</span>
-        </div>
-        <div class="ozet-kart" *ngFor="let d of durumlar">
-          <span class="ozet-sayi" [style.color]="d.renk">{{ durumSayisi(d.value) }}</span>
-          <span class="ozet-etiket">{{ d.label }}</span>
-        </div>
+  <!-- ── Sag Panel: Gerceklesen Ziyaretler ────────────────────── -->
+  <div class="side-panel">
+    <h3 class="side-panel-title">
+      <span class="side-dot completed"></span> Gerceklesen Ziyaretler
+      <span class="side-count">{{ gerceklesen.length }}</span>
+    </h3>
+    <div *ngIf="yukleniyor" class="side-loading">Yukleniyor...</div>
+    <div *ngIf="!yukleniyor && gerceklesen.length === 0" class="side-empty">
+      Henuz gerceklesen ziyaret yok.
+    </div>
+    <div *ngFor="let kayit of gerceklesen; trackBy: trackById" class="side-card"
+      [class.side-card-cancelled]="kayit.ziyaretDurumu === 3">
+      <div class="side-card-header">
+        <span class="side-card-tur">{{ kayit.unvan }}</span>
+        <span class="side-card-il">{{ kayit.il }}</span>
       </div>
-
-      <div class="rehber-kutu">
-        <h3>Kullanim Rehberi</h3>
-        <ul>
-          <li>Ziyaretci adi soyadini tam olarak giriniz.</li>
-          <li>Makam/Unvan secimi veri tutarliligi icin zorunludur.</li>
-          <li>Ziyaret konumu olarak okul adi veya sandik numarasi girebilirsiniz.</li>
-          <li>Durum bilgisini ziyaret sirasinda guncelleyebilirsiniz.</li>
-          <li>Gozlemler alani en fazla 2000 karakter kabul eder.</li>
-        </ul>
+      <div class="side-card-baslik">{{ kayit.ziyaretEdenAdSoyad }}</div>
+      <div class="side-card-meta">
+        <span>{{ kayit.mekan }}</span>
       </div>
+      <span class="side-card-status cancelled" *ngIf="kayit.ziyaretDurumu === 3">Iptal Edildi</span>
+      <span class="side-card-status completed" *ngIf="kayit.ziyaretDurumu === 1 || kayit.ziyaretDurumu === 2">Tamamlandi</span>
     </div>
   </div>
 
-  <!-- ══════════════════════ LISTE SEKMESI ══════════════════════ -->
-  <div *ngIf="aktifSekme === 'liste'" class="liste-panel">
-
-    <div *ngIf="yukleniyor" class="yukleniyor">
-      <div class="spinner-buyuk"></div>
-      <p>Kayitlar yukleniyor...</p>
-    </div>
-
-    <div *ngIf="!yukleniyor && kayitlar.length === 0" class="bos-durum">
-      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-      </svg>
-      <p>Henuz ziyaret kaydi bulunmuyor.</p>
-      <button class="btn-ekle" (click)="aktifSekme = 'form'">Yeni Kayit Olustur</button>
-    </div>
-
-    <div *ngIf="!yukleniyor && kayitlar.length > 0" class="kayit-grid">
-      <div class="kayit-karti" *ngFor="let kayit of kayitlar" (click)="kayitDetay(kayit)">
-        <div class="kart-ust">
-          <span class="unvan-rozet">{{ kayit.unvan }}</span>
-          <span class="durum-rozet"
-            [style.background-color]="getDurumBilgi(kayit.ziyaretDurumu).bg"
-            [style.color]="getDurumBilgi(kayit.ziyaretDurumu).renk"
-            [style.border-color]="getDurumBilgi(kayit.ziyaretDurumu).renk">
-            {{ getDurumBilgi(kayit.ziyaretDurumu).label }}
-          </span>
-        </div>
-        <h3 class="kart-ad">{{ kayit.ziyaretEdenAdSoyad }}</h3>
-        <div class="kart-detay">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          {{ kayit.il }}{{ kayit.mekan ? ' — ' + kayit.mekan : '' }}
-        </div>
-        <div class="kart-detay">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-          </svg>
-          {{ tarihFormat(kayit.baslangicTarihi) }}
-        </div>
-        <div class="kart-guvenlik" *ngIf="kayit.guvenlikSeviyesi">
-          Guvenlik: <strong>{{ kayit.guvenlikSeviyesi }}</strong>
-        </div>
-        <p class="kart-gozlem" *ngIf="kayit.gozlemNoktalari">
-          {{ kayit.gozlemNoktalari.substring(0, 80) }}{{ kayit.gozlemNoktalari.length > 80 ? '...' : '' }}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ── Detay Modali ──────────────────────────────────────────────── -->
-<div class="modal-overlay" *ngIf="modalAcik" (click)="modalKapat()">
-  <div class="modal-icerik" (click)="$event.stopPropagation()">
-    <div class="modal-baslik">
-      <h3>Ziyaret Detayi</h3>
-      <button class="modal-kapat" (click)="modalKapat()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <div class="modal-govde" *ngIf="secilenKayit">
-      <div class="modal-satir">
-        <span class="modal-etiket">Ad Soyad</span>
-        <span class="modal-deger">{{ secilenKayit.ziyaretEdenAdSoyad }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Unvan</span>
-        <span class="unvan-rozet">{{ secilenKayit.unvan }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Konum</span>
-        <span class="modal-deger">{{ secilenKayit.il }}{{ secilenKayit.mekan ? ' / ' + secilenKayit.mekan : '' }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Durum</span>
-        <span class="durum-rozet"
-          [style.background-color]="getDurumBilgi(secilenKayit.ziyaretDurumu).bg"
-          [style.color]="getDurumBilgi(secilenKayit.ziyaretDurumu).renk"
-          [style.border-color]="getDurumBilgi(secilenKayit.ziyaretDurumu).renk">
-          {{ getDurumBilgi(secilenKayit.ziyaretDurumu).label }}
-        </span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Guvenlik</span>
-        <span class="modal-deger">{{ secilenKayit.guvenlikSeviyesi }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Baslangic</span>
-        <span class="modal-deger">{{ tarihFormat(secilenKayit.baslangicTarihi) }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Bitis</span>
-        <span class="modal-deger">{{ tarihFormat(secilenKayit.bitisTarihi) }}</span>
-      </div>
-      <div class="modal-satir modal-gozlem" *ngIf="secilenKayit.gozlemNoktalari">
-        <span class="modal-etiket">Gozlemler</span>
-        <p class="modal-deger">{{ secilenKayit.gozlemNoktalari }}</p>
-      </div>
-      <div class="modal-alt">
-        <button class="btn-sil" (click)="kayitSil(secilenKayit.id)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-          </svg>
-          Kaydi Sil
-        </button>
-      </div>
-    </div>
-  </div>
 </div>

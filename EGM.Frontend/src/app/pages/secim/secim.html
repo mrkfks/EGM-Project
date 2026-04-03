@@ -19,14 +19,25 @@
     <div class="form-panel">
       <h2 class="panel-title">Yeni Olay Kaydi</h2>
 
-      <!-- Musahit adi -->
-      <div class="form-group">
-        <label>Musahit Adi <span class="zorunlu">*</span></label>
-        <div class="input-wrapper">
-          <input type="text" [(ngModel)]="musahitAdi" placeholder="En az 3 karakter" [class.input-gecersiz]="musahitAdi.length > 0 && musahitAdi.length < 3" />
-          <span class="karakter-sayac" [class.gecersiz]="musahitAdi.length > 0 && musahitAdi.length < 3">{{ musahitAdi.length }}/250</span>
+      <!-- Olay Turu + Gerceklesme Sekli -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Olay Turu <span class="zorunlu">*</span></label>
+          <select [(ngModel)]="secilenOlayTuruId" (ngModelChange)="olayTuruIdDegisti($event)" [disabled]="turlerYukleniyor">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let t of olayTurleri" [value]="t.id">{{ t.name }}</option>
+          </select>
+          <small *ngIf="turlerYukleniyor" class="alan-aciklama">Yukleniyor...</small>
+          <small *ngIf="!turlerYukleniyor && turlerHata" class="alan-hata">Yuklenemedi, sunucu baglantisini kontrol edin.</small>
         </div>
-        <small class="dogrulama-mesaj" *ngIf="musahitAdi.length > 0 && musahitAdi.length < 3">En az 3 karakter girilmeli</small>
+        <div class="form-group">
+          <label>Olayın Gerceklesme Sekli <span class="zorunlu">*</span></label>
+          <select [(ngModel)]="secilenGerceklesmeSekliId" (ngModelChange)="gerceklesmeSekliIdDegisti($event)" [disabled]="!secilenOlayTuruId">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let s of filtreliGerceklesmeSekilleri" [value]="s.id">{{ s.name }}</option>
+          </select>
+          <small *ngIf="secilenOlayTuruId && filtreliGerceklesmeSekilleri.length === 0" class="alan-aciklama">Bu tur icin gerceklesme sekli tanimlanmamis.</small>
+        </div>
       </div>
 
       <!-- Il / Ilce -->
@@ -44,11 +55,43 @@
         </div>
       </div>
 
-      <!-- Mahalle / Sandik No -->
+      <!-- Mahalle / Okul -->
       <div class="form-row">
         <div class="form-group">
           <label>Mahalle</label>
           <input type="text" [(ngModel)]="mahalle" placeholder="Mahalle adi (opsiyonel)" />
+        </div>
+        <div class="form-group">
+          <label>Okul</label>
+          <input type="text" [(ngModel)]="okul" placeholder="Okul adi (opsiyonel)" />
+        </div>
+      </div>
+
+      <!-- Konu / Olay Tarihi ve Saati -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Konu</label>
+          <select [(ngModel)]="konu" [disabled]="konularYukleniyor">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let k of konular" [value]="k.ad">{{ k.ad }}</option>
+          </select>
+          <small *ngIf="konularYukleniyor" class="alan-aciklama">Yukleniyor...</small>
+        </div>
+        <div class="form-group">
+          <label>Olay Tarihi ve Saati <span class="zorunlu">*</span></label>
+          <input type="datetime-local" [(ngModel)]="olayTarihi" />
+        </div>
+      </div>
+
+      <!-- Musahit Adi / Sandik No -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Musahit Adi <span class="zorunlu">*</span></label>
+          <div class="input-wrapper">
+            <input type="text" [(ngModel)]="musahitAdi" placeholder="En az 3 karakter" [class.input-gecersiz]="musahitAdi.length > 0 && musahitAdi.length < 3" />
+            <span class="karakter-sayac" [class.gecersiz]="musahitAdi.length > 0 && musahitAdi.length < 3">{{ musahitAdi.length }}/250</span>
+          </div>
+          <small class="dogrulama-mesaj" *ngIf="musahitAdi.length > 0 && musahitAdi.length < 3">En az 3 karakter girilmeli</small>
         </div>
         <div class="form-group">
           <label>Sandik No <span class="zorunlu">*</span></label>
@@ -56,30 +99,23 @@
         </div>
       </div>
 
-      <!-- Kategori chips -->
-      <div class="form-group">
-        <label>Olay Kategorisi <span class="zorunlu">*</span></label>
-        <div class="chip-grup">
-          <button type="button" class="chip" *ngFor="let k of kategoriler"
-            [class.chip-aktif]="olayKategorisi === k"
-            [style.border-color]="olayKategorisi === k ? kategoriRenk(k) : ''"
-            [style.background-color]="olayKategorisi === k ? kategoriRenk(k) + '22' : ''"
-            [style.color]="olayKategorisi === k ? kategoriRenk(k) : ''"
-            (click)="kategoriSec(k)">
-            {{ k }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Olay Saati / Tarih -->
+      <!-- Katilimci / Sehit / Olu / Gozalti -->
       <div class="form-row">
         <div class="form-group">
-          <label>Olay Saati <span class="zorunlu">*</span></label>
-          <input type="time" [(ngModel)]="olaySaati" />
+          <label>Katilimci Sayisi</label>
+          <input type="number" [(ngModel)]="katilimciSayisi" placeholder="0" min="0" />
         </div>
         <div class="form-group">
-          <label>Tarih <span class="zorunlu">*</span></label>
-          <input type="date" [(ngModel)]="tarih" />
+          <label>Sehit Sayisi</label>
+          <input type="number" [(ngModel)]="sehitSayisi" placeholder="0" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Olu Sayisi</label>
+          <input type="number" [(ngModel)]="oluSayisi" placeholder="0" min="0" />
+        </div>
+        <div class="form-group">
+          <label>Gozalti Sayisi</label>
+          <input type="number" [(ngModel)]="gozaltiSayisi" placeholder="0" min="0" />
         </div>
       </div>
 
@@ -137,110 +173,10 @@
           <span class="is-etiket">Toplam Kayit</span>
           <span class="is-deger">{{ kayitlar.length }}</span>
         </div>
-        <div class="istatistik-satir" *ngFor="let k of kategoriler">
-          <span class="is-etiket" [style.color]="kategoriRenk(k)">{{ k }}</span>
-          <span class="is-deger">{{ kategoriSayisi(k) }}</span>
+        <div class="istatistik-satir" *ngFor="let t of olayTurleri">
+          <span class="is-etiket" [style.color]="kategoriRenk(t.name)">{{ t.name }}</span>
+          <span class="is-deger">{{ kategoriSayisi(t.name) }}</span>
         </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Kayitlar listesi -->
-  <div class="liste-bolum">
-    <h2 class="panel-title">Kayitli Olaylar</h2>
-
-    <div *ngIf="yukleniyor" class="yukleniyor">
-      <div class="spinner-buyuk"></div>
-      <p>Kayitlar yukleniyor...</p>
-    </div>
-
-    <div *ngIf="!yukleniyor && kayitlar.length === 0" class="bos-durum">
-      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-        <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-      </svg>
-      <p>Henuz olay kaydi bulunmuyor.</p>
-    </div>
-
-    <div *ngIf="!yukleniyor && kayitlar.length > 0" class="kayit-grid">
-      <div class="kayit-karti" *ngFor="let kayit of kayitlar" (click)="kayitDetay(kayit)">
-        <div class="kayit-kart-ust">
-          <span class="kategori-rozet"
-            [style.background-color]="kategoriRenk(kayit.olayKategorisi) + '22'"
-            [style.color]="kategoriRenk(kayit.olayKategorisi)"
-            [style.border-color]="kategoriRenk(kayit.olayKategorisi)">
-            {{ kayit.olayKategorisi }}
-          </span>
-          <span class="kayit-tarih">{{ tarihFormat(kayit.tarih) }}</span>
-        </div>
-        <h3 class="kayit-musahit">{{ kayit.musahitAdi }}</h3>
-        <div class="kayit-konum">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
-          </svg>
-          {{ kayit.il }} / {{ kayit.ilce }} — Sandik {{ kayit.sandikNo }}
-        </div>
-        <p class="kayit-aciklama-onizleme">{{ kayit.aciklama.substring(0, 80) }}{{ kayit.aciklama.length > 80 ? '...' : '' }}</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Detay Modali -->
-<div class="modal-overlay" *ngIf="modalAcik" (click)="modalKapat()">
-  <div class="modal-icerik" (click)="$event.stopPropagation()">
-    <div class="modal-baslik">
-      <h3>Olay Detayi</h3>
-      <button class="modal-kapat" (click)="modalKapat()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-        </svg>
-      </button>
-    </div>
-    <div class="modal-govde" *ngIf="secilenKayit">
-      <div class="modal-satir">
-        <span class="modal-etiket">Musahit Adi</span>
-        <span class="modal-deger">{{ secilenKayit.musahitAdi }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Konum</span>
-        <span class="modal-deger">{{ secilenKayit.il }} / {{ secilenKayit.ilce }}{{ secilenKayit.mahalle ? ' / ' + secilenKayit.mahalle : '' }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Sandik No</span>
-        <span class="modal-deger">{{ secilenKayit.sandikNo }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Kategori</span>
-        <span class="kategori-rozet"
-          [style.background-color]="kategoriRenk(secilenKayit.olayKategorisi) + '22'"
-          [style.color]="kategoriRenk(secilenKayit.olayKategorisi)"
-          [style.border-color]="kategoriRenk(secilenKayit.olayKategorisi)">
-          {{ secilenKayit.olayKategorisi }}
-        </span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Olay Saati</span>
-        <span class="modal-deger">{{ secilenKayit.olaySaati }}</span>
-      </div>
-      <div class="modal-satir">
-        <span class="modal-etiket">Tarih</span>
-        <span class="modal-deger">{{ tarihFormat(secilenKayit.tarih) }}</span>
-      </div>
-      <div class="modal-satir modal-aciklama">
-        <span class="modal-etiket">Aciklama</span>
-        <p class="modal-deger">{{ secilenKayit.aciklama }}</p>
-      </div>
-      <div class="modal-satir" *ngIf="secilenKayit.kanitDosyasi">
-        <span class="modal-etiket">Kanit Dosyasi</span>
-        <span class="modal-deger dosya-var">Dosya mevcut</span>
-      </div>
-      <div class="modal-alt">
-        <button class="btn-sil" (click)="kayitSil(secilenKayit.id)">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-          </svg>
-          Kaydi Sil
-        </button>
       </div>
     </div>
   </div>

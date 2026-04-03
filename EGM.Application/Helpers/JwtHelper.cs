@@ -18,8 +18,6 @@ namespace EGM.Application.Helpers
                 new Claim(ClaimTypes.Role,             user.Role),
                 new Claim("role",                      user.Role),
                 new Claim("fullName",                  user.FullName ?? string.Empty),
-                new Claim("gsm",                       user.GSM),
-                new Claim("email",                     user.Email),
                 new Claim("cityId",                    user.CityId?.ToString() ?? string.Empty)
             };
 
@@ -30,7 +28,7 @@ namespace EGM.Application.Helpers
                 issuer,
                 audience,
                 claims,
-                expires: DateTime.UtcNow.AddHours(8),
+                expires: DateTime.UtcNow.AddHours(1),
                 signingCredentials: credentials);
             return new JwtSecurityTokenHandler().WriteToken(token);
 

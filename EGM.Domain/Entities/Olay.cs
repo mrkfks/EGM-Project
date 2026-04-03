@@ -42,6 +42,16 @@ namespace EGM.Domain.Entities
         public DateTime? GercekBaslangicTarihi { get; set; }
         public DateTime? GercekBitisTarihi { get; set; }
 
+        /// <summary>Formdan girilen planlanan bitiş tarihi (GercekBitisTarihi'nden farklı).</summary>
+        public DateTime? OlayBitisTarihi { get; set; }
+
+        /// <summary>Etkinlik sonunda gerçekleşen katılımcı sayısı (planlananından farklı olabilir).</summary>
+        public int? GerceklesenKatilimciSayisi { get; set; }
+
+        /// <summary>Gerçekleşme şekli kaydı (FK). Null ise belirtilmemiş.</summary>
+        public Guid? GerceklesmeSekliId { get; set; }
+        public GerceklesmeSekli? GerceklesmeSekli { get; set; }
+
         public ICollection<YuruyusRota> YuruyusRotasi { get; set; } = new List<YuruyusRota>();
         public ICollection<OperasyonelFaaliyet> OperasyonelFaaliyetler { get; set; } = new List<OperasyonelFaaliyet>();
         public ICollection<SosyalMedyaOlay> SosyalMedyaOlaylar { get; set; } = new List<SosyalMedyaOlay>();

@@ -1,45 +1,48 @@
 ﻿<div class="veri-container">
 
-  <div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-    <button class="btn-yenile" (click)="verileriGetir()">
-      <span *ngIf="!yukleniyor">&#8635; Yenile</span>
-      <span *ngIf="yukleniyor" class="spinner"></span>
-    </button>
-  </div>
-
   <!-- HATA -->
   <div class="alert alert-hata" *ngIf="hata">{{ hata }}</div>
 
-  <!-- ÖZET KARTLAR -->
-  <div class="ozet-izgarasi">
-    <div class="ozet-kart" *ngFor="let o of ozet" [style.border-left-color]="o.renk">
-      <div class="ozet-sayi" [style.color]="o.renk">
-        <span *ngIf="yukleniyor" class="spinner-kucuk"></span>
-        <span *ngIf="!yukleniyor">{{ o.sayi }}</span>
-      </div>
-      <div class="ozet-tur">{{ o.tur }}</div>
+  <!-- VERİ GİRİŞLERİ TABLOSU -->
+  <div class="tablo-blok">
+    <div class="tablo-ust">
+      <h2 class="bolum-baslik" style="margin:0">Veri Girişleri</h2>
+      <input class="arama-kutusu" type="text" [(ngModel)]="aramaMetni"
+             placeholder="Sicil, ad, birim, konu, form ile ara..." />
     </div>
-  </div>
 
-  <!-- TOPLAM -->
-  <div class="toplam-satir">
-    <span class="toplam-etiket">Toplam Olay Kaydı</span>
-    <span class="toplam-sayi">{{ toplamKayit() }}</span>
-  </div>
-
-  <!-- MODÜLLER -->
-  <h2 class="bolum-baslik">Veri Modülleri</h2>
-  <div class="modul-izgarasi">
-    <div class="modul-kart" *ngFor="let a of alanlar" [routerLink]="a.route" [style.--accent]="a.renk">
-      <div class="modul-renk-serit" [style.background]="a.renk"></div>
-      <div class="modul-icerik">
-        <div class="modul-ust">
-          <span class="modul-etiket" [style.background]="a.renk + '22'" [style.color]="a.renk">{{ a.etiket }}</span>
-        </div>
-        <div class="modul-baslik">{{ a.baslik }}</div>
-        <div class="modul-aciklama">{{ a.aciklama }}</div>
-        <div class="modul-git">Gözat <span class="git-ok">→</span></div>
+    <div class="tablo-sarici">
+      <div *ngIf="tabloYukleniyor" class="tablo-yukle">
+        <span class="spinner-kucuk"></span> Yükleniyor...
       </div>
+
+      <table class="veri-tablo" *ngIf="!tabloYukleniyor">
+        <thead>
+          <tr>
+            <th>Sicil</th>
+            <th>Ad Soyad</th>
+            <th>Birim</th>
+            <th>Tarih</th>
+            <th>Form</th>
+            <th>Konu</th>
+            <th>Detay</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of filtrelenmis">
+            <td><span class="sicil-rozet">{{ v.sicil }}</span></td>
+            <td class="ad-hucre">{{ v.adSoyad }}</td>
+            <td class="birim-hucre">{{ v.birim || '-' }}</td>
+            <td class="tarih-hucre">{{ tarihFormat(v.tarih) }}</td>
+            <td><span class="kaynak-rozet">{{ v.kaynak }}</span></td>
+            <td>{{ v.konu }}</td>
+            <td>{{ v.faaliyet }}</td>
+          </tr>
+          <tr *ngIf="filtrelenmis.length === 0">
+            <td colspan="7" class="bos-satir">Kayıt bulunamadı.</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 

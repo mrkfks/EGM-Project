@@ -1,5 +1,5 @@
 ﻿import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
@@ -10,6 +10,8 @@ interface UserKaydi {
   fullName: string;
   email: string;
   gsm: string;
+  cityId: number | null;
+  birim: string;
 }
 
 @Component({
@@ -18,6 +20,7 @@ interface UserKaydi {
   imports: [CommonModule, FormsModule],
   templateUrl: './kullanicilar.html',
   styleUrls: ['./kullanicilar.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Kullanicilar implements OnInit {
   private readonly apiUser = 'http://localhost:5117/api/user';
@@ -33,11 +36,15 @@ export class Kullanicilar implements OnInit {
   hataMesaji = '';
   basariMesaji = '';
 
-  rolModalAcik = false;
+  duzenleModalAcik = false;
   secilenKullanici: UserKaydi | null = null;
-  yeniRol = 'Izleyici';
-  cityIdInput: number | null = null;
-  rolAtiyor = false;
+  duzenleFullName = '';
+  duzenleEmail = '';
+  duzenleGsm = '';
+  dunzleBirim = '';
+  duzenleRol = 'Izleyici';
+  dunzeleCityId: number | null = null;
+  duzenleYapiyor = false;
 
   silModalAcik = false;
   silinecekKullanici: UserKaydi | null = null;
@@ -48,7 +55,9 @@ export class Kullanicilar implements OnInit {
   formAdSoyad = '';
   formEmail = '';
   formGsm = '';
+  formBirim = '';
   formCityId: number | null = null;
+  formRol = 'Izleyici';
   ekleniyor = false;
 
   mevcutRol = '';
@@ -92,9 +101,23 @@ export class Kullanicilar implements OnInit {
     { kod: 79, ad: 'Kilis' }, { kod: 80, ad: 'Osmaniye' }, { kod: 81, ad: 'Duzce' },
   ];
 
+  readonly birimler: string[] = [
+    'Başkanlık',
+    'Adana', 'Adıyaman', 'Afyonkarahisar', 'Ağrı', 'Amasya', 'Ankara', 'Antalya', 'Artvin',
+    'Aydın', 'Balıkesir', 'Bilecik', 'Bingöl', 'Bitlis', 'Bolu', 'Burdur', 'Bursa',
+    'Çanakkale', 'Çankırı', 'Çorum', 'Denizli', 'Diyarbakır', 'Edirne', 'Elazığ', 'Erzincan',
+    'Erzurum', 'Eskişehir', 'Gaziantep', 'Giresun', 'Gümüşhane', 'Hakkari', 'Hatay', 'Isparta',
+    'Mersin', 'İstanbul', 'İzmir', 'Kars', 'Kastamonu', 'Kayseri', 'Kırklareli', 'Kırşehir',
+    'Kocaeli', 'Konya', 'Kütahya', 'Malatya', 'Manisa', 'Kahramanmaraş', 'Mardin', 'Muğla',
+    'Muş', 'Nevşehir', 'Niğde', 'Ordu', 'Rize', 'Sakarya', 'Samsun', 'Siirt', 'Sinop',
+    'Sivas', 'Tekirdağ', 'Tokat', 'Trabzon', 'Tunceli', 'Şanlıurfa', 'Uşak', 'Van', 'Yozgat',
+    'Zonguldak', 'Aksaray', 'Bayburt', 'Karaman', 'Kırıkkale', 'Batman', 'Şırnak', 'Bartın',
+    'Ardahan', 'Iğdır', 'Yalova', 'Karabük', 'Kilis', 'Osmaniye', 'Düzce',
+  ];
+
   yetkiliSayisi = 0;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.jwtOku();
@@ -121,10 +144,12 @@ export class Kullanicilar implements OnInit {
         this.filtrele();
         this.yetkiliSayisi = this.kullanicilar.filter(k => k.role === 'Yetkili').length; // Calculate Yetkili count
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.hataMesaji = err?.error?.toString()?.substring(0, 120) ?? 'Kullanicilar yuklenemedi. Backend baglantisi kontrol edin.';
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -157,7 +182,9 @@ export class Kullanicilar implements OnInit {
       fullName: this.formAdSoyad.trim(),
       email: this.formEmail.trim(),
       gsm: this.formGsm.trim(),
+      birim: this.formBirim.trim(),
       cityId: this.formCityId,
+      role: this.formRol || 'Izleyici',
     };
     this.http.post(this.apiRegister, body, { responseType: 'text' }).subscribe({
       next: () => {
@@ -170,6 +197,7 @@ export class Kullanicilar implements OnInit {
       error: (err) => {
         this.hataMesaji = err?.error ?? 'Kullanici eklenemedi.';
         this.ekleniyor = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -177,36 +205,49 @@ export class Kullanicilar implements OnInit {
   private formuSifirla(): void {
     this.formSicil = null; this.formSifre = '';
     this.formAdSoyad = ''; this.formEmail = '';
-    this.formGsm = ''; this.formCityId = null;
+    this.formGsm = ''; this.formBirim = ''; this.formCityId = null; this.formRol = 'Izleyici';
   }
 
-  // ── Rol atama ──────────────────────────────────────────────────────────
-  rolModalAc(k: UserKaydi): void {
+  // ── Düzenleme ──────────────────────────────────────────────────────────
+  duzenleModalAc(k: UserKaydi): void {
     this.secilenKullanici = k;
-    this.yeniRol = k.role;
-    this.cityIdInput = null;
-    this.rolModalAcik = true;
+    this.duzenleFullName = k.fullName;
+    this.duzenleEmail = k.email;
+    this.duzenleGsm = k.gsm;
+    this.dunzleBirim = k.birim;
+    this.duzenleRol = k.role;
+    this.birimDegistiDuzenle();
+    this.dunzeleCityId = k.cityId;
+    this.duzenleModalAcik = true;
     this.hataMesaji = '';
     this.basariMesaji = '';
   }
 
-  rolAta(): void {
+  duzenleKaydet(): void {
     if (!this.secilenKullanici) return;
-    this.rolAtiyor = true;
-    this.http.post(
-      `${this.apiUser}/${this.secilenKullanici.sicil}/rol-ata`,
-      { yeniRol: this.yeniRol, cityId: this.cityIdInput }
-    ).subscribe({
+    this.duzenleYapiyor = true;
+    const sicil = this.secilenKullanici.sicil;
+    const ad    = this.secilenKullanici.fullName;
+    const body = {
+      fullName: this.duzenleFullName.trim(),
+      email:    this.duzenleEmail.trim(),
+      gsm:      this.duzenleGsm.trim(),
+      birim:    this.dunzleBirim.trim(),
+      role:     this.duzenleRol,
+      cityId:   this.dunzeleCityId,
+    };
+    this.http.put(`${this.apiUser}/${sicil}`, body, { responseType: 'json' }).subscribe({
       next: () => {
-        this.basariMesaji = `${this.secilenKullanici!.fullName} icin rol guncellendi.`;
-        this.rolAtiyor = false;
-        this.rolModalAcik = false;
+        this.duzenleYapiyor   = false;
+        this.duzenleModalAcik = false;
         this.secilenKullanici = null;
+        this.basariMesaji     = `${ad} basariyla guncellendi.`;
         this.kullanicilariGetir();
       },
       error: (err) => {
-        this.hataMesaji = err?.error?.mesaj ?? err?.error ?? 'Rol atanamadi.';
-        this.rolAtiyor = false;
+        this.duzenleYapiyor = false;
+        this.hataMesaji = err?.error?.mesaj ?? err?.error ?? 'Kullanici guncellenemedi.';
+        this.cdr.markForCheck();
       },
     });
   }
@@ -235,13 +276,15 @@ export class Kullanicilar implements OnInit {
         this.hataMesaji = err?.error ?? 'Kullanici silinemedi.';
         this.siliyor = false;
         this.silModalAcik = false;
+        this.cdr.markForCheck();
       },
     });
   }
 
   modalKapat(): void {
-    this.rolModalAcik = false;
-    this.silModalAcik = false;
+    this.duzenleModalAcik = false;
+    this.duzenleYapiyor   = false;
+    this.silModalAcik     = false;
     this.secilenKullanici = null;
     this.silinecekKullanici = null;
   }
@@ -296,5 +339,30 @@ export class Kullanicilar implements OnInit {
 
   rolSayisi(rol: string): number {
     return this.kullanicilar.filter(k => k.role === rol).length;
+  }
+
+  // ── Birime göre uygun rol değerleri ─────────────────────────────
+  private birimUygunRolDegerleri(birim: string): string[] {
+    if (birim === 'Başkanlık') {
+      return ['Izleyici', 'BaskanlikPersoneli', 'BaskanlikYoneticisi', 'Yetkili'];
+    }
+    if (birim) {
+      // 81 il
+      return ['Izleyici', 'IlPersoneli', 'IlYoneticisi', 'Yetkili'];
+    }
+    // birim seçilmemiş - tüm roller
+    return this.rolSirasi.slice();
+  }
+
+  get duzenleAtanabilirRoller(): { value: string; label: string }[] {
+    const uygun = this.birimUygunRolDegerleri(this.dunzleBirim);
+    return this.atanabilirRoller.filter(r => uygun.includes(r.value));
+  }
+
+  birimDegistiDuzenle(): void {
+    const izinliler = this.duzenleAtanabilirRoller;
+    if (!izinliler.find(r => r.value === this.duzenleRol)) {
+      this.duzenleRol = izinliler[0]?.value ?? 'Izleyici';
+    }
   }
 }

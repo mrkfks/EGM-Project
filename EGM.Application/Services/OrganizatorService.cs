@@ -66,6 +66,7 @@ namespace EGM.Application.Services
             existing.SiyasiYonelim = updated.SiyasiYonelim;
             existing.KutukNumarasi = updated.KutukNumarasi;
             existing.UstKurulusId = updated.UstKurulusId;
+            existing.Logo = updated.Logo;
 
             await _organizatorRepository.UpdateAsync(existing);
             return true;
@@ -97,10 +98,10 @@ namespace EGM.Application.Services
                 return kategoriler;
             }
 
-            foreach (var ad in VarsayilanKategoriler)
-            {
-                await _kategoriRepository.AddAsync(new KategoriOrganizator { Ad = ad });
-            }
+            var yeniKategoriler = VarsayilanKategoriler
+                .Select(ad => new KategoriOrganizator { Ad = ad })
+                .ToList();
+            await _kategoriRepository.AddRangeAsync(yeniKategoriler);
 
             return await _kategoriRepository.ListAllAsync();
         }

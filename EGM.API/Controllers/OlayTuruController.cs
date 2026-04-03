@@ -1,65 +1,63 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using EGM.Infrastructure;
 using EGM.Domain.Entities;
+using EGM.Domain.Constants;
+using EGM.Domain.Interfaces;
 
 namespace EGM.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class OlayTuruController : ControllerBase
     {
-        private readonly EGMDbContext _context;
-        public OlayTuruController(EGMDbContext context)
+        private readonly IRepository<OlayTuru> _repo;
+        public OlayTuruController(IRepository<OlayTuru> repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var list = await _context.OlayTurleri
-                .Select(x => new { x.Id, x.Name })
-                .ToListAsync();
-            return Ok(list);
+            var list = await _repo.ListAllAsync();
+            return Ok(list.Select(x => new { x.Id, x.Name }));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(Guid id)
         {
-            var entity = await _context.OlayTurleri
-                .Where(x => x.Id == id)
-                .Select(x => new { x.Id, x.Name })
-                .FirstOrDefaultAsync();
+            var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return NotFound();
-            return Ok(entity);
+            return Ok(new { entity.Id, entity.Name });
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
         public async Task<IActionResult> Create([FromBody] OlayTuru model)
         {
-            _context.OlayTurleri.Add(model);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = model.Id }, model);
+            var created = await _repo.AddAsync(model);
+            return CreatedAtAction(nameof(Get), new { id = created.Id }, new { created.Id, created.Name });
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] OlayTuru model)
         {
-            var entity = await _context.OlayTurleri.FindAsync(id);
+            var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return NotFound();
             entity.Name = model.Name;
-            await _context.SaveChangesAsync();
+            await _repo.UpdateAsync(entity);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var entity = await _context.OlayTurleri.FindAsync(id);
+            var entity = await _repo.GetByIdAsync(id);
             if (entity == null) return NotFound();
-            _context.OlayTurleri.Remove(entity);
-            await _context.SaveChangesAsync();
+            await _repo.DeleteAsync(entity);
             return NoContent();
         }
     }

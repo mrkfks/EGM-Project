@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-supheli',
@@ -7,5 +7,6 @@ import { Component } from '@angular/core';
   imports: [CommonModule],
   templateUrl: './supheli.html',
   styleUrls: ['./supheli.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Supheli {}

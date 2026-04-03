@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, Inject, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -71,6 +71,7 @@ interface OlayListItem {
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './sokak-olay-ekle.html',
   styleUrl: './sokak-olay-ekle.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SokakOlayEkle implements OnInit, OnDestroy {
 
@@ -121,6 +122,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     private router: Router,
     private olayTuruService: OlayTuruService,
     private gerceklesmeSekliService: GerceklesmeSekliService,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -177,7 +179,6 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       latitude:         [null, [Validators.min(-90),   Validators.max(90)]],
       longitude:        [null, [Validators.min(-180),  Validators.max(180)]],
       katilimciSayisi:  [null, Validators.min(0)],
-      sosyalSignalSkoru:[0,   [Validators.min(0), Validators.max(100)]],
       hassasiyet:       [0,    Validators.required],
       aciklama:         ['', Validators.maxLength(1000)],
       kaynakKurum:      ['', Validators.maxLength(250)],
@@ -198,7 +199,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     }
 
     this.form.get('hassasiyet')!.valueChanges.subscribe(v => this.onHassasiyetChange(+v));
-    ['katilimciSayisi', 'hassasiyet', 'olayTuru', 'sosyalSignalSkoru'].forEach(f =>
+    ['katilimciSayisi', 'hassasiyet', 'olayTuru'].forEach(f =>
       this.form.get(f)!.valueChanges.subscribe(() => this.riskSubject.next())
     );
   }
@@ -219,21 +220,22 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
   // ── Lookup yükleme ──────────────────────────────────────────────────
   private loadLookups(): void {
     this.http.get<any[]>(`${API}/organizator`).subscribe({
-      next: res => this.organizatorler = res.map(o => ({ id: o.id, ad: o.ad })),
+      next: res => { this.organizatorler = res.map(o => ({ id: o.id, ad: o.ad })); this.cdr.markForCheck(); },
       error: () => {},
     });
     this.http.get<any[]>(`${API}/organizator/konu`).subscribe({
-      next: res => this.konular = res.map(k => ({ id: k.id, ad: k.ad })),
+      next: res => { this.konular = res.map(k => ({ id: k.id, ad: k.ad })); this.cdr.markForCheck(); },
       error: () => {},
     });
     this.olayTuruService.getAll().subscribe({
-      next: res => this.olayTurleri = res,
+      next: res => { this.olayTurleri = res; this.cdr.markForCheck(); },
       error: () => {},
     });
     this.gerceklesmeSekliService.getAll().subscribe({
       next: res => {
         this.tumGerceklesmeSekilleri = res;
         this.filtreliGerceklesmeSekilleri = res;
+        this.cdr.markForCheck();
       },
       error: () => {},
     });
@@ -258,11 +260,11 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       katilimciSayisi:   v.katilimciSayisi ?? null,
       hassasiyet:        +v.hassasiyet,
       olayTuru:          v.olayTuru ?? '',
-      sosyalSignalSkoru: +v.sosyalSignalSkoru,
     }).subscribe({
       next: res => {
         this.riskPreview = res;
         this.isHighRisk  = res.riskPuaniNormalized >= 0.8;
+        this.cdr.markForCheck();
       },
       error: () => {},
     });
@@ -324,8 +326,9 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       next: res => {
         this.completedEvents = res?.items ?? res ?? [];
         this.isLoadingCompleted = false;
+        this.cdr.markForCheck();
       },
-      error: () => { this.isLoadingCompleted = false; }
+      error: () => { this.isLoadingCompleted = false; this.cdr.markForCheck(); }
     });
   }
 
@@ -335,8 +338,9 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       next: res => {
         this.userPlans = res?.items ?? res ?? [];
         this.isLoadingPlanned = false;
+        this.cdr.markForCheck();
       },
-      error: () => { this.isLoadingPlanned = false; }
+      error: () => { this.isLoadingPlanned = false; this.cdr.markForCheck(); }
     });
   }
 
@@ -394,6 +398,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
         if (this.isCityScoped) {
           this.form.get('il')!.disable();
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         // Detay çekilemezse mevcut özet veriyle doldur
@@ -404,6 +409,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
           katilimciSayisi: plan.katilimciSayisi ?? null,
           hassasiyet:      plan.hassasiyet ?? 0,
         });
+        this.cdr.markForCheck();
       }
     });
   }
@@ -433,7 +439,10 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       kaynakKurum:     v.kaynakKurum || null,
       hassasiyet:      +v.hassasiyet,
       cityId:          v.cityId ?? null,
-      durum:           2
+      durum:           2,
+      gerceklesmeSekliId:           v.olayinGerceklesmeSekli || null,
+      gerceklesenKatilimciSayisi:   v.gerceklesenKatilimciSayisi ?? null,
+      olayBitisTarihi:              v.bitisTarihi || null
     };
     this.http.put<void>(`${API}/olay/${planId}`, payload).subscribe({
       next: () => {
@@ -451,10 +460,12 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
           const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
           this.form.get('il')!.setValue(ilAdi);
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isSaving = false;
         this.formError = 'İptal işlemi sırasında bir hata oluştu.';
+        this.cdr.markForCheck();
       }
     });
   }
@@ -486,7 +497,10 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       kaynakKurum:     v.kaynakKurum || null,
       hassasiyet:      +v.hassasiyet,
       cityId:          v.cityId ?? null,
-      durum
+      durum,
+      gerceklesmeSekliId:           v.olayinGerceklesmeSekli || null,
+      gerceklesenKatilimciSayisi:   v.gerceklesenKatilimciSayisi ?? null,
+      olayBitisTarihi:              v.bitisTarihi || null
     };
 
     // Planlanan olay gerçekleşenlere taşınıyorsa → PUT
@@ -509,10 +523,12 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
             const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
             this.form.get('il')!.setValue(ilAdi);
           }
+          this.cdr.markForCheck();
         },
         error: () => {
           this.isSaving = false;
           this.formError = 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+          this.cdr.markForCheck();
         }
       });
       return;
@@ -535,11 +551,16 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
         } else {
           this.completedEvents = [created, ...this.completedEvents];
         }
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isSaving = false;
         this.formError = 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+        this.cdr.markForCheck();
       }
     });
   }
+
+  trackById(_index: number, item: { id: string }): string { return item.id; }
+  trackByValue(_index: number, item: string | number): string | number { return item; }
 }

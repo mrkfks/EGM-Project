@@ -274,6 +274,14 @@ namespace EGM.Infrastructure
                 .WithOne(g => g.OlayTuru)
                 .HasForeignKey(g => g.OlayTuruId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // ── Olay - GerceklesmeSekli (optional FK) ───────────────────
+            modelBuilder.Entity<Olay>()
+                .HasOne(o => o.GerceklesmeSekli)
+                .WithMany()
+                .HasForeignKey(o => o.GerceklesmeSekliId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .IsRequired(false);
         }
     }
 }

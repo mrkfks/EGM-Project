@@ -19,5 +19,8 @@ namespace EGM.Domain.Entities
         /// IlPersoneli ve IlYoneticisi için zorunludur; Başkanlık kullanıcıları için null.
         /// </summary>
         public int? CityId { get; set; }
+
+        /// <summary>Kullanıcının çalıştığı birim / şube adı. Ör: "İstihbarat Şube Müdürlüğü"</summary>
+        public string Birim { get; set; } = string.Empty;
     }
 }

@@ -35,10 +35,6 @@ namespace EGM.API.Controllers
         public async Task<IActionResult> GetByPlatform(string platform)
             => Ok((await _service.GetByPlatformAsync(platform)).Select(MapToResponse));
 
-        [HttpGet("yuksek-signal")]
-        public async Task<IActionResult> GetHighSignal([FromQuery] double minSkor = 50)
-            => Ok((await _service.GetHighSignalAsync(minSkor)).Select(MapToResponse));
-
         [HttpGet("hassasiyet/{hassasiyet}")]
         public async Task<IActionResult> GetByHassasiyet(Hassasiyet hassasiyet)
             => Ok((await _service.GetByHassasiyetAsync(hassasiyet)).Select(MapToResponse));
@@ -51,13 +47,15 @@ namespace EGM.API.Controllers
             {
                 OlayId = dto.OlayId,
                 Platform = dto.Platform,
+                Konu = dto.Konu,
                 PaylasimLinki = dto.PaylasimLinki,
                 PaylasimTarihi = dto.PaylasimTarihi,
                 IcerikOzeti = dto.IcerikOzeti,
                 IlgiliKisiKurum = dto.IlgiliKisiKurum,
+                Il = dto.Il,
+                Ilce = dto.Ilce,
                 EkranGoruntusu = dto.EkranGoruntusu,
-                Hassasiyet = dto.Hassasiyet,
-                SosyalSignalSkoru = dto.SosyalSignalSkoru
+                Hassasiyet = dto.Hassasiyet
             };
             var created = await _service.CreateAsync(entity);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, MapToResponse(created));
@@ -70,9 +68,11 @@ namespace EGM.API.Controllers
             var updated = new SosyalMedyaOlay
             {
                 OlayId = dto.OlayId, Platform = dto.Platform,
+                Konu = dto.Konu,
                 PaylasimLinki = dto.PaylasimLinki, PaylasimTarihi = dto.PaylasimTarihi,
                 IcerikOzeti = dto.IcerikOzeti, IlgiliKisiKurum = dto.IlgiliKisiKurum,
-                Hassasiyet = dto.Hassasiyet, SosyalSignalSkoru = dto.SosyalSignalSkoru
+                Il = dto.Il, Ilce = dto.Ilce,
+                Hassasiyet = dto.Hassasiyet
             };
             return await _service.UpdateAsync(id, updated) ? NoContent() : NotFound();
         }
@@ -85,10 +85,12 @@ namespace EGM.API.Controllers
         private static SosyalMedyaOlayResponseDto MapToResponse(SosyalMedyaOlay s) => new()
         {
             Id = s.Id, OlayId = s.OlayId, Platform = s.Platform,
+            Konu = s.Konu,
             PaylasimLinki = s.PaylasimLinki, PaylasimTarihi = s.PaylasimTarihi,
             IcerikOzeti = s.IcerikOzeti, IlgiliKisiKurum = s.IlgiliKisiKurum,
+            Il = s.Il, Ilce = s.Ilce,
             EkranGoruntusu = s.EkranGoruntusu,
-            Hassasiyet = s.Hassasiyet, SosyalSignalSkoru = s.SosyalSignalSkoru
+            Hassasiyet = s.Hassasiyet
         };
     }
 }

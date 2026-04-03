@@ -1,5 +1,5 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -92,6 +92,7 @@ export interface KonuOption {
   imports: [CommonModule, FormsModule],
   templateUrl: './olay.html',
   styleUrl: './olay.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Olay implements OnInit {
 
@@ -132,6 +133,7 @@ export class Olay implements OnInit {
   constructor(
     private http: HttpClient,
     private router: Router,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: object
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -171,11 +173,11 @@ export class Olay implements OnInit {
   // ── Lookup yükleme ────────────────────────────────────────────────────
   private loadLookups(): void {
     this.http.get<any[]>(`${API}/organizator`).subscribe({
-      next: res => this.organizatorler = res.map(o => ({ id: o.id, ad: o.ad })),
+      next: res => { this.organizatorler = res.map(o => ({ id: o.id, ad: o.ad })); this.cdr.markForCheck(); },
       error: () => {}
     });
     this.http.get<any[]>(`${API}/organizator/konu`).subscribe({
-      next: res => this.konular = res.map(k => ({ id: k.id, ad: k.ad })),
+      next: res => { this.konular = res.map(k => ({ id: k.id, ad: k.ad })); this.cdr.markForCheck(); },
       error: () => {}
     });
   }
@@ -218,10 +220,12 @@ export class Olay implements OnInit {
         }));
         this.applyClientFilters();
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.tableError = 'Veriler yüklenemedi. Lütfen tekrar deneyiniz.';
         this.isLoading  = false;
+        this.cdr.markForCheck();
       }
     });
   }

@@ -3,6 +3,8 @@
  * Bu paketler kurulduktan sonra gerçek tipler otomatik devreye girer.
  */
 
+declare module 'leaflet.markercluster';
+
 declare module 'leaflet.heat' {
   // leaflet.heat bir Leaflet plugin'idir — L.heatLayer() global metodunu ekler.
   // Kendi başına dışa aktarma yapmaz; yan-etki import'u olarak kullanılır.

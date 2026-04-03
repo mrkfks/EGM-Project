@@ -133,6 +133,16 @@ namespace EGM.Application.DTOs
         public int? CityId { get; set; }
         /// <summary>Olay durumu: 0=Planlandi (varsayılan), 1=Gerceklesti</summary>
         public OlayDurum Durum { get; set; } = OlayDurum.Planlandi;
+
+        /// <summary>Formdan girilen planlanan bitiş tarihi.</summary>
+        public DateTime? OlayBitisTarihi { get; set; }
+
+        /// <summary>Etkinlik sonunda gerçekleşen katılımcı sayısı.</summary>
+        [Range(0, int.MaxValue)]
+        public int? GerceklesenKatilimciSayisi { get; set; }
+
+        /// <summary>Gerçekleşme şekli FK Id'si.</summary>
+        public Guid? GerceklesmeSekliId { get; set; }
     }
 
     public class OlayResponseDto
@@ -167,6 +177,9 @@ namespace EGM.Application.DTOs
         public string CreatedByUserId { get; set; } = string.Empty;
         /// <summary>Olayın gerçekleştiği ilin plaka kodu.</summary>
         public int? CityId { get; set; }
+        public DateTime? OlayBitisTarihi { get; set; }
+        public int? GerceklesenKatilimciSayisi { get; set; }
+        public Guid? GerceklesmeSekliId { get; set; }
     }
 
     // ── Risk Preview ────────────────────────────────────────────────────────
@@ -176,8 +189,6 @@ namespace EGM.Application.DTOs
         public Hassasiyet Hassasiyet { get; set; }
         [StringLength(100)]
         public string? OlayTuru { get; set; }
-        [Range(0.0, 100.0, ErrorMessage = "Sosyal sinyal skoru 0-100 arasında olmalıdır.")]
-        public double SosyalSignalSkoru { get; set; }
     }
 
     public class RiskPreviewResponseDto
@@ -331,6 +342,9 @@ namespace EGM.Application.DTOs
         [StringLength(100)]
         public string? Platform { get; set; }
 
+        [StringLength(250)]
+        public string? Konu { get; set; }
+
         [Required(ErrorMessage = "Paylaşım linki zorunludur.")]
         [StringLength(2000)]
         public string? PaylasimLinki { get; set; }
@@ -344,12 +358,15 @@ namespace EGM.Application.DTOs
         [StringLength(250)]
         public string? IlgiliKisiKurum { get; set; }
 
+        [StringLength(100)]
+        public string? Il { get; set; }
+
+        [StringLength(100)]
+        public string? Ilce { get; set; }
+
         public string? EkranGoruntusu { get; set; }
 
         public Hassasiyet Hassasiyet { get; set; }
-
-        [Range(0.0, 100.0, ErrorMessage = "Sosyal sinyal skoru 0-100 arasında olmalıdır.")]
-        public double SosyalSignalSkoru { get; set; }
     }
 
     public class SosyalMedyaOlayResponseDto
@@ -357,13 +374,15 @@ namespace EGM.Application.DTOs
         public Guid Id { get; set; }
         public Guid? OlayId { get; set; }
         public string? Platform { get; set; }
+        public string? Konu { get; set; }
         public string? PaylasimLinki { get; set; }
         public DateTime PaylasimTarihi { get; set; }
         public string? IcerikOzeti { get; set; }
         public string? IlgiliKisiKurum { get; set; }
+        public string? Il { get; set; }
+        public string? Ilce { get; set; }
         public string? EkranGoruntusu { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
-        public double SosyalSignalSkoru { get; set; }
     }
 
     // ── Organizator ──────────────────────────────────────────────────────
@@ -405,6 +424,9 @@ namespace EGM.Application.DTOs
         public string? KutukNumarasi { get; set; }
 
         public Guid? UstKurulusId { get; set; }
+
+        /// <summary>Kuruluş logosu (base64 encoded resim).</summary>
+        public string? Logo { get; set; }
     }
 
     public class OrganizatorResponseDto
@@ -424,6 +446,7 @@ namespace EGM.Application.DTOs
         public Guid? UstKurulusId { get; set; }
         public string? UstKurulusAd { get; set; }
         public int AltKurulusSayisi { get; set; }
+        public string? Logo { get; set; }
     }
 
     // ── Konu ─────────────────────────────────────────────────────────────
@@ -473,6 +496,12 @@ namespace EGM.Application.DTOs
         [StringLength(100)]
         public string? Mahalle { get; set; }
 
+        [StringLength(200)]
+        public string? Okul { get; set; }
+
+        [StringLength(250)]
+        public string? Konu { get; set; }
+
         [Range(1, 99999, ErrorMessage = "Gecerli bir sandik numarasi giriniz.")]
         public int SandikNo { get; set; }
 
@@ -489,6 +518,18 @@ namespace EGM.Application.DTOs
         public string? KanitDosyasi { get; set; }
 
         public DateTime Tarih { get; set; }
+
+        [Range(0, int.MaxValue)]
+        public int KatilimciSayisi { get; set; }
+
+        [Range(0, int.MaxValue)]
+        public int SehitSayisi { get; set; }
+
+        [Range(0, int.MaxValue)]
+        public int OluSayisi { get; set; }
+
+        [Range(0, int.MaxValue)]
+        public int GozaltiSayisi { get; set; }
     }
 
     public class SandikOlayResponseDto
@@ -498,6 +539,8 @@ namespace EGM.Application.DTOs
         public string? Il { get; set; }
         public string? Ilce { get; set; }
         public string? Mahalle { get; set; }
+        public string? Okul { get; set; }
+        public string? Konu { get; set; }
         public int SandikNo { get; set; }
         public string? OlayKategorisi { get; set; }
         public TimeSpan OlaySaati { get; set; }
@@ -505,6 +548,10 @@ namespace EGM.Application.DTOs
         public string? KanitDosyasi { get; set; }
         public DateTime Tarih { get; set; }
         public DateTime CreatedAt { get; set; }
+        public int KatilimciSayisi { get; set; }
+        public int SehitSayisi { get; set; }
+        public int OluSayisi { get; set; }
+        public int GozaltiSayisi { get; set; }
     }
 
     public class SecimSonucuCreateDto
@@ -679,18 +726,34 @@ namespace EGM.Application.DTOs
         public string Role { get; set; } = string.Empty;
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string GSM { get; set; } = string.Empty;
-    }
+        public string GSM { get; set; } = string.Empty;        public int? CityId { get; set; }
+        public string Birim { get; set; } = string.Empty;    }
     /// <summary>Rol atama işlemi için request body DTO'su.</summary>
     public class RolAtamaDto
     {
-        /// <summary>
-        /// Hedef kullanıcıya atanacak yeni rol.
-        /// Geçerli değerler: Izleyici, IlPersoneli, IlYoneticisi,
-        /// BaskanlikPersoneli, BaskanlikYoneticisi
-        /// </summary>
         public string YeniRol { get; set; } = string.Empty;
-
-        /// <summary>Başkanlık Yöneticisi tarafından il personeli atanmasında il plaka kodu.</summary>
         public int? CityId { get; set; }
-    }}
+    }
+
+    /// <summary>Kullanıcı bilgilerini güncelleme için DTO.</summary>
+    public class UserGuncelleDto
+    {
+        public string FullName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string GSM { get; set; } = string.Empty;
+        public string Birim { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public int? CityId { get; set; }
+    }
+
+    // ── Veri Girişi Listesi ──────────────────────────────────────────────
+    public class VeriGirisiDto
+    {
+        public int Sicil { get; set; }
+        public string AdSoyad { get; set; } = string.Empty;
+        public string Birim { get; set; } = string.Empty;
+        public DateTime Tarih { get; set; }
+        public string Konu { get; set; } = string.Empty;
+        public string Faaliyet { get; set; } = string.Empty;
+    }
+}

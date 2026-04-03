@@ -1,0 +1,99 @@
+<div class="page">
+
+  <!-- ── Filtreler ──────────────────────────────────────── -->
+  <div class="filtre-bar">
+    <div class="filtre-group">
+      <label>Platform</label>
+      <input type="text" [(ngModel)]="filtrePlatform" placeholder="Twitter, Facebook..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Konu</label>
+      <input type="text" [(ngModel)]="filtreKonu" placeholder="Konu ara..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>İlgili Kişi / Kurum</label>
+      <input type="text" [(ngModel)]="filtreIlgiliKisi" placeholder="Kişi veya kurum..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Hassasiyet</label>
+      <select [(ngModel)]="filtreHassasiyet" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option value="0">Düşük</option>
+        <option value="1">Orta</option>
+        <option value="2">Yüksek</option>
+        <option value="3">Kritik</option>
+      </select>
+    </div>
+    <div class="filtre-group">
+      <label>İl</label>
+      <input type="text" [(ngModel)]="filtreIl" placeholder="İl adı..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>İlçe</label>
+      <input type="text" [(ngModel)]="filtreIlce" placeholder="İlçe adı..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Başlangıç Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih1" (change)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Bitiş Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih2" (change)="filtrele()" />
+    </div>
+  </div>
+
+  <!-- ── Yükleniyor / Hata ────────────────────────────────── -->
+  <div class="durum-mesaj" *ngIf="yukleniyor">Yükleniyor...</div>
+  <div class="durum-mesaj hata" *ngIf="hata">{{ hata }}</div>
+
+  <!-- ── Tablo ────────────────────────────────────────────── -->
+  <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
+    <table class="tablo">
+      <thead>
+        <tr>
+          <th>Platform</th>
+          <th>Konu</th>
+          <th>İçerik Özeti</th>
+          <th>İlgili Kişi / Kurum</th>
+          <th>İl</th>
+          <th>İlçe</th>
+          <th>Paylaşım Tarihi</th>
+          <th>Hassasiyet</th>
+          <th>Link</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of sayfaKayitlari">
+          <td><span class="platform-badge">{{ s.platform || '—' }}</span></td>
+          <td>{{ s.konu || '—' }}</td>
+          <td class="ozet-cell">{{ s.icerikOzeti || '—' }}</td>
+          <td>{{ s.ilgiliKisiKurum || '—' }}</td>
+          <td>{{ s.il || '—' }}</td>
+          <td>{{ s.ilce || '—' }}</td>
+          <td class="tarih-cell">{{ s.paylasimTarihi ? (s.paylasimTarihi | date:'dd.MM.yyyy') : '—' }}</td>
+          <td><span class="badge" [class]="hassasiyetClass(s.hassasiyet)">{{ hassasiyetLabel[s.hassasiyet] }}</span></td>
+          <td>
+            <a *ngIf="s.paylasimLinki" [href]="s.paylasimLinki" target="_blank" rel="noopener" class="link-btn">↗</a>
+            <span *ngIf="!s.paylasimLinki">—</span>
+          </td>
+        </tr>
+        <tr *ngIf="sayfaKayitlari.length === 0">
+          <td colspan="9" class="bos-satir">Kayıt bulunamadı.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Sayfalama ────────────────────────────────────────── -->
+  <div class="sayfalama" *ngIf="toplamSayfa > 1 && !yukleniyor">
+    <button class="sayfa-btn" (click)="oncekiSayfa()" [disabled]="mevcutSayfa === 1">‹</button>
+    <button
+      class="sayfa-btn"
+      *ngFor="let p of sayfaNumaralari"
+      [class.aktif]="p === mevcutSayfa"
+      (click)="sayfayaGit(p)">{{ p }}</button>
+    <button class="sayfa-btn" (click)="sonrakiSayfa()" [disabled]="mevcutSayfa === toplamSayfa">›</button>
+    <span class="sayfa-bilgi">{{ mevcutSayfa }} / {{ toplamSayfa }}</span>
+  </div>
+
+</div>

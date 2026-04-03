@@ -1,5 +1,5 @@
 ﻿import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -21,6 +21,7 @@ interface KurulusKaydi {
   sosyalMedyaHesaplari?: string;
   siyasiYonelim?: string;
   kutukNumarasi?: string;
+  logo?: string | null;
 }
 
 @Component({
@@ -29,6 +30,7 @@ interface KurulusKaydi {
   imports: [CommonModule, FormsModule],
   templateUrl: './organizasyon.html',
   styleUrls: ['./organizasyon.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Organizasyon implements OnInit {
   private readonly apiBase = `${environment.apiUrl}/api/organizator`;
@@ -117,7 +119,7 @@ export class Organizasyon implements OnInit {
     'Diger':         { bg: '#f0f3f4', color: '#7f8c8d', border: '#d5d8dc' },
   };
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.turleriYukle();
@@ -138,9 +140,11 @@ export class Organizasyon implements OnInit {
       next: (data) => {
         this.tumKuruluslar = data;
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       },
     });
   }
@@ -177,13 +181,10 @@ export class Organizasyon implements OnInit {
         : null,
       siyasiYonelim: this.formSiyasiYonelim || null,
       kutukNumarasi: this.formKutukNumarasi.trim() || null,
+      logo: this.formLogo || null,
     };
     this.http.post<KurulusKaydi>(this.apiBase, body, { headers: this.getHeaders() }).subscribe({
       next: (yeni) => {
-        if (this.formLogo) {
-          this.orgLogolari = { ...this.orgLogolari, [yeni.id]: this.formLogo };
-          localStorage.setItem(this.ORG_LOGO_KEY, JSON.stringify(this.orgLogolari));
-        }
         this.ekleniyor = false;
         this.formuSifirla();
         this.router.navigate(['/rapor-kuruluslar'], { queryParams: { id: yeni.id, mesaj: 'kayit' } });
@@ -192,6 +193,7 @@ export class Organizasyon implements OnInit {
         const e = err?.error;
         this.hataMesaji = typeof e === 'string' ? e : (e?.title ?? e?.message ?? `Hata ${err?.status ?? ''}: Kurulus eklenemedi.`.trim());
         this.ekleniyor = false;
+        this.cdr.markForCheck();
       },
     });
   }

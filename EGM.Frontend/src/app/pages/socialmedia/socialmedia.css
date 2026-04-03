@@ -104,6 +104,26 @@ select.form-input { padding-left: 12px; }
   flex-wrap: wrap;
   gap: 8px;
 }
+.platform-btn-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.platform-sil-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  color: #c0392b;
+  padding: 0 3px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+  margin-left: -2px;
+}
+.platform-btn-wrap:hover .platform-sil-btn { opacity: 0.6; }
+.platform-btn-wrap:hover .platform-sil-btn:hover { opacity: 1; }
+
 .platform-btn {
   padding: 6px 14px;
   border: 1px solid #d1d5db;
@@ -116,6 +136,53 @@ select.form-input { padding-left: 12px; }
 }
 .platform-btn:hover { border-color: #3b82f6; color: #1d4ed8; background: #eff6ff; }
 .platform-btn.selected { border-color: #1d4ed8; color: #fff; background: #1d4ed8; font-weight: 600; }
+.platform-btn-ekle {
+  border-style: dashed !important;
+  border-color: #3b82f6 !important;
+  color: #1d4ed8 !important;
+  background: none !important;
+}
+.platform-btn-ekle:hover { background: #eff6ff !important; }
+
+.platform-yeni-ekle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.platform-inline-input {
+  width: 130px;
+  padding: 5px 10px;
+  border: 1.5px solid #3b82f6;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: #1a1a2e;
+  outline: none;
+  background: #fff;
+}
+.platform-inline-kaydet {
+  padding: 5px 12px;
+  background: #1a3a5c;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.platform-inline-kaydet:hover:not(:disabled) { background: #2c5f8a; }
+.platform-inline-kaydet:disabled { opacity: 0.45; cursor: not-allowed; }
+.platform-inline-iptal {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #8a94a6;
+  padding: 3px 6px;
+  border-radius: 50%;
+  transition: background 0.15s, color 0.15s;
+}
+.platform-inline-iptal:hover { background: #fdecea; color: #c0392b; }
 
 /* Signal Score */
 .score-input-wrap { display: flex; flex-direction: column; gap: 6px; }

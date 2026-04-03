@@ -1,29 +1,4 @@
 import { Routes } from '@angular/router';
-import { Home } from './pages/home/home';
-import { Province } from './pages/province/province';
-import { Login } from './pages/login/login';
-import { Olay } from './pages/olay/olay';
-import { VIP } from './pages/vip/vip';
-import { Organizasyon } from './pages/organizasyon/organizasyon';
-import { Secim } from './pages/secim/secim';
-import { Socialmedia } from './pages/socialmedia/socialmedia';
-import { Olu } from './pages/olu/olu';
-import { Supheli } from './pages/supheli/supheli';
-import { Operasyonel } from './pages/operasyonel/operasyonel';
-import { Sehit } from './pages/sehit/sehit';
-import { Kullanicilar } from './pages/kullanicilar/kullanicilar';
-import { Istatistikler } from './pages/istatistikler/istatistikler';
-import { Bultenler } from './pages/bultenler/bultenler';
-import { Raporlar } from './pages/raporlar/raporlar';
-import { RaporKuruluslar } from './pages/rapor-kuruluslar/rapor-kuruluslar';
-import { RaporKonular } from './pages/rapor-konular/rapor-konular';
-import { KonuIslemleri } from './pages/konu-islemleri/konu-islemleri';
-import { Konular } from './pages/konular/konular';
-import { SokakOlayEkle } from './pages/sokak-olay-ekle/sokak-olay-ekle';
-import { VeriYonetimi } from './pages/veri-yonetimi/veri-yonetimi';
-import { FaaliyetYonetimiComponent } from './pages/faaliyet-yonetimi/faaliyet-yonetimi';
-import { KurulusDetay } from './pages/kurulus-detay/kurulus-detay';
-import { KonuDetay } from './pages/konu-detay/konu-detay';
 import { authGuard, roleGuard, ROLES } from './guards/auth.guard';
 
 // Kısa yardımcılar
@@ -39,37 +14,41 @@ const HQ_YONETICISI_VE_UZERI = [ROLES.BaskanlikYoneticisi, ROLES.Yetkili];
 
 export const routes: Routes = [
     { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: 'login', component: Login },
+    { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
 
     // ── Herkese açık (sadece giriş gerekli) ──────────────────────────────
-    { path: 'home',              component: Home,          canActivate: [authGuard] },
-    { path: 'olay',              component: Olay,          canActivate: [authGuard] },
-    { path: 'istatistikler',     component: Istatistikler, canActivate: [authGuard] },
-    { path: 'raporlar',          component: Bultenler,     canActivate: [authGuard] },
-    { path: 'rapor-gunluk-bulten', component: Raporlar,   canActivate: [authGuard] },
-    { path: 'rapor-kuruluslar',  component: RaporKuruluslar, canActivate: [authGuard] },
-    { path: 'kurulus-detay/:id', component: KurulusDetay, canActivate: [authGuard] },
-    { path: 'konu-detay/:id',    component: KonuDetay,    canActivate: [authGuard] },
-    { path: 'rapor-konular',     component: RaporKonular, canActivate: [authGuard] },
-    { path: 'konular',           component: Konular,       canActivate: [authGuard] },
-    { path: 'province/:id',      component: Province,      canActivate: [authGuard] },
+    { path: 'home',              loadComponent: () => import('./pages/home/home').then(m => m.Home),                         canActivate: [authGuard] },
+    { path: 'olay',              loadComponent: () => import('./pages/olay/olay').then(m => m.Olay),                         canActivate: [authGuard] },
+    { path: 'istatistikler',     loadComponent: () => import('./pages/istatistikler/istatistikler').then(m => m.Istatistikler), canActivate: [authGuard] },
+    { path: 'raporlar',          loadComponent: () => import('./pages/bultenler/bultenler').then(m => m.Bultenler),          canActivate: [authGuard] },
+    { path: 'rapor-gunluk-bulten', loadComponent: () => import('./pages/raporlar/raporlar').then(m => m.Raporlar),          canActivate: [authGuard] },
+    { path: 'rapor-kuruluslar',  loadComponent: () => import('./pages/rapor-kuruluslar/rapor-kuruluslar').then(m => m.RaporKuruluslar), canActivate: [authGuard] },
+    { path: 'kurulus-detay/:id', loadComponent: () => import('./pages/kurulus-detay/kurulus-detay').then(m => m.KurulusDetay), canActivate: [authGuard] },
+    { path: 'konu-detay/:id',    loadComponent: () => import('./pages/konu-detay/konu-detay').then(m => m.KonuDetay),        canActivate: [authGuard] },
+    { path: 'rapor-konular',     loadComponent: () => import('./pages/rapor-konular/rapor-konular').then(m => m.RaporKonular), canActivate: [authGuard] },
+    { path: 'konular',           loadComponent: () => import('./pages/konular/konular').then(m => m.Konular),                canActivate: [authGuard] },
+    { path: 'sokak-istatistik',        loadComponent: () => import('./pages/sokak-istatistik/sokak-istatistik').then(m => m.SokakIstatistik),              canActivate: [authGuard] },
+    { path: 'sosyal-medya-istatistik', loadComponent: () => import('./pages/sosyal-medya-istatistik/sosyal-medya-istatistik').then(m => m.SosyalMedyaIstatistik), canActivate: [authGuard] },
+    { path: 'secim-istatistik',        loadComponent: () => import('./pages/secim-istatistik/secim-istatistik').then(m => m.SecimIstatistik),              canActivate: [authGuard] },
+    { path: 'vip-istatistik',          loadComponent: () => import('./pages/vip-istatistik/vip-istatistik').then(m => m.VipIstatistik),                    canActivate: [authGuard] },
+    { path: 'province/:id',      loadComponent: () => import('./pages/province/province').then(m => m.Province),            canActivate: [authGuard] },
 
     // ── İl Personeli ve üzeri ────────────────────────────────────────────
-    { path: 'sokak-olay-ekle', component: SokakOlayEkle, canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
-    { path: 'socialmedia',     component: Socialmedia,   canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
-    { path: 'secim',           component: Secim,         canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
+    { path: 'sokak-olay-ekle', loadComponent: () => import('./pages/sokak-olay-ekle/sokak-olay-ekle').then(m => m.SokakOlayEkle), canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
+    { path: 'socialmedia',     loadComponent: () => import('./pages/socialmedia/socialmedia').then(m => m.Socialmedia),    canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
+    { path: 'secim',           loadComponent: () => import('./pages/secim/secim').then(m => m.Secim),                      canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
 
     // ── İl Yöneticisi ve üzeri ───────────────────────────────────────────
-    { path: 'vip',             component: VIP,           canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'organizasyon',    component: Organizasyon,  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'konu-islemleri',  component: KonuIslemleri, canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'faaliyet-yonetimi', component: FaaliyetYonetimiComponent, canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'kullanicilar',    component: Kullanicilar,  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'olu',             component: Olu,           canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'supheli',         component: Supheli,       canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'operasyonel',     component: Operasyonel,   canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'sehit',           component: Sehit,         canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'vip',             loadComponent: () => import('./pages/vip/vip').then(m => m.VIP),                            canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'organizasyon',    loadComponent: () => import('./pages/organizasyon/organizasyon').then(m => m.Organizasyon),  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'konu-islemleri',  loadComponent: () => import('./pages/konu-islemleri/konu-islemleri').then(m => m.KonuIslemleri), canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'faaliyet-yonetimi', loadComponent: () => import('./pages/faaliyet-yonetimi/faaliyet-yonetimi').then(m => m.FaaliyetYonetimiComponent), canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'kullanicilar',    loadComponent: () => import('./pages/kullanicilar/kullanicilar').then(m => m.Kullanicilar),  canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'olu',             loadComponent: () => import('./pages/olu/olu').then(m => m.Olu),                            canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'supheli',         loadComponent: () => import('./pages/supheli/supheli').then(m => m.Supheli),                canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'operasyonel',     loadComponent: () => import('./pages/operasyonel/operasyonel').then(m => m.Operasyonel),    canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    { path: 'sehit',           loadComponent: () => import('./pages/sehit/sehit').then(m => m.Sehit),                      canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
 
     // ── Başkanlık Yöneticisi ve Yetkili ─────────────────────────────────
-    { path: 'veri-yonetimi',   component: VeriYonetimi,  canActivate: [authGuard, roleGuard(HQ_YONETICISI_VE_UZERI)] },
+    { path: 'veri-yonetimi',   loadComponent: () => import('./pages/veri-yonetimi/veri-yonetimi').then(m => m.VeriYonetimi), canActivate: [authGuard, roleGuard(HQ_YONETICISI_VE_UZERI)] },
 ];

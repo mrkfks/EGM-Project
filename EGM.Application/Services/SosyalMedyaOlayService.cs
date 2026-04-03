@@ -37,10 +37,6 @@ namespace EGM.Application.Services
         public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByHassasiyetAsync(Hassasiyet hassasiyet)
             => await _sosyalMedyaRepository.FindAsync(s => s.Hassasiyet == hassasiyet);
 
-        // Yüksek signal skoruna sahip paylaşımlar (eşik değer üstü)
-        public async Task<IReadOnlyList<SosyalMedyaOlay>> GetHighSignalAsync(double minSkor)
-            => await _sosyalMedyaRepository.FindAsync(s => s.SosyalSignalSkoru >= minSkor);
-
         // Tarih aralığına göre filtrele
         public async Task<IReadOnlyList<SosyalMedyaOlay>> GetByTarihAraligiAsync(DateTime baslangic, DateTime bitis)
             => await _sosyalMedyaRepository.FindAsync(s => s.PaylasimTarihi >= baslangic && s.PaylasimTarihi <= bitis);
@@ -61,8 +57,11 @@ namespace EGM.Application.Services
             existing.IcerikOzeti = updated.IcerikOzeti;
             existing.IlgiliKisiKurum = updated.IlgiliKisiKurum;
             existing.Hassasiyet = updated.Hassasiyet;
-            existing.SosyalSignalSkoru = updated.SosyalSignalSkoru;
             existing.OlayId = updated.OlayId;
+            existing.Konu = updated.Konu;
+            existing.Il = updated.Il;
+            existing.Ilce = updated.Ilce;
+            existing.EkranGoruntusu = updated.EkranGoruntusu;
 
             await _sosyalMedyaRepository.UpdateAsync(existing);
             return true;

@@ -509,3 +509,74 @@
   .egm-filter-panel { width: 165px; font-size: 0.72rem; }
   .egm-notif-banner { min-width: unset; width: calc(100vw - 24px); }
 }
+
+/* ─── Popup footer ────────────────────────────────────────────────────── */
+.egm-pop-footer {
+  padding: 8px 14px 10px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid rgba(15, 111, 163, 0.25);
+}
+
+.egm-pop-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #0f6fa3, #0a4f7a);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.egm-pop-btn:hover { opacity: 0.85; }
+
+.egm-pop-btn-sec {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(15, 111, 163, 0.4);
+  color: #7ec8e3;
+}
+
+/* ─── Koordinatsız uyarı ─────────────────────────────────────────────── */
+.egm-no-coord-warn {
+  color: #f39c12;
+  font-size: 0.72rem;
+  padding: 2px 0;
+}
+
+/* ─── İstatistik paneli (sol üst) ────────────────────────────────────────── */
+.egm-stats-bar {
+  position: absolute;
+  top: 52px;
+  left: 12px;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  padding: 7px 12px;
+  background: rgba(6, 20, 40, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(15, 111, 163, 0.35);
+  border-radius: 8px;
+  color: #cfe6f5;
+  font-size: 0.75rem;
+  max-width: 320px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+.egm-stat { white-space: nowrap; }
+.egm-stat b { color: #7ec8e3; }
+.egm-stat-sep { color: rgba(126, 200, 227, 0.4); }
+
+.egm-stat-chip {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}

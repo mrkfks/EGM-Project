@@ -17,30 +17,36 @@ export class Navbar implements OnInit, OnDestroy {
   userRole = '';
   userEmail = '';
   dropdownOpen = false;
-  pageTitle    = 'EGM Proje';
-  pageSubtitle = 'Güvenlik Yönetim Sistemi';
+  pageTitle = '';
+  pageIcon  = '';
   private sub?: Subscription;
 
-  private readonly PAGE_TITLES: Record<string, { title: string; subtitle: string }> = {
-    '/home':            { title: 'Harita',                  subtitle: 'Operasyonel Durum Haritası' },
-    '/olay':            { title: 'Olay Listesi',            subtitle: 'Sistemdeki tüm olayları görüntüleyin ve filtreleyin' },
-    '/sokak-olay-ekle': { title: 'Sokak Olayı Ekle',        subtitle: 'Yeni sokak olayını sisteme kaydediniz' },
-    '/vip':             { title: 'VIP Ziyaret Takibi',      subtitle: 'Devlet büyükleri ve protokol ziyaretleri' },
-    '/organizasyon':    { title: 'Kuruluş İşlemleri',      subtitle: 'Sendikalar, konfederasyonlar ve sivil toplum kuruluşları' },
-    '/secim':           { title: 'Seçim Güvenliği',        subtitle: 'Sandık güvenliği ihlalleri ve olay kaydı' },
-    '/socialmedia':     { title: 'Sosyal Medya Olayları',  subtitle: 'Sosyal medya kaynaklı olaylar' },
-    '/olu':             { title: 'Ölü Kayıtları',           subtitle: 'Ölü kayıt yönetimi' },
-    '/supheli':         { title: 'Şüpheli Kayıtları',      subtitle: 'Şüpheli takip ve kayıt yönetimi' },
-    '/operasyonel':     { title: 'Operasyonel Faaliyetler', subtitle: 'Operasyonel faaliyet kayıtları' },
-    '/istatistikler':   { title: 'Güvenlik İstatistikleri', subtitle: 'Olay verilerinin istatistiksel analizi' },
-    '/raporlar':              { title: 'Bültenler',               subtitle: 'Bülten türü seçin' },
-    '/rapor-gunluk-bulten':  { title: 'Başkanlık Legal Günlük Bülten', subtitle: 'Günlük güvenlik bülteni raporu' },
-    '/rapor-kuruluslar':     { title: 'Kuruluşlar',            subtitle: 'Kayıtlı kuruluşlar ve dağılım analizi' },
-    '/rapor-konular':        { title: 'Konular',               subtitle: 'Kayıtlı konular ve kategori analizi' },
-    '/konu-islemleri':  { title: 'Konu İşlemleri',         subtitle: 'Konu ve alt konu kategorileri yönetimi' },
-    '/sehit':           { title: 'Şehit Kayıtları',         subtitle: 'Şehit kayıt yönetimi' },
-    '/kullanicilar':    { title: 'Kullanıcı Yönetimi',     subtitle: 'Sistem kullanıcıları ve rol atamaları' },
-    '/veri-yonetimi':   { title: 'Veri Yönetimi',          subtitle: 'Merkezi veri erişim noktası' },
+  private readonly PAGE_MAP: Record<string, { title: string; icon: string }> = {
+    '/home':                 { title: 'Harita',                         icon: 'map' },
+    '/olay':                 { title: 'Olay Listesi',                   icon: 'alert' },
+    '/sokak-olay-ekle':      { title: 'Sokak Olayı Ekle',               icon: 'alert' },
+    '/vip':                  { title: 'VIP Ziyaret Takibi',             icon: 'star' },
+    '/organizasyon':         { title: 'Kuruluş İşlemleri',             icon: 'building' },
+    '/secim':                { title: 'Seçim Güvenliği',               icon: 'vote' },
+    '/socialmedia':          { title: 'Sosyal Medya Olayları',         icon: 'share' },
+    '/olu':                  { title: 'Ölü Kayıtları',                  icon: 'activity' },
+    '/supheli':              { title: 'Şüpheli Kayıtları',             icon: 'search-person' },
+    '/operasyonel':          { title: 'Operasyonel Faaliyetler',        icon: 'activity' },
+    '/istatistikler':        { title: 'Güvenlik İstatistikleri',        icon: 'bar-chart' },
+    '/raporlar':             { title: 'Bültenler',                      icon: 'file-text' },
+    '/rapor-gunluk-bulten':  { title: 'Başkanlık Günlük Bülten',       icon: 'file-text' },
+    '/rapor-kuruluslar':     { title: 'Kuruluşlar',                     icon: 'bar-chart' },
+    '/rapor-konular':        { title: 'Konular',                        icon: 'pie-chart' },
+    '/konu-islemleri':       { title: 'Konu İşlemleri',                icon: 'book' },
+    '/sehit':                { title: 'Şehit Kayıtları',               icon: 'star' },
+    '/kullanicilar':         { title: 'Kullanıcı Yönetimi',            icon: 'users' },
+    '/veri-yonetimi':        { title: 'Veri Yönetimi',                 icon: 'database' },
+    '/sokak-istatistik':     { title: 'Sokak Olayları İstatistikleri',  icon: 'trending-up' },
+    '/sosyal-medya-istatistik': { title: 'Sosyal Medya İstatistikleri', icon: 'hash' },
+    '/secim-istatistik':     { title: 'Seçim Olayları İstatistikleri', icon: 'check-square' },
+    '/vip-istatistik':       { title: 'Ziyaretçi Olayları İstatistikleri', icon: 'user-check' },
+    '/konular':              { title: 'Konu İstatistikleri',            icon: 'pie-chart' },
+    '/faaliyet-yonetimi':    { title: 'Faaliyet Yönetimi',             icon: 'briefcase' },
   };
 
   constructor(private router: Router) {}
@@ -58,13 +64,13 @@ export class Navbar implements OnInit, OnDestroy {
   private checkRoute(url: string): void {
     this.show = !url.includes('/login');
     this.dropdownOpen = false;
-    const match = Object.keys(this.PAGE_TITLES).find(k => url.startsWith(k));
+    const match = Object.keys(this.PAGE_MAP).find(k => url.startsWith(k));
     if (match) {
-      this.pageTitle    = this.PAGE_TITLES[match].title;
-      this.pageSubtitle = this.PAGE_TITLES[match].subtitle;
+      this.pageTitle = this.PAGE_MAP[match].title;
+      this.pageIcon  = this.PAGE_MAP[match].icon;
     } else {
-      this.pageTitle    = 'EGM Proje';
-      this.pageSubtitle = 'Güvenlik Yönetim Sistemi';
+      this.pageTitle = '';
+      this.pageIcon  = '';
     }
   }
 

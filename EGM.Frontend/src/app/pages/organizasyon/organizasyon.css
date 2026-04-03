@@ -718,19 +718,19 @@
 }
 
 .tur-btn {
-  padding: 6px 13px;
-  border: 1.5px solid #dde3ea;
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
   border-radius: 20px;
-  background: #f8fafb;
-  color: #374151;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: .8rem;
+  color: #4b5563;
+  background: #f3f4f6;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+  font-weight: 500;
+  transition: border-color .18s, background .18s, color .18s;
 }
 
-.tur-btn:hover { transform: translateY(-1px); box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-.tur-aktif { font-weight: 700; }
+.tur-btn:hover { border-color: #3b82f6; color: #1d4ed8; background: #eff6ff; }
+.tur-aktif { border-color: #1d4ed8 !important; color: #fff !important; background: #1d4ed8 !important; font-weight: 600; }
 
 /* ─── TUR BUTON WRAP (sil butonu ile beraber) ────────────────────── */
 .tur-btn-wrap {
@@ -758,10 +758,11 @@
 /* ─── SATIR ICI TUR EKLEME ───────────────────────────────────────── */
 .tur-btn-ekle-trigger {
   border-style: dashed !important;
-  color: #2c5f8a !important;
+  border-color: #3b82f6 !important;
+  color: #1d4ed8 !important;
   background: none !important;
 }
-.tur-btn-ekle-trigger:hover { background: #eaf2ff !important; }
+.tur-btn-ekle-trigger:hover { background: #eff6ff !important; }
 
 .tur-yeni-ekle {
   display: inline-flex;

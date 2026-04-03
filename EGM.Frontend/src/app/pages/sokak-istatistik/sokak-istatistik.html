@@ -1,0 +1,138 @@
+<div class="page">
+
+  <!-- ── Filtreler ──────────────────────────────────────── -->
+  <div class="filtre-bar">
+    <div class="filtre-group">
+      <label>Başlık</label>
+      <input type="text" [(ngModel)]="filtreBaslik" placeholder="Başlık ara..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Olay Türü</label>
+      <input type="text" [(ngModel)]="filtreOlayTuru" placeholder="Olay türü..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Organizatör</label>
+      <input type="text" [(ngModel)]="filtreOrganizator" placeholder="Organizatör..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Konu</label>
+      <input type="text" [(ngModel)]="filtreKonu" placeholder="Konu..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Hassasiyet</label>
+      <select [(ngModel)]="filtreHassasiyet" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option value="0">Düşük</option>
+        <option value="1">Orta</option>
+        <option value="2">Yüksek</option>
+        <option value="3">Kritik</option>
+      </select>
+    </div>
+    <div class="filtre-group">
+      <label>Durum</label>
+      <select [(ngModel)]="filtreDurum" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option value="0">Planlandı</option>
+        <option value="1">Gerçekleşti</option>
+        <option value="2">İptal</option>
+      </select>
+    </div>
+    <div class="filtre-group">
+      <label>İl</label>
+      <input type="text" [(ngModel)]="filtreIl" placeholder="İl..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>İlçe</label>
+      <input type="text" [(ngModel)]="filtreIlce" placeholder="İlçe..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Mekan</label>
+      <input type="text" [(ngModel)]="filtreMekan" placeholder="Mekan..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Kaynak Kurum</label>
+      <input type="text" [(ngModel)]="filtreKaynakKurum" placeholder="Kurum..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Evrak No</label>
+      <input type="text" [(ngModel)]="filtreEvrakNo" placeholder="Evrak no..." (input)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Başlangıç Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih1" (change)="filtrele()" />
+    </div>
+    <div class="filtre-group">
+      <label>Bitiş Tarihi</label>
+      <input type="date" [(ngModel)]="filtreTarih2" (change)="filtrele()" />
+    </div>
+  </div>
+
+  <div class="durum-mesaj" *ngIf="yukleniyor">Yükleniyor...</div>
+  <div class="durum-mesaj hata" *ngIf="hata">{{ hata }}</div>
+
+  <!-- ── Tablo ────────────────────────────────────────────── -->
+  <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
+    <table class="tablo">
+      <thead>
+        <tr>
+          <th>Başlık</th>
+          <th>Olay Türü</th>
+          <th>Organizatör</th>
+          <th>Konu</th>
+          <th>İl / İlçe</th>
+          <th>Mekan</th>
+          <th>Tarih</th>
+          <th>Saat</th>
+          <th>Hassasiyet</th>
+          <th>Durum</th>
+          <th class="sayi">Katılımcı</th>
+          <th class="sayi">Gözaltı</th>
+          <th class="sayi">şehit/Ölü</th>
+          <th class="sayi">Risk</th>
+          <th>Kaynak</th>
+          <th>Evrak No</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let o of sayfaKayitlari">
+          <td class="baslik-cell">{{ o.baslik || '—' }}</td>
+          <td>{{ o.olayTuru || '—' }}</td>
+          <td>{{ o.organizatorAd || '—' }}</td>
+          <td>{{ o.konuAd || '—' }}</td>
+          <td class="il-cell">{{ o.il || '—' }}<span *ngIf="o.ilce"> / {{ o.ilce }}</span></td>
+          <td class="mekan-cell">{{ o.mekan || '—' }}</td>
+          <td class="tarih-cell">{{ o.tarih | date:'dd.MM.yyyy' }}</td>
+          <td class="saat-cell">
+            <span *ngIf="o.baslangicSaati">{{ o.baslangicSaati }}</span>
+            <span *ngIf="o.bitisSaati"> - {{ o.bitisSaati }}</span>
+            <span *ngIf="!o.baslangicSaati">—</span>
+          </td>
+          <td><span class="badge" [class]="hassasiyetClass(o.hassasiyet)">{{ hassasiyetLabel[o.hassasiyet] }}</span></td>
+          <td><span class="badge" [class]="durumClass(o.durum)">{{ durumLabel[o.durum] }}</span></td>
+          <td class="sayi">{{ o.katilimciSayisi ?? '—' }}</td>
+          <td class="sayi">{{ o.gozaltiSayisi ?? '—' }}</td>
+          <td class="sayi">{{ o.sehitOluSayisi ?? '—' }}</td>
+          <td class="sayi">{{ o.riskPuani != null ? (o.riskPuani | number:'1.0-0') : '—' }}</td>
+          <td class="kisa-cell">{{ o.kaynakKurum || '—' }}</td>
+          <td class="kisa-cell">{{ o.evrakNumarasi || '—' }}</td>
+        </tr>
+        <tr *ngIf="sayfaKayitlari.length === 0">
+          <td colspan="16" class="bos-satir">Kayıt bulunamadı.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Sayfalama ────────────────────────────────────────── -->
+  <div class="sayfalama" *ngIf="toplamSayfa > 1 && !yukleniyor">
+    <button class="sayfa-btn" (click)="oncekiSayfa()" [disabled]="mevcutSayfa === 1">‹</button>
+    <button
+      class="sayfa-btn"
+      *ngFor="let p of sayfaNumaralari"
+      [class.aktif]="p === mevcutSayfa"
+      (click)="sayfayaGit(p)">{{ p }}</button>
+    <button class="sayfa-btn" (click)="sonrakiSayfa()" [disabled]="mevcutSayfa === toplamSayfa">›</button>
+    <span class="sayfa-bilgi">{{ mevcutSayfa }} / {{ toplamSayfa }}</span>
+  </div>
+
+</div>

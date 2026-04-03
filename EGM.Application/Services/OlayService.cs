@@ -157,6 +157,10 @@ namespace EGM.Application.Services
             existing.EvrakNumarasi  = updated.EvrakNumarasi;
             existing.Hassasiyet     = updated.Hassasiyet;
             existing.Durum          = updated.Durum;
+            existing.CityId         = updated.CityId;
+            existing.OlayBitisTarihi            = updated.OlayBitisTarihi;
+            existing.GerceklesenKatilimciSayisi  = updated.GerceklesenKatilimciSayisi;
+            existing.GerceklesmeSekliId          = updated.GerceklesmeSekliId;
             existing.RiskPuani      = CalculateRisk(existing);
 
             await _olayRepository.UpdateAsync(existing);

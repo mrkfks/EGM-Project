@@ -170,6 +170,61 @@
   font-weight: 600;
 }
 
+.chip-sekli {
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  opacity: 0.92;
+}
+
+.chip-bos-mesaj {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  padding: 4px 0;
+}
+
+.tur-yukleniyor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.83rem;
+  color: #6b7280;
+  padding: 4px 0;
+}
+
+.spinner-kucuk {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #d1d5db;
+  border-top-color: #2c5f8a;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.7s linear infinite;
+}
+
+.tur-hata {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 7px;
+  padding: 7px 12px;
+}
+
+.alan-aciklama {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 2px;
+}
+
+.alan-hata {
+  font-size: 0.75rem;
+  color: #dc2626;
+  margin-top: 2px;
+}
+
 /* ── Kaydet butonu ────────────────────────────────────────────── */
 .btn-kaydet {
   width: 100%;

@@ -24,7 +24,7 @@
     {
       "label": "Frontend: ng serve",
       "type": "shell",
-      "command": "ng serve",
+      "command": "ng serve --host 0.0.0.0",
       "options": {
         "cwd": "${workspaceFolder}/EGM.Frontend"
       },

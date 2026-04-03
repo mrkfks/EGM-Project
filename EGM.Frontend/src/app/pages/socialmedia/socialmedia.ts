@@ -1,16 +1,19 @@
 ﻿import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { KonuService, Konu } from '../../services/konu.service';
 
 interface SosyalMedyaForm {
   kullaniciAdi: string;
   paylasimLinki: string;
   platform: string;
+  konu: string;
+  il: string;
+  ilce: string;
   paylasimTarihi: string;
   icerikOzeti: string;
   hassasiyet: number;
-  sosyalSignalSkoru: number;
   ekranGoruntusuBase64: string;
   ekranGoruntusuAd: string;
 }
@@ -22,26 +25,31 @@ interface SosyalMedyaForm {
   templateUrl: './socialmedia.html',
   styleUrls: ['./socialmedia.css'],
 })
-export class Socialmedia {
+export class Socialmedia implements OnInit {
   private apiBase = 'http://localhost:5117/api';
 
   kaydediliyor = false;
   basariMesaji = '';
   hataMesaji = '';
 
+  konular: Konu[] = [];
+  konularYukleniyor = false;
+
   form: SosyalMedyaForm = {
     kullaniciAdi: '',
     paylasimLinki: '',
     platform: '',
+    konu: '',
+    il: '',
+    ilce: '',
     paylasimTarihi: new Date().toISOString().slice(0, 16),
     icerikOzeti: '',
     hassasiyet: 0,
-    sosyalSignalSkoru: 0,
     ekranGoruntusuBase64: '',
     ekranGoruntusuAd: '',
   };
 
-  readonly platformlar = [
+  platformlar: string[] = [
     'Twitter / X',
     'Facebook',
     'Instagram',
@@ -53,7 +61,47 @@ export class Socialmedia {
     'Diger',
   ];
 
-  constructor(private http: HttpClient) {}
+  iller: string[] = [
+    'Adana','Adiyaman','Afyonkarahisar','Agri','Amasya','Ankara','Antalya',
+    'Artvin','Aydin','Balikesir','Bilecik','Bingol','Bitlis','Bolu','Burdur',
+    'Bursa','Canakkale','Cankiri','Corum','Denizli','Diyarbakir','Edirne',
+    'Elazig','Erzincan','Erzurum','Eskisehir','Gaziantep','Giresun',
+    'Gumushane','Hakkari','Hatay','Isparta','Mersin','Istanbul','Izmir',
+    'Kars','Kastamonu','Kayseri','Kirklareli','Kirsehir','Kocaeli','Konya',
+    'Kutahya','Malatya','Manisa','Kahramanmaras','Mardin','Mugla','Mus',
+    'Nevsehir','Nigde','Ordu','Rize','Sakarya','Samsun','Siirt','Sinop',
+    'Sivas','Tekirdag','Tokat','Trabzon','Tunceli','Sanliurfa','Usak',
+    'Van','Yozgat','Zonguldak','Aksaray','Bayburt','Karaman','Kirikkale',
+    'Batman','Sirnak','Bartin','Ardahan','Igdir','Yalova','Karabuk',
+    'Kilis','Osmaniye','Duzce'
+  ];
+
+  yeniPlatformAcik = false;
+  yeniPlatform = '';
+
+  platformEkle(): void {
+    const ad = this.yeniPlatform.trim();
+    if (!ad || this.platformlar.includes(ad)) return;
+    this.platformlar.push(ad);
+    this.form.platform = ad;
+    this.yeniPlatform = '';
+    this.yeniPlatformAcik = false;
+  }
+
+  platformSil(p: string): void {
+    this.platformlar = this.platformlar.filter(x => x !== p);
+    if (this.form.platform === p) this.form.platform = '';
+  }
+
+  constructor(private http: HttpClient, private konuService: KonuService) {}
+
+  ngOnInit(): void {
+    this.konularYukleniyor = true;
+    this.konuService.getAll().subscribe({
+      next: res => { this.konular = res; this.konularYukleniyor = false; },
+      error: () => { this.konularYukleniyor = false; }
+    });
+  }
 
   gorselSec(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -109,13 +157,15 @@ export class Socialmedia {
     const payload = {
       olayId: null,
       platform: this.form.platform,
+      konu: this.form.konu || null,
+      il: this.form.il || null,
+      ilce: this.form.ilce || null,
       paylasimLinki: this.form.paylasimLinki,
       paylasimTarihi: this.form.paylasimTarihi,
       icerikOzeti: this.form.icerikOzeti,
       ilgiliKisiKurum: this.form.kullaniciAdi,
       ekranGoruntusu: this.form.ekranGoruntusuBase64 || null,
       hassasiyet: this.form.hassasiyet,
-      sosyalSignalSkoru: this.form.sosyalSignalSkoru,
     };
 
     this.http
@@ -138,10 +188,12 @@ export class Socialmedia {
       kullaniciAdi: '',
       paylasimLinki: '',
       platform: '',
+      konu: '',
+      il: '',
+      ilce: '',
       paylasimTarihi: new Date().toISOString().slice(0, 16),
       icerikOzeti: '',
       hassasiyet: 0,
-      sosyalSignalSkoru: 0,
       ekranGoruntusuBase64: '',
       ekranGoruntusuAd: '',
     };
