@@ -29,7 +29,10 @@ export class Login implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (isPlatformBrowser(this.platformId)) document.body.classList.add('login-page');
+    if (isPlatformBrowser(this.platformId)) {
+      document.body.classList.add('login-page');
+      localStorage.removeItem('token');
+    }
     this.form = this.fb.group({
       sicil:    ['', Validators.required],
       password: ['', Validators.required]
@@ -54,13 +57,17 @@ export class Login implements OnInit, OnDestroy {
     }).subscribe({
       next: res => {
         localStorage.setItem('token', res.token);
+        this.loading = false;
         this.router.navigate(['/home']);
       },
       error: err => {
         this.loading  = false;
-        this.errorMsg = err.status === 401
-          ? 'Geçersiz sicil numarası veya parola.'
-          : 'Sunucuya bağlanılamadı. Lütfen tekrar deneyin.';
+        if (err.status === 401) {
+          this.errorMsg = 'Geçersiz sicil numarası veya parola.';
+          this.form.reset();
+        } else {
+          this.errorMsg = 'Sunucuya bağlanılamadı. Lütfen tekrar deneyin.';
+        }
       }
     });
   }

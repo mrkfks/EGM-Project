@@ -44,14 +44,17 @@
       <div class="form-row">
         <div class="form-group">
           <label>Il <span class="zorunlu">*</span></label>
-          <select [(ngModel)]="il">
+          <select [(ngModel)]="il" (ngModelChange)="ilDegisti($event)">
             <option value="">Il seciniz</option>
             <option *ngFor="let i of iller" [value]="i">{{ i }}</option>
           </select>
         </div>
         <div class="form-group">
           <label>Ilce <span class="zorunlu">*</span></label>
-          <input type="text" [(ngModel)]="ilce" placeholder="Ilce adi" />
+          <select [(ngModel)]="ilce" [disabled]="!il">
+            <option value="">Ilce seciniz</option>
+            <option *ngFor="let d of filtreliIlceler" [value]="d">{{ d }}</option>
+          </select>
         </div>
       </div>
 

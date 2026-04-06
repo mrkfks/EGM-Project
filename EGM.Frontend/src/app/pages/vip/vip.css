@@ -305,6 +305,88 @@
 
 .span-2 { grid-column: span 2; }
 
+/* ── Unvan Chip Secimi ────────────────────────────────────────── */
+.unvan-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.unvan-btn-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.unvan-sil-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.65rem;
+  color: #c0392b;
+  padding: 0 3px;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.15s;
+  margin-left: -2px;
+}
+.unvan-btn-wrap:hover .unvan-sil-btn { opacity: 0.6; }
+.unvan-btn-wrap:hover .unvan-sil-btn:hover { opacity: 1; }
+.unvan-btn {
+  padding: 6px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 20px;
+  font-size: .8rem;
+  color: #4b5563;
+  background: #f3f4f6;
+  cursor: pointer;
+  transition: all .18s;
+}
+.unvan-btn:hover { border-color: #3b82f6; color: #1d4ed8; background: #eff6ff; }
+.unvan-btn.selected { border-color: #1d4ed8; color: #fff; background: #1d4ed8; font-weight: 600; }
+.unvan-btn-ekle {
+  border-style: dashed !important;
+  border-color: #3b82f6 !important;
+  color: #1d4ed8 !important;
+  background: none !important;
+}
+.unvan-btn-ekle:hover { background: #eff6ff !important; }
+.unvan-yeni-ekle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.unvan-inline-input {
+  width: 140px;
+  padding: 5px 10px;
+  border: 1.5px solid #3b82f6;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: #1a1a2e;
+  outline: none;
+  background: #fff;
+}
+.unvan-inline-kaydet {
+  padding: 5px 12px;
+  background: #1a3a5c;
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.unvan-inline-kaydet:hover:not(:disabled) { background: #2c5f8a; }
+.unvan-inline-kaydet:disabled { opacity: 0.45; cursor: not-allowed; }
+.unvan-inline-iptal {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #c0392b;
+  padding: 0 4px;
+  line-height: 1;
+}
+
 /* ── Alan gruplari ────────────────────────────────────────────── */
 .form-field {
   display: flex;

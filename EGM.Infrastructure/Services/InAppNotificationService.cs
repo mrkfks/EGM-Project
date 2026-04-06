@@ -11,8 +11,7 @@ namespace EGM.Infrastructure.Services
     public class InAppNotificationService : IInAppNotificationService
     {
         // Kritik risk eşiği: Hassasiyet.Kritik (20 puan) veya katılımcı > 1000 (10 puan)
-        // RiskPuani > 0 → şehir yöneticileri; RiskPuani >= 20 → merkez yöneticileri de
-        private const double CriticalRiskThreshold = 20.0;
+        // Hassasiyet >= Yüksek (2) → şehir yöneticileri; Hassasiyet == Kritik (3) → merkez yöneticileri de
 
         // Aynı olay için 30 saniye içinde tekrar bildirim gönderilmesini engelle
         private static readonly Dictionary<string, DateTime> _rateLimitMap = new();
@@ -35,7 +34,7 @@ namespace EGM.Infrastructure.Services
         // ─── Olay Risk Bildirimi ─────────────────────────────────────────
         public async Task NotifyOlayRiskAsync(Olay olay, bool isSelfCorrection = false)
         {
-            if (olay.RiskPuani <= 0 && !isSelfCorrection) return;
+            if (olay.Hassasiyet == Hassasiyet.Dusuk && !isSelfCorrection) return;
 
             // Rate limiting: aynı olay için 30 sn içinde tekrar bildirim gönderme
             var rateLimitKey = $"{olay.Id}_{(isSelfCorrection ? "correction" : "risk")}";
@@ -47,14 +46,13 @@ namespace EGM.Infrastructure.Services
                 _rateLimitMap[rateLimitKey] = DateTime.UtcNow;
             }
 
-            var isCritical = olay.RiskPuani >= CriticalRiskThreshold;
+            var isCritical = olay.Hassasiyet == Hassasiyet.Kritik;
 
             var title = isSelfCorrection
-                ? $"[Düzeltme] Olay Güncellendi: {olay.Baslik}"
-                : $"[Risk] Yüksek Riskli Olay: {olay.Baslik}";
+                ? $"[Düzeltme] Olay Güncellendi: {olay.OlayTuru ?? olay.Il ?? "Olay"}"
+                : $"[Uyarı] Yüksek Hassasiyetli Olay: {olay.OlayTuru ?? olay.Il ?? "Olay"}";
 
             var message =
-                $"Risk Puanı: {olay.RiskPuani} | " +
                 $"Hassasiyet: {olay.Hassasiyet} | " +
                 $"Tarih: {olay.Tarih:dd.MM.yyyy}" +
                 (isSelfCorrection ? " | Kayıt sahibi tarafından düzeltildi." : string.Empty);
@@ -69,7 +67,7 @@ namespace EGM.Infrastructure.Services
                 .ToListAsync();
 
             var notifications = ilKullanicilari
-                .Select(u => BuildNotification(u.Sicil.ToString(), title, message, olay.RiskPuani, type))
+                .Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)olay.Hassasiyet * 10, type))
                 .ToList();
 
             // Kritik olaylar → tüm başkanlık personeline de gönder
@@ -80,7 +78,7 @@ namespace EGM.Infrastructure.Services
                     .ToListAsync();
 
                 notifications.AddRange(
-                    hqKullanicilari.Select(u => BuildNotification(u.Sicil.ToString(), title, message, olay.RiskPuani, type)));
+                    hqKullanicilari.Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)olay.Hassasiyet * 10, type)));
             }
 
             if (notifications.Count == 0) return;
@@ -101,7 +99,7 @@ namespace EGM.Infrastructure.Services
                 Action     = AuditAction.Create,
                 UserId     = triggeredBy,
                 Timestamp  = DateTime.UtcNow,
-                Changes    = $"Bildirim gönderildi → Gruplar: [{targetGroups}] | Risk: {olay.RiskPuani:F1} | Hassasiyet: {olay.Hassasiyet}"
+                Changes    = $"Bildirim gönderildi → Gruplar: [{targetGroups}] | Hassasiyet: {olay.Hassasiyet}"
             }).ToList();
 
             await _context.AuditLoglar.AddRangeAsync(auditLogs);
@@ -113,7 +111,6 @@ namespace EGM.Infrastructure.Services
             {
                 title,
                 message,
-                riskPuani  = olay.RiskPuani,
                 hassasiyet = (int)olay.Hassasiyet,
                 type       = type.ToString(),
                 olayId     = olay.Id,

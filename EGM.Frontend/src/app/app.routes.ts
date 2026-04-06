@@ -18,15 +18,18 @@ export const routes: Routes = [
 
     // ── Herkese açık (sadece giriş gerekli) ──────────────────────────────
     { path: 'home',              loadComponent: () => import('./pages/home/home').then(m => m.Home),                         canActivate: [authGuard] },
+    { path: 'ajanda',            loadComponent: () => import('./pages/ajanda/ajanda').then(m => m.Ajanda),                     canActivate: [authGuard] },
     { path: 'olay',              loadComponent: () => import('./pages/olay/olay').then(m => m.Olay),                         canActivate: [authGuard] },
     { path: 'istatistikler',     loadComponent: () => import('./pages/istatistikler/istatistikler').then(m => m.Istatistikler), canActivate: [authGuard] },
     { path: 'raporlar',          loadComponent: () => import('./pages/bultenler/bultenler').then(m => m.Bultenler),          canActivate: [authGuard] },
+    { path: 'bulten-paneli',     loadComponent: () => import('./pages/bulten-paneli/bulten-paneli').then(m => m.BultenPaneli), canActivate: [authGuard] },
     { path: 'rapor-gunluk-bulten', loadComponent: () => import('./pages/raporlar/raporlar').then(m => m.Raporlar),          canActivate: [authGuard] },
     { path: 'rapor-kuruluslar',  loadComponent: () => import('./pages/rapor-kuruluslar/rapor-kuruluslar').then(m => m.RaporKuruluslar), canActivate: [authGuard] },
     { path: 'kurulus-detay/:id', loadComponent: () => import('./pages/kurulus-detay/kurulus-detay').then(m => m.KurulusDetay), canActivate: [authGuard] },
     { path: 'konu-detay/:id',    loadComponent: () => import('./pages/konu-detay/konu-detay').then(m => m.KonuDetay),        canActivate: [authGuard] },
     { path: 'rapor-konular',     loadComponent: () => import('./pages/rapor-konular/rapor-konular').then(m => m.RaporKonular), canActivate: [authGuard] },
     { path: 'konular',           loadComponent: () => import('./pages/konular/konular').then(m => m.Konular),                canActivate: [authGuard] },
+    { path: 'istatistik-paneli',       loadComponent: () => import('./pages/istatistik-paneli/istatistik-paneli').then(m => m.IstatistikPaneli),          canActivate: [authGuard] },
     { path: 'sokak-istatistik',        loadComponent: () => import('./pages/sokak-istatistik/sokak-istatistik').then(m => m.SokakIstatistik),              canActivate: [authGuard] },
     { path: 'sosyal-medya-istatistik', loadComponent: () => import('./pages/sosyal-medya-istatistik/sosyal-medya-istatistik').then(m => m.SosyalMedyaIstatistik), canActivate: [authGuard] },
     { path: 'secim-istatistik',        loadComponent: () => import('./pages/secim-istatistik/secim-istatistik').then(m => m.SecimIstatistik),              canActivate: [authGuard] },
@@ -34,6 +37,7 @@ export const routes: Routes = [
     { path: 'province/:id',      loadComponent: () => import('./pages/province/province').then(m => m.Province),            canActivate: [authGuard] },
 
     // ── İl Personeli ve üzeri ────────────────────────────────────────────
+    { path: 'olay-bildirim-paneli', loadComponent: () => import('./pages/olay-bildirim-paneli/olay-bildirim-paneli').then(m => m.OlayBildirimPaneli), canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
     { path: 'sokak-olay-ekle', loadComponent: () => import('./pages/sokak-olay-ekle/sokak-olay-ekle').then(m => m.SokakOlayEkle), canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
     { path: 'socialmedia',     loadComponent: () => import('./pages/socialmedia/socialmedia').then(m => m.Socialmedia),    canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
     { path: 'secim',           loadComponent: () => import('./pages/secim/secim').then(m => m.Secim),                      canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
@@ -51,4 +55,5 @@ export const routes: Routes = [
 
     // ── Başkanlık Yöneticisi ve Yetkili ─────────────────────────────────
     { path: 'veri-yonetimi',   loadComponent: () => import('./pages/veri-yonetimi/veri-yonetimi').then(m => m.VeriYonetimi), canActivate: [authGuard, roleGuard(HQ_YONETICISI_VE_UZERI)] },
+    { path: 'yonetim-paneli', loadComponent: () => import('./pages/yonetim-paneli/yonetim-paneli').then(m => m.YonetimPaneli), canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
 ];

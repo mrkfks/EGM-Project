@@ -36,7 +36,7 @@ export class VIP implements OnInit {
   guvenlikSeviyesi = 'Normal';
   gozlemNoktalari = '';
   baslangicTarihi = new Date().toISOString().substring(0, 16);
-  bitisTarihi = new Date().toISOString().substring(0, 16);
+  bitisTarihi = new Date(Date.now() + 60 * 60 * 1000).toISOString().substring(0, 16);
   il = '';
   hassasiyet = 0;
 
@@ -50,13 +50,31 @@ export class VIP implements OnInit {
   activeForm: 'planned' | 'completed' = 'planned';
   selectedPlanId: string | null = null;
 
-  readonly unvanlar = [
+  unvanlar = [
     'Bakan',
     'Milletvekili',
     'Vali / Kaymakam',
     'Emniyet Muduru',
     'Parti Genel Merkezi Yetkilisi'
   ];
+
+  yeniUnvanAcik = false;
+  yeniUnvan = '';
+
+  unvanSil(u: string): void {
+    this.unvanlar = this.unvanlar.filter(x => x !== u);
+    if (this.unvan === u) this.unvan = '';
+  }
+
+  unvanEkle(): void {
+    const v = this.yeniUnvan.trim();
+    if (v && !this.unvanlar.includes(v)) {
+      this.unvanlar = [...this.unvanlar, v];
+    }
+    this.unvan = v || this.unvan;
+    this.yeniUnvanAcik = false;
+    this.yeniUnvan = '';
+  }
 
   readonly durumlar = [
     { value: 0, label: 'Planlandi',     renk: '#3498db', bg: '#ebf5fb' },
@@ -89,11 +107,11 @@ export class VIP implements OnInit {
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   get planlananlar(): VIPZiyaretRecord[] {
-    return this.kayitlar.filter(k => k.ziyaretDurumu === 0);
+    return this.kayitlar.filter(k => k != null && k.ziyaretDurumu === 0);
   }
 
   get gerceklesen(): VIPZiyaretRecord[] {
-    return this.kayitlar.filter(k => k.ziyaretDurumu !== 0);
+    return this.kayitlar.filter(k => k != null && k.ziyaretDurumu !== 0);
   }
 
   switchToPlannedForm(): void {
@@ -142,7 +160,7 @@ export class VIP implements OnInit {
       bitisTarihi: new Date(this.bitisTarihi).toISOString(),
       il: this.il,
       mekan: this.mekan.trim(),
-      hassasiyet: this.hassasiyet,
+      hassasiyet: +this.hassasiyet,
       guvenlikSeviyesi: this.guvenlikSeviyesi,
       gozlemNoktalari: this.gozlemNoktalari.trim(),
       ziyaretDurumu: 3
@@ -205,10 +223,10 @@ export class VIP implements OnInit {
       bitisTarihi: bitis.toISOString(),
       il: this.il,
       mekan: this.mekan.trim(),
-      hassasiyet: this.hassasiyet,
+      hassasiyet: +this.hassasiyet,
       guvenlikSeviyesi: this.guvenlikSeviyesi,
       gozlemNoktalari: this.gozlemNoktalari.trim(),
-      ziyaretDurumu: this.ziyaretDurumu
+      ziyaretDurumu: +this.ziyaretDurumu
     };
 
     if (this.selectedPlanId) {
@@ -260,7 +278,7 @@ export class VIP implements OnInit {
     this.guvenlikSeviyesi = 'Normal';
     this.gozlemNoktalari = '';
     this.baslangicTarihi = new Date().toISOString().substring(0, 16);
-    this.bitisTarihi = new Date().toISOString().substring(0, 16);
+    this.bitisTarihi = new Date(Date.now() + 60 * 60 * 1000).toISOString().substring(0, 16);
   }
 
   trackById(_index: number, item: { id: string }): string { return item.id; }

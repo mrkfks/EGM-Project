@@ -23,6 +23,7 @@ export class Navbar implements OnInit, OnDestroy {
 
   private readonly PAGE_MAP: Record<string, { title: string; icon: string }> = {
     '/home':                 { title: 'Harita',                         icon: 'map' },
+    '/ajanda':               { title: 'Ajanda',                         icon: 'calendar' },
     '/olay':                 { title: 'Olay Listesi',                   icon: 'alert' },
     '/sokak-olay-ekle':      { title: 'Sokak Olayı Ekle',               icon: 'alert' },
     '/vip':                  { title: 'VIP Ziyaret Takibi',             icon: 'star' },
@@ -33,6 +34,10 @@ export class Navbar implements OnInit, OnDestroy {
     '/supheli':              { title: 'Şüpheli Kayıtları',             icon: 'search-person' },
     '/operasyonel':          { title: 'Operasyonel Faaliyetler',        icon: 'activity' },
     '/istatistikler':        { title: 'Güvenlik İstatistikleri',        icon: 'bar-chart' },
+    '/istatistik-paneli':    { title: 'İstatistikler',                  icon: 'bar-chart' },
+    '/olay-bildirim-paneli': { title: 'Olay Bildirim Formları',         icon: 'alert' },
+    '/yonetim-paneli':       { title: 'Yönetim Paneli',                icon: 'settings' },
+    '/bulten-paneli':        { title: 'Bültenler',                      icon: 'file-text' },
     '/raporlar':             { title: 'Bültenler',                      icon: 'file-text' },
     '/rapor-gunluk-bulten':  { title: 'Başkanlık Günlük Bülten',       icon: 'file-text' },
     '/rapor-kuruluslar':     { title: 'Kuruluşlar',                     icon: 'bar-chart' },

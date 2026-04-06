@@ -22,7 +22,6 @@ Chart.register(...registerables);
 
 interface OlayRow {
   id: string;
-  baslik: string;
   olayTuru: string;
   tarih: string;
   baslangicSaati?: string;
@@ -31,7 +30,6 @@ interface OlayRow {
   ilce?: string;
   hassasiyet: number;
   durum: number;
-  riskPuani: number;
   katilimciSayisi: number;
   gozaltiSayisi?: number;
   sehitOluSayisi?: number;
@@ -231,9 +229,6 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
     this.gerceklesti = v.filter(o => o.durum === 1).length;
     this.planlandiSayisi = v.filter(o => o.durum === 0).length;
     this.iptal = v.filter(o => o.durum === 2).length;
-    this.ortalamaRisk = v.length
-      ? Math.round((v.reduce((s, o) => s + (o.riskPuani ?? 0), 0) / v.length) * 1000) / 1000
-      : 0;
   }
 
   private grafikleriOlustur(): void {
@@ -402,7 +397,6 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
 
   excelExport(): void {
     const satirlar = this.filtreliVeri.map(o => ({
-      'Baslik': o.baslik,
       'Tur': o.olayTuru,
       'Tarih': o.tarih ? new Date(o.tarih).toLocaleDateString('tr-TR') : '',
       'Baslangic Saati': o.baslangicSaati ?? '',
@@ -411,7 +405,6 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
       'Ilce': o.ilce ?? '',
       'Hassasiyet': this.hassasiyetEtiket(o.hassasiyet),
       'Durum': this.durumEtiket(o.durum),
-      'Risk Puani': o.riskPuani,
       'Katilimci Sayisi': o.katilimciSayisi,
       'Organizator': o.organizatorAd ?? '',
       'Konu': o.konuAd ?? '',
@@ -426,7 +419,6 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
       { 'Metrik': 'Gerceklesti', 'Deger': this.gerceklesti },
       { 'Metrik': 'Planlanmis', 'Deger': this.planlandiSayisi },
       { 'Metrik': 'Iptal', 'Deger': this.iptal },
-      { 'Metrik': 'Ortalama Risk', 'Deger': this.ortalamaRisk },
     ];
     const wsOzet = XLSX.utils.json_to_sheet(ozet);
     XLSX.utils.book_append_sheet(wb, wsOzet, 'Ozet');
@@ -468,30 +460,9 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
 
     const canvas = this.ozelChartRef.nativeElement;
 
-    // ── Dağılım (Scatter) ─────────────────────────────
+    // ── Dağılım (Scatter) kaldırıldı ─────────────────
     if (this.secilenGrafikTuru === 'scatter') {
-      this.ozelGrafikInstance = new Chart(canvas, {
-        type: 'scatter',
-        data: {
-          datasets: [{
-            label: 'Risk Puanı / Katılımcı Sayısı',
-            data: veri.map(o => ({ x: o.katilimciSayisi ?? 0, y: o.riskPuani ?? 0 })),
-            backgroundColor: 'rgba(59,130,246,0.55)',
-            borderColor: '#3b82f6',
-            pointRadius: 5,
-            pointHoverRadius: 7,
-          }],
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { position: 'bottom', display: true } },
-          scales: {
-            x: { title: { display: true, text: 'Katılımcı Sayısı' }, beginAtZero: true, ticks: { precision: 0 } },
-            y: { title: { display: true, text: 'Risk Puanı' }, beginAtZero: true },
-          },
-        },
-      } as ChartConfiguration);
-      this.ozelGrafikVar = true;
+      this.ozelGrafikVar = false;
       return;
     }
 

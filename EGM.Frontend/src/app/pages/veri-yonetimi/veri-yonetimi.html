@@ -1,49 +1,429 @@
-﻿<div class="veri-container">
+﻿<div class="vy-kapsam">
 
-  <!-- HATA -->
-  <div class="alert alert-hata" *ngIf="hata">{{ hata }}</div>
+  <!-- ── Sekmeler ─────────────────────────────────────────────── -->
+  <div class="vy-sekmeler">
+    <button class="vy-sekme" [class.aktif]="aktifSekme==='sokak'"  (click)="sekmeSec('sokak')">
+      Sokak Olayları <span class="vy-sayi">{{ sokakOlaylar.length }}</span>
+    </button>
+    <button class="vy-sekme" [class.aktif]="aktifSekme==='sosyal'" (click)="sekmeSec('sosyal')">
+      Sosyal Medya <span class="vy-sayi">{{ sosyalOlaylar.length }}</span>
+    </button>
+    <button class="vy-sekme" [class.aktif]="aktifSekme==='secim'"  (click)="sekmeSec('secim')">
+      Seçim Olayları <span class="vy-sayi">{{ secimOlaylar.length }}</span>
+    </button>
+    <button class="vy-sekme" [class.aktif]="aktifSekme==='vip'"    (click)="sekmeSec('vip')">
+      VIP Ziyaret <span class="vy-sayi">{{ vipOlaylar.length }}</span>
+    </button>
+  </div>
 
-  <!-- VERİ GİRİŞLERİ TABLOSU -->
-  <div class="tablo-blok">
-    <div class="tablo-ust">
-      <h2 class="bolum-baslik" style="margin:0">Veri Girişleri</h2>
-      <input class="arama-kutusu" type="text" [(ngModel)]="aramaMetni"
-             placeholder="Sicil, ad, birim, konu, form ile ara..." />
-    </div>
+  <!-- ── Yükleniyor ──────────────────────────────────────────── -->
+  <div *ngIf="yukleniyor" class="vy-yukle">
+    <span class="vy-spinner"></span> Veriler yükleniyor…
+  </div>
 
-    <div class="tablo-sarici">
-      <div *ngIf="tabloYukleniyor" class="tablo-yukle">
-        <span class="spinner-kucuk"></span> Yükleniyor...
-      </div>
+  <!-- ═══════════════ SOKAK OLAYLARI ═══════════════ -->
+  <div *ngIf="!yukleniyor && aktifSekme==='sokak'" class="vy-tablo-kap">
+    <table class="vy-tablo">
+      <thead>
+        <tr>
+          <th>Sicil</th>
+          <th>Olay Türü</th>
+          <th>İl</th>
+          <th>Tarih</th>
+          <th>Hassasiyet</th>
+          <th>Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of sokakOlaylar" class="vy-satir" (click)="satirSec(r)">
+          <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td>{{ r.olayTuru || '-' }}</td>
+          <td>{{ r.il || '-' }}</td>
+          <td class="vy-tarih">{{ tarihFormat(r.tarih) }}</td>
+          <td>
+            <span class="vy-badge" [style.background]="hassasiyetRenk(r.hassasiyet)">
+              {{ hassasiyetLabel(r.hassasiyet) }}
+            </span>
+          </td>
+          <td>{{ OLAY_DURUMLAR[r.durum] || '-' }}</td>
+        </tr>
+        <tr *ngIf="sokakOlaylar.length === 0">
+          <td colspan="7" class="vy-bos">Kayıt yok.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
-      <table class="veri-tablo" *ngIf="!tabloYukleniyor">
-        <thead>
-          <tr>
-            <th>Sicil</th>
-            <th>Ad Soyad</th>
-            <th>Birim</th>
-            <th>Tarih</th>
-            <th>Form</th>
-            <th>Konu</th>
-            <th>Detay</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let v of filtrelenmis">
-            <td><span class="sicil-rozet">{{ v.sicil }}</span></td>
-            <td class="ad-hucre">{{ v.adSoyad }}</td>
-            <td class="birim-hucre">{{ v.birim || '-' }}</td>
-            <td class="tarih-hucre">{{ tarihFormat(v.tarih) }}</td>
-            <td><span class="kaynak-rozet">{{ v.kaynak }}</span></td>
-            <td>{{ v.konu }}</td>
-            <td>{{ v.faaliyet }}</td>
-          </tr>
-          <tr *ngIf="filtrelenmis.length === 0">
-            <td colspan="7" class="bos-satir">Kayıt bulunamadı.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <!-- ═══════════════ SOSYAL MEDYA ═══════════════ -->
+  <div *ngIf="!yukleniyor && aktifSekme==='sosyal'" class="vy-tablo-kap">
+    <table class="vy-tablo">
+      <thead>
+        <tr>
+          <th>Sicil</th>
+          <th>Platform</th>
+          <th>Konu</th>
+          <th>İl</th>
+          <th>Paylaşım Tarihi</th>
+          <th>Hassasiyet</th>
+          <th>Giriş Tarihi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of sosyalOlaylar" class="vy-satir" (click)="satirSec(r)">
+          <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td>{{ r.platform || '-' }}</td>
+          <td class="vy-elips" title="{{ r.konu }}">{{ r.konu || '-' }}</td>
+          <td>{{ r.il || '-' }}</td>
+          <td class="vy-tarih">{{ tarihFormat(r.paylasimTarihi) }}</td>
+          <td>
+            <span class="vy-badge" [style.background]="hassasiyetRenk(r.hassasiyet)">
+              {{ hassasiyetLabel(r.hassasiyet) }}
+            </span>
+          </td>
+          <td class="vy-tarih">{{ tarihFormat(r.createdAt) }}</td>
+        </tr>
+        <tr *ngIf="sosyalOlaylar.length === 0">
+          <td colspan="7" class="vy-bos">Kayıt yok.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════ SEÇİM ═══════════════ -->
+  <div *ngIf="!yukleniyor && aktifSekme==='secim'" class="vy-tablo-kap">
+    <table class="vy-tablo">
+      <thead>
+        <tr>
+          <th>Sicil</th>
+          <th>Müşahit Adı</th>
+          <th>İl / İlçe</th>
+          <th>Okul / Sandık</th>
+          <th>Kategori</th>
+          <th>Tarih</th>
+          <th>Giriş Tarihi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of secimOlaylar" class="vy-satir" (click)="satirSec(r)">
+          <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td>{{ r.musahitAdi || '-' }}</td>
+          <td>{{ r.il || '-' }}{{ r.ilce ? ' / ' + r.ilce : '' }}</td>
+          <td>{{ r.okul || '-' }} – {{ r.sandikNo }}</td>
+          <td>{{ r.olayKategorisi || '-' }}</td>
+          <td class="vy-tarih">{{ tarihFormat(r.tarih) }}</td>
+          <td class="vy-tarih">{{ tarihFormat(r.createdAt) }}</td>
+        </tr>
+        <tr *ngIf="secimOlaylar.length === 0">
+          <td colspan="7" class="vy-bos">Kayıt yok.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════ VIP ZİYARET ═══════════════ -->
+  <div *ngIf="!yukleniyor && aktifSekme==='vip'" class="vy-tablo-kap">
+    <table class="vy-tablo">
+      <thead>
+        <tr>
+          <th>Sicil</th>
+          <th>Ad Soyad</th>
+          <th>Unvan</th>
+          <th>İl / Mekan</th>
+          <th>Başlangıç</th>
+          <th>Hassasiyet</th>
+          <th>Durum</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of vipOlaylar" class="vy-satir" (click)="satirSec(r)">
+          <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td>{{ r.ziyaretEdenAdSoyad || '-' }}</td>
+          <td>{{ r.unvan || '-' }}</td>
+          <td>{{ r.il || '-' }}{{ r.mekan ? ' · ' + r.mekan : '' }}</td>
+          <td class="vy-tarih">{{ tarihFormat(r.baslangicTarihi) }}</td>
+          <td>
+            <span class="vy-badge" [style.background]="hassasiyetRenk(r.hassasiyet)">
+              {{ hassasiyetLabel(r.hassasiyet) }}
+            </span>
+          </td>
+          <td>{{ VIP_DURUMLAR[r.ziyaretDurumu] || '-' }}</td>
+        </tr>
+        <tr *ngIf="vipOlaylar.length === 0">
+          <td colspan="7" class="vy-bos">Kayıt yok.</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
 </div>
+
+<!-- ═══════════════════════ DÜZENLEME MODALI ═══════════════════════ -->
+<div class="vy-modal-arkaplan" *ngIf="modalAcik" (click)="modalKapat()">
+  <div class="vy-modal" (click)="$event.stopPropagation()">
+
+    <div class="vy-modal-ust">
+      <h2 class="vy-modal-baslik">Kaydı Düzenle</h2>
+      <button class="vy-kapat-btn" (click)="modalKapat()">✕</button>
+    </div>
+
+    <div class="vy-modal-icerik">
+
+      <!-- Mesajlar -->
+      <div class="vy-uyari hata" *ngIf="hata">{{ hata }}</div>
+      <div class="vy-uyari basari" *ngIf="basari">{{ basari }}</div>
+
+      <!-- ── SOKAK FORM ── -->
+      <ng-container *ngIf="aktifSekme==='sokak'">
+        <div class="vy-form-grid">
+          <div class="vy-form-alan">
+            <label>İl</label>
+            <select [(ngModel)]="formSokak.il">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let il of ILLER" [value]="il">{{ il }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>İlçe</label>
+            <input type="text" [(ngModel)]="formSokak.ilce" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Mekan</label>
+            <input type="text" [(ngModel)]="formSokak.mekan" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Tarih</label>
+            <input type="date" [(ngModel)]="formSokak.tarih" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Katılımcı Sayısı</label>
+            <input type="number" [(ngModel)]="formSokak.katilimciSayisi" min="0" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Gözaltı Sayısı</label>
+            <input type="number" [(ngModel)]="formSokak.gozaltiSayisi" min="0" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Şehit / Ölü Sayısı</label>
+            <input type="number" [(ngModel)]="formSokak.sehitOluSayisi" min="0" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Hassasiyet</label>
+            <select [(ngModel)]="formSokak.hassasiyet">
+              <option *ngFor="let h of hassasiyetler" [value]="h.value">{{ h.label }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>Durum</label>
+            <select [(ngModel)]="formSokak.durum">
+              <option [value]="0">Planlandı</option>
+              <option [value]="1">Devam Ediyor</option>
+              <option [value]="2">Gerçekleşti</option>
+              <option [value]="3">İptal</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>Evrak Numarası</label>
+            <input type="text" [(ngModel)]="formSokak.evrakNumarasi" />
+          </div>
+          <div class="vy-form-alan tam">
+            <label>Açıklama</label>
+            <textarea [(ngModel)]="formSokak.aciklama" rows="3"></textarea>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── SOSYAL MEDYA FORM ── -->
+      <ng-container *ngIf="aktifSekme==='sosyal'">
+        <div class="vy-form-grid">
+          <div class="vy-form-alan">
+            <label>Platform</label>
+            <select [(ngModel)]="formSosyal.platform">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let p of PLATFORMLAR" [value]="p">{{ p }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>Konu</label>
+            <input type="text" [(ngModel)]="formSosyal.konu" />
+          </div>
+          <div class="vy-form-alan tam">
+            <label>Paylaşım Linki</label>
+            <input type="url" [(ngModel)]="formSosyal.paylasimLinki" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Paylaşım Tarihi</label>
+            <input type="datetime-local" [(ngModel)]="formSosyal.paylasimTarihi" />
+          </div>
+          <div class="vy-form-alan">
+            <label>İl</label>
+            <select [(ngModel)]="formSosyal.il">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let il of ILLER" [value]="il">{{ il }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>İlçe</label>
+            <input type="text" [(ngModel)]="formSosyal.ilce" />
+          </div>
+          <div class="vy-form-alan">
+            <label>İlgili Kişi / Kurum</label>
+            <input type="text" [(ngModel)]="formSosyal.ilgiliKisiKurum" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Hassasiyet</label>
+            <select [(ngModel)]="formSosyal.hassasiyet">
+              <option *ngFor="let h of hassasiyetler" [value]="h.value">{{ h.label }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan tam">
+            <label>İçerik Özeti</label>
+            <textarea [(ngModel)]="formSosyal.icerikOzeti" rows="3"></textarea>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── SEÇİM FORM ── -->
+      <ng-container *ngIf="aktifSekme==='secim'">
+        <div class="vy-form-grid">
+          <div class="vy-form-alan">
+            <label>Müşahit Adı</label>
+            <input type="text" [(ngModel)]="formSecim.musahitAdi" />
+          </div>
+          <div class="vy-form-alan">
+            <label>İl</label>
+            <select [(ngModel)]="formSecim.il">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let il of ILLER" [value]="il">{{ il }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>İlçe</label>
+            <input type="text" [(ngModel)]="formSecim.ilce" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Mahalle</label>
+            <input type="text" [(ngModel)]="formSecim.mahalle" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Okul</label>
+            <input type="text" [(ngModel)]="formSecim.okul" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Sandık No</label>
+            <input type="number" [(ngModel)]="formSecim.sandikNo" min="1" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Olay Kategorisi</label>
+            <select [(ngModel)]="formSecim.olayKategorisi">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let k of KATEGORILER" [value]="k">{{ k }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>Tarih</label>
+            <input type="date" [(ngModel)]="formSecim.tarih" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Olay Saati</label>
+            <input type="time" [(ngModel)]="formSecim.olaySaati" step="1" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Katılımcı Sayısı</label>
+            <input type="number" [(ngModel)]="formSecim.katilimciSayisi" min="0" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Şehit Sayısı</label>
+            <input type="number" [(ngModel)]="formSecim.sehitSayisi" min="0" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Ölü Sayısı</label>
+            <input type="number" [(ngModel)]="formSecim.oluSayisi" min="0" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Gözaltı Sayısı</label>
+            <input type="number" [(ngModel)]="formSecim.gozaltiSayisi" min="0" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Konu</label>
+            <input type="text" [(ngModel)]="formSecim.konu" />
+          </div>
+          <div class="vy-form-alan tam">
+            <label>Açıklama</label>
+            <textarea [(ngModel)]="formSecim.aciklama" rows="3"></textarea>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- ── VIP FORM ── -->
+      <ng-container *ngIf="aktifSekme==='vip'">
+        <div class="vy-form-grid">
+          <div class="vy-form-alan">
+            <label>Ad Soyad</label>
+            <input type="text" [(ngModel)]="formVip.ziyaretEdenAdSoyad" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Unvan</label>
+            <select [(ngModel)]="formVip.unvan">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let u of VIP_UNVANLAR" [value]="u">{{ u }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>İl</label>
+            <select [(ngModel)]="formVip.il">
+              <option value="">Seçiniz</option>
+              <option *ngFor="let il of ILLER" [value]="il">{{ il }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>Mekan</label>
+            <input type="text" [(ngModel)]="formVip.mekan" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Başlangıç Tarihi</label>
+            <input type="datetime-local" [(ngModel)]="formVip.baslangicTarihi" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Bitiş Tarihi</label>
+            <input type="datetime-local" [(ngModel)]="formVip.bitisTarihi" />
+          </div>
+          <div class="vy-form-alan">
+            <label>Hassasiyet</label>
+            <select [(ngModel)]="formVip.hassasiyet">
+              <option *ngFor="let h of hassasiyetler" [value]="h.value">{{ h.label }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>Güvenlik Seviyesi</label>
+            <select [(ngModel)]="formVip.guvenlikSeviyesi">
+              <option *ngFor="let g of GUVENLIK_SEVIYELERI" [value]="g">{{ g }}</option>
+            </select>
+          </div>
+          <div class="vy-form-alan">
+            <label>Ziyaret Durumu</label>
+            <select [(ngModel)]="formVip.ziyaretDurumu">
+              <option [value]="0">Planlandı</option>
+              <option [value]="1">Varış Yapıldı</option>
+              <option [value]="2">Ayrıldı</option>
+              <option [value]="3">İptal Edildi</option>
+            </select>
+          </div>
+          <div class="vy-form-alan tam">
+            <label>Gözlem Noktaları</label>
+            <textarea [(ngModel)]="formVip.gozlemNoktalari" rows="3"></textarea>
+          </div>
+        </div>
+      </ng-container>
+
+    </div><!-- /.vy-modal-icerik -->
+
+    <div class="vy-modal-alt">
+      <button class="vy-btn iptal" (click)="modalKapat()">Vazgeç</button>
+      <button class="vy-btn kaydet" (click)="kaydet()" [disabled]="kaydediliyor">
+        <span *ngIf="kaydediliyor" class="vy-spinner kucuk"></span>
+        {{ kaydediliyor ? 'Kaydediliyor…' : 'Kaydet' }}
+      </button>
+    </div>
+
+  </div><!-- /.vy-modal -->
+</div><!-- /.vy-modal-arkaplan -->

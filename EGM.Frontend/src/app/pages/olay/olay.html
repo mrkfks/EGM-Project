@@ -131,12 +131,11 @@
           <th class="col-sayi">Gözaltı</th>
           <th class="col-sayi">Şehit/Ölü</th>
           <th>Durum</th>
-          <th class="col-risk">Risk</th>
           <th>Evrak No</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let row of rows; let i = index; trackBy: trackById" [class.row-high-risk]="row.riskPuani >= 44">
+        <tr *ngFor="let row of rows; let i = index; trackBy: trackById">
           <td class="col-sn td-center">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
           <td>{{ row.olayTuru ?? '—' }}</td>
           <td>{{ row.konuAd || '—' }}</td>
@@ -164,19 +163,10 @@
               {{ durumLabel(row.durum) }}
             </span>
           </td>
-          <td class="col-risk">
-            <div class="risk-mini-bar">
-              <div class="risk-mini-fill"
-                   [style.width.%]="(row.riskPuani / 55) * 100"
-                   [style.background]="row.riskPuani >= 44 ? '#e74c3c' : row.riskPuani >= 33 ? '#f39c12' : '#27ae60'">
-              </div>
-            </div>
-            <span class="risk-val">{{ row.riskPuani | number:'1.0-0' }}</span>
-          </td>
           <td class="td-evrak">{{ row.evrakNumarasi || '—' }}</td>
         </tr>
         <tr *ngIf="rows.length === 0">
-          <td colspan="13" class="empty-row">Kayıt bulunamadı.</td>
+          <td colspan="12" class="empty-row">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -29,10 +29,11 @@ interface KategoriKaydi {
   imports: [CommonModule, FormsModule],
   templateUrl: './konular.html',
   styleUrls: ['./konular.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Konular implements OnInit {
-    altKonularaGit(id: string): void {
-      this.router.navigate(['/rapor-konular'], { queryParams: { ustKonuId: id } });
+    altKonularaGit(id: string, ad: string): void {
+      this.router.navigate(['/rapor-konular'], { queryParams: { ustKonuId: id, ustKonuAd: ad } });
     }
   tumKayitlar: KonuKaydi[] = [];
   filtrelenmis: KonuKaydi[] = [];
@@ -58,7 +59,7 @@ export class Konular implements OnInit {
     'Diger':                         { bg: '#f0f3f4', color: '#7f8c8d', border: '#d5d8dc' },
   };
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.kategorileriYukle();
@@ -75,8 +76,11 @@ export class Konular implements OnInit {
       .subscribe({
         next: (data) => {
           this.turler = data.map(k => k.ad ?? '').filter(Boolean);
+          this.cdr.markForCheck();
         },
-        error: () => {}
+        error: () => {
+          this.cdr.markForCheck();
+        }
       });
   }
 
@@ -89,10 +93,12 @@ export class Konular implements OnInit {
           this.tumKayitlar = data;
           this.filtrele();
           this.yukleniyor = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.hataMesaji = 'Konu verileri yüklenemedi. Bağlantıyı kontrol edin.';
           this.yukleniyor = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -110,6 +116,10 @@ export class Konular implements OnInit {
 
   turRenk(tur: string | null) {
     return this.turRenkleri[tur ?? 'Diger'] ?? this.turRenkleri['Diger'];
+  }
+
+  altKonuSayisiGetir(anaKonuId: string): number {
+    return this.tumKayitlar.filter(k => k.ustKonuId === anaKonuId).length;
   }
 
   get anaKonuSayisi(): number {

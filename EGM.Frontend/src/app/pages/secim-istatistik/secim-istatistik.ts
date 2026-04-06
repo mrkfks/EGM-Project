@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -31,6 +31,7 @@ interface SandikOlayItem {
   imports: [CommonModule, FormsModule],
   templateUrl: './secim-istatistik.html',
   styleUrl:    './secim-istatistik.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SecimIstatistik implements OnInit {
 
@@ -55,7 +56,7 @@ export class SecimIstatistik implements OnInit {
   readonly sayfaBoyutu = 20;
   mevcutSayfa = 1;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void { this.yukle(); }
 
@@ -67,10 +68,12 @@ export class SecimIstatistik implements OnInit {
         this.tumKayitlar = res;
         this.filtrele();
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.hata = 'Veriler yüklenirken hata oluştu.';
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       }
     });
   }

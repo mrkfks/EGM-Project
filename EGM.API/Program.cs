@@ -18,6 +18,7 @@ using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using System.Text.Json;
+using BCrypt.Net;
 using System.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -138,13 +139,9 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<RoleAssignmentService>();
 builder.Services.AddScoped<OlayService>();
-builder.Services.AddScoped<OperasyonelFaaliyetService>();
 builder.Services.AddScoped<OrganizatorService>();
 builder.Services.AddScoped<SecimService>();
-builder.Services.AddScoped<SehitService>();
-builder.Services.AddScoped<OluService>();
 builder.Services.AddScoped<SosyalMedyaOlayService>();
-builder.Services.AddScoped<SupheliService>();
 builder.Services.AddScoped<VIPZiyaretService>();
 builder.Services.AddScoped<RaporlarService>();
 
@@ -213,6 +210,25 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
         options.JsonSerializerOptions.ReferenceHandler =
             System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+
+// Model validation hatalarını loglat (geliştirme aşaması için)
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>
+{
+    var builtInFactory = options.InvalidModelStateResponseFactory;
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        var logger = context.HttpContext.RequestServices
+            .GetRequiredService<ILogger<Program>>();
+        var errors = context.ModelState
+            .Where(e => e.Value?.Errors.Count > 0)
+            .Select(e => $"{e.Key}: {string.Join(", ", e.Value!.Errors.Select(x => x.ErrorMessage))}");
+        logger.LogWarning("Model validation hatası [{Path}]: {Errors}",
+            context.HttpContext.Request.Path,
+            string.Join(" | ", errors));
+        return builtInFactory(context);
+    };
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -299,13 +315,53 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     }
 }).AllowAnonymous();
 
-// ── Başlangıçta DB bağlantısını doğrula ─────────────────────────────────
+// ── Başlangıçta DB doğrula + ilk kullanıcı seed ─────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<EGMDbContext>();
     if (!await db.Database.CanConnectAsync())
         throw new InvalidOperationException("Veritabanına bağlanılamadı. Bağlantı dizesini kontrol edin.");
+
+    // DB boşsa varsayılan yönetici kullanıcılarını oluştur
+    if (!db.Users.Any())
+    {
+        var seedUsers = app.Configuration.GetSection("Seed:Users").Get<List<SeedUserConfig>>();
+        if (seedUsers is { Count: > 0 })
+        {
+            foreach (var su in seedUsers)
+            {
+                db.Users.Add(new EGM.Domain.Entities.User
+                {
+                    Id           = Guid.NewGuid(),
+                    Sicil        = su.Sicil,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(su.Password),
+                    Role         = su.Role,
+                    FullName     = su.FullName,
+                    Email        = su.Email ?? string.Empty,
+                    GSM          = su.GSM ?? string.Empty,
+                    Birim        = su.Birim ?? string.Empty,
+                    CityId       = su.CityId,
+                    CreatedAt    = DateTime.UtcNow,
+                    IsDeleted    = false
+                });
+            }
+            await db.SaveChangesAsync();
+            app.Logger.LogInformation("Seed: {Count} kullanıcı oluşturuldu.", seedUsers.Count);
+        }
+    }
 }
 
 app.Run("http://0.0.0.0:5117");
+
+internal sealed class SeedUserConfig
+{
+    public int Sicil { get; set; }
+    public string Password { get; set; } = string.Empty;
+    public string Role { get; set; } = "Izleyici";
+    public string FullName { get; set; } = string.Empty;
+    public string? Email { get; set; }
+    public string? GSM { get; set; }
+    public string? Birim { get; set; }
+    public int? CityId { get; set; }
+}
 

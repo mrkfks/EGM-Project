@@ -48,41 +48,27 @@ export class Sidebar implements OnInit, OnDestroy {
       items: [
         // İzleyici dahil tüm roller erişebilir
         { label: 'Harita',    route: '/home',    icon: 'map' },
-        { label: 'Bültenler', route: '/raporlar', icon: 'file-text' },
+        { label: 'Ajanda',    route: '/ajanda',   icon: 'calendar' },
+        { label: 'Bültenler', route: '/rapor-gunluk-bulten', icon: 'file-text' },
       ]
     },
     {
-      title: 'İstatistikler',
+      title: '',
       items: [
-        { label: 'Kuruluş İstatistikleri', route: '/rapor-kuruluslar',      icon: 'bar-chart' },
-        { label: 'Konu İstatistikleri',    route: '/konular',               icon: 'pie-chart' },
-        { label: 'Sokak Olayları İstatistikleri',      route: '/sokak-istatistik',    icon: 'trending-up' },
-        { label: 'Sosyal Medya Olayları İstatistikleri', route: '/sosyal-medya-istatistik', icon: 'hash' },
-        { label: 'Seçim Olayları İstatistikleri',          route: '/secim-istatistik',         icon: 'check-square' },
-        { label: 'Ziyaretçi Olayları İstatistikleri',       route: '/vip-istatistik',           icon: 'user-check' },
+        { label: 'İstatistikler', route: '/istatistik-paneli', icon: 'bar-chart' },
       ]
     },
     {
-      title: 'Olay Bildirim Formları',
+      title: '',
       items: [
-        // İl Personeli ve üzeri
-        { label: 'Sokak Olayları',         route: '/sokak-olay-ekle', icon: 'alert',  roles: IL_P_VE_UZERI },
-        { label: 'Sosyal Medya Olayları',  route: '/socialmedia',     icon: 'share',  roles: IL_P_VE_UZERI },
-        { label: 'Seçim Olayları',         route: '/secim',           icon: 'vote',   roles: IL_P_VE_UZERI },
-        // İl Yöneticisi ve üzeri
-        { label: 'Ziyaretçi Olayları',     route: '/vip',             icon: 'star',   roles: IL_Y_VE_UZERI },
+        { label: 'Olay Bildirim Formları', route: '/olay-bildirim-paneli', icon: 'alert', roles: IL_P_VE_UZERI },
       ]
     },
     {
-      title: 'Yönetim',
+      title: '',
       items: [
-        // İl Yöneticisi ve üzeri
-        { label: 'Kullanıcı Yönetimi', route: '/kullanicilar',   icon: 'users',    roles: IL_Y_VE_UZERI },
-        { label: 'Kuruluş Yönetimi', route: '/organizasyon',   icon: 'building',  roles: IL_Y_VE_UZERI },
-        { label: 'Konu Yönetimi',    route: '/konu-islemleri', icon: 'book',     roles: IL_Y_VE_UZERI },
-        { label: 'Faaliyet Yönetimi', route: '/faaliyet-yonetimi', icon: 'briefcase', roles: IL_Y_VE_UZERI },
-        // Başkanlık Yöneticisi ve Yetkili
-        { label: 'Veri Yönetimi',     route: '/veri-yonetimi',  icon: 'database', roles: HQ_Y_VE_UZERI },
+        // İl Yöneticisi ve üzeri → tek panel
+        { label: 'Yönetim Paneli',  route: '/yonetim-paneli', icon: 'settings', roles: IL_Y_VE_UZERI },
       ]
     }
   ];

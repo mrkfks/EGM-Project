@@ -61,20 +61,46 @@
       <div class="form-grid">
 
         <div class="form-field span-2">
+          <label>Makam / Unvan <span class="req">*</span></label>
+          <div class="unvan-grid">
+            <div class="unvan-btn-wrap" *ngFor="let u of unvanlar">
+              <button
+                type="button"
+                class="unvan-btn"
+                [class.selected]="unvan === u"
+                (click)="unvan = u"
+              >{{ u }}</button>
+              <button class="unvan-sil-btn" type="button" (click)="unvanSil(u)" title="{{ u }} unvanini sil">&#10005;</button>
+            </div>
+            <!-- Yeni unvan ekle -->
+            <div class="unvan-yeni-ekle" [class.acik]="yeniUnvanAcik">
+              <button *ngIf="!yeniUnvanAcik" class="unvan-btn unvan-btn-ekle" type="button" (click)="yeniUnvanAcik = true">
+                + Yeni Unvan
+              </button>
+              <ng-container *ngIf="yeniUnvanAcik">
+                <input
+                  class="unvan-inline-input"
+                  type="text"
+                  placeholder="Unvan girin..."
+                  [(ngModel)]="yeniUnvan"
+                  (keyup.enter)="unvanEkle()"
+                  (keyup.escape)="yeniUnvanAcik = false; yeniUnvan = ''"
+                  maxlength="100"
+                />
+                <button class="unvan-inline-kaydet" type="button" (click)="unvanEkle()" [disabled]="!yeniUnvan.trim()">Ekle</button>
+                <button class="unvan-inline-iptal" type="button" (click)="yeniUnvanAcik = false; yeniUnvan = ''">&#10005;</button>
+              </ng-container>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-field span-2">
           <label>Ziyaretci Adi ve Soyadi <span class="req">*</span></label>
           <input type="text" [(ngModel)]="ziyaretEdenAdSoyad" placeholder="Ad ve soyad giriniz..."
             [class.is-invalid]="ziyaretEdenAdSoyad.length > 0 && ziyaretEdenAdSoyad.length < 2" />
           <div class="field-error" *ngIf="ziyaretEdenAdSoyad.length > 0 && ziyaretEdenAdSoyad.length < 2">
             En az 2 karakter girilmeli.
           </div>
-        </div>
-
-        <div class="form-field">
-          <label>Makam / Unvan <span class="req">*</span></label>
-          <select [(ngModel)]="unvan">
-            <option value="">--- Seciniz ---</option>
-            <option *ngFor="let u of unvanlar" [value]="u">{{ u }}</option>
-          </select>
         </div>
 
         <div class="form-field">
@@ -87,17 +113,17 @@
         <div class="form-field">
           <label>Hassasiyet</label>
           <select [(ngModel)]="hassasiyet">
-            <option [value]="0">Düşük</option>
-            <option [value]="1">Orta</option>
-            <option [value]="2">Yüksek</option>
-            <option [value]="3">Kritik</option>
+            <option [ngValue]="0">Düşük</option>
+            <option [ngValue]="1">Orta</option>
+            <option [ngValue]="2">Yüksek</option>
+            <option [ngValue]="3">Kritik</option>
           </select>
         </div>
 
         <div class="form-field" *ngIf="activeForm === 'completed'">
           <label>Ziyaret Durumu</label>
           <select [(ngModel)]="ziyaretDurumu">
-            <option *ngFor="let d of durumlar" [value]="d.value">{{ d.label }}</option>
+            <option *ngFor="let d of durumlar" [ngValue]="d.value">{{ d.label }}</option>
           </select>
         </div>
 
@@ -127,7 +153,7 @@
           <input type="datetime-local" [(ngModel)]="baslangicTarihi" />
         </div>
 
-        <div class="form-field" *ngIf="activeForm === 'completed'">
+        <div class="form-field">
           <label>Bitis Tarihi &amp; Saati</label>
           <input type="datetime-local" [(ngModel)]="bitisTarihi" />
         </div>

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface GerceklesmeSekli {
   id: string;
@@ -11,7 +12,7 @@ export interface GerceklesmeSekli {
 
 @Injectable({ providedIn: 'root' })
 export class GerceklesmeSekliService {
-  private apiUrl = '/api/GerceklesmeSekli';
+  private apiUrl = environment.apiUrl + '/api/GerceklesmeSekli';
   private cache$?: Observable<GerceklesmeSekli[]>;
 
   constructor(private http: HttpClient) {}

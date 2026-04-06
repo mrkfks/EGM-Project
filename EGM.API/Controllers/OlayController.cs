@@ -19,41 +19,6 @@ namespace EGM.API.Controllers
             _olayService = olayService;
         }
 
-        /// <summary>
-        /// Kayıt yapılmadan önce risk puanı ön izlemesi hesaplar.
-        /// Max puan: 55 (Katılımcı 10 + Hassasiyet 20 + Yürüyüş 15 + Sosyal 10).
-        /// </summary>
-        [HttpPost("risk-preview")]
-        public IActionResult RiskPreview([FromBody] RiskPreviewRequestDto dto)
-        {
-            double raw = 0;
-            if (dto.KatilimciSayisi.HasValue && dto.KatilimciSayisi.Value > 1000) raw += 10;
-            raw += dto.Hassasiyet switch
-            {
-                Hassasiyet.Kritik  => 20,
-                Hassasiyet.Yuksek => 12,
-                Hassasiyet.Orta   => 5,
-                _                 => 0
-            };
-            if (dto.OlayTuru == "Yürüyüş") raw += 15;
-
-            const double max = 45.0;
-            var normalized = Math.Round(raw / max, 3);
-            var seviye = normalized switch
-            {
-                >= 0.8 => "Kritik",
-                >= 0.6 => "Yüksek",
-                >= 0.4 => "Orta",
-                _      => "Düşük"
-            };
-            return Ok(new RiskPreviewResponseDto
-            {
-                RiskPuaniRaw        = raw,
-                RiskPuaniNormalized = normalized,
-                Seviye              = seviye
-            });
-        }
-
         [HttpGet]
         public async Task<IActionResult> GetAll(
             [FromQuery] int sayfa = 1,
@@ -116,7 +81,6 @@ namespace EGM.API.Controllers
         {
             var olay = new Olay
             {
-                Baslik = dto.Baslik,
                 OlayTuru = dto.OlayTuru,
                 OrganizatorId = dto.OrganizatorId,
                 KonuId = dto.KonuId,
@@ -132,7 +96,6 @@ namespace EGM.API.Controllers
                 GozaltiSayisi = dto.GozaltiSayisi,
                 SehitOluSayisi = dto.SehitOluSayisi,
                 Aciklama = dto.Aciklama,
-                KaynakKurum = dto.KaynakKurum,
                 EvrakNumarasi = dto.EvrakNumarasi,
                 Hassasiyet = dto.Hassasiyet,
                 CityId = dto.CityId,
@@ -160,7 +123,6 @@ namespace EGM.API.Controllers
         {
             var updated = new Olay
             {
-                Baslik = dto.Baslik,
                 OlayTuru = dto.OlayTuru,
                 OrganizatorId = dto.OrganizatorId,
                 KonuId = dto.KonuId,
@@ -176,7 +138,6 @@ namespace EGM.API.Controllers
                 GozaltiSayisi = dto.GozaltiSayisi,
                 SehitOluSayisi = dto.SehitOluSayisi,
                 Aciklama = dto.Aciklama,
-                KaynakKurum = dto.KaynakKurum,
                 EvrakNumarasi = dto.EvrakNumarasi,
                 Hassasiyet = dto.Hassasiyet,
                 CityId = dto.CityId,
@@ -226,7 +187,6 @@ namespace EGM.API.Controllers
         private static OlayResponseDto MapToResponse(Olay o) => new()
         {
             Id = o.Id,
-            Baslik = o.Baslik,
             OlayTuru = o.OlayTuru,
             OrganizatorId = o.OrganizatorId,
             OrganizatorAd = o.Organizator?.Ad,
@@ -244,11 +204,9 @@ namespace EGM.API.Controllers
             GozaltiSayisi = o.GozaltiSayisi,
             SehitOluSayisi = o.SehitOluSayisi,
             Aciklama = o.Aciklama,
-            KaynakKurum = o.KaynakKurum,
             EvrakNumarasi = o.EvrakNumarasi,
             Durum = o.Durum,
             Hassasiyet = o.Hassasiyet,
-            RiskPuani = o.RiskPuani,
             GercekBaslangicTarihi = o.GercekBaslangicTarihi,
             GercekBitisTarihi = o.GercekBitisTarihi,
             CreatedByUserId = o.CreatedByUserId,

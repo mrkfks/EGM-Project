@@ -18,7 +18,7 @@
         <span class="side-card-tur">{{ plan.olayTuru || '—' }}</span>
         <span class="side-card-il">{{ plan.il }}</span>
       </div>
-      <div class="side-card-baslik">{{ plan.baslik || (plan.olayTuru + ' – ' + plan.il) }}</div>
+      <div class="side-card-baslik">{{ plan.olayTuru + ' – ' + plan.il }}</div>
       <div class="side-card-meta">
         <span>{{ plan.tarih | date:'dd.MM.yyyy' }}</span>
         <span *ngIf="plan.katilimciSayisi">· {{ plan.katilimciSayisi | number }} kişi</span>
@@ -132,7 +132,25 @@
 
         <div class="form-field">
           <label>İlçe</label>
-          <input type="text" formControlName="ilce" placeholder="İlçe adı…">
+          <select formControlName="ilce" *ngIf="filtreliIlceler.length > 0">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let ilce of filtreliIlceler" [value]="ilce">{{ ilce }}</option>
+          </select>
+          <input type="text" formControlName="ilce" placeholder="İlçe adı…" *ngIf="filtreliIlceler.length === 0">
+        </div>
+
+        <div class="form-field">
+          <label>Başlangıç Konum <small style="font-weight:400;color:#888">(enlem, boylam)</small></label>
+          <input type="text" formControlName="baslangicKonum" placeholder="Örn: 39.925533, 32.866287"
+                 inputmode="decimal" autocomplete="off">
+          <div class="field-error" *ngIf="fieldError('baslangicKonum')">Geçerli format: enlem, boylam (örn: 39.925, 32.866)</div>
+        </div>
+
+        <div class="form-field">
+          <label>Bitiş Konum <small style="font-weight:400;color:#888">(enlem, boylam)</small></label>
+          <input type="text" formControlName="bitisKonum" placeholder="Örn: 39.930000, 32.870000"
+                 inputmode="decimal" autocomplete="off">
+          <div class="field-error" *ngIf="fieldError('bitisKonum')">Geçerli format: enlem, boylam (örn: 39.930, 32.870)</div>
         </div>
 
         <div class="form-field">
@@ -166,6 +184,14 @@
       </div>
     </fieldset>
 
+    <!-- Hata / Başarı -->
+    <div class="form-alert form-alert-error" *ngIf="formError">
+      {{ formError }}
+    </div>
+    <div class="form-alert form-alert-success" *ngIf="formSuccess">
+      {{ formSuccess }}
+    </div>
+
     <!-- Alt buton -->
     <div class="form-actions">
       <button type="button" class="btn btn-danger" *ngIf="selectedPlanId" (click)="iptalEt()" [disabled]="isSaving">İptal Edildi</button>
@@ -189,7 +215,7 @@
         <span class="side-card-tur">{{ event.olayTuru || '—' }}</span>
         <span class="side-card-il">{{ event.il }}</span>
       </div>
-      <div class="side-card-baslik">{{ event.baslik || (event.olayTuru + ' – ' + event.il) }}</div>
+      <div class="side-card-baslik">{{ event.olayTuru + ' – ' + event.il }}</div>
       <div class="side-card-meta">
         <span>{{ event.tarih | date:'dd.MM.yyyy' }}</span>
         <span *ngIf="event.katilimciSayisi">· {{ event.katilimciSayisi | number }} kişi</span>

@@ -204,15 +204,6 @@
               <option value="3">İptal Edildi</option>
             </select>
           </div>
-          <div class="filtre-secim-grup">
-            <label>Risk Seviyesi</label>
-            <select [(ngModel)]="olayRiskFiltre">
-              <option value="">Tümü</option>
-              <option value="dusuk">Düşük (0–3)</option>
-              <option value="orta">Orta (4–6)</option>
-              <option value="yuksek">Yüksek (7+)</option>
-            </select>
-          </div>
           <div class="filtre-secim-grup" *ngIf="mevcutIller.length > 0">
             <label>İl</label>
             <select [(ngModel)]="olayIlFiltre">
@@ -277,7 +268,7 @@
                 {{ durumEtiketleri[o.durum]?.ad ?? 'Belirsiz' }}
               </span>
             </div>
-            <div class="olay-baslik">{{ o.baslik }}</div>
+            <div class="olay-baslik">{{ o.olayTuru || '—' }}</div>
             <div class="olay-meta">
               <span *ngIf="o.il">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -298,15 +289,9 @@
               </span>
             </div>
           </div>
-          <div class="olay-risk" [class.risk-dusuk]="o.riskPuani < 4"
-               [class.risk-orta]="o.riskPuani >= 4 && o.riskPuani < 7"
-               [class.risk-yuksek]="o.riskPuani >= 7">
-            {{ o.riskPuani | number:'1.0-1' }}
-          </div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 

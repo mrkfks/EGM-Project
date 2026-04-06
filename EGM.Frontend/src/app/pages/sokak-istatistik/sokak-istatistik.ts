@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -15,7 +15,6 @@ const DURUM_LABEL: Record<number, string> = {
 
 interface OlayItem {
   id: string;
-  baslik?: string;
   olayTuru?: string;
   organizatorAd?: string;
   konuAd?: string;
@@ -30,8 +29,6 @@ interface OlayItem {
   katilimciSayisi?: number;
   gozaltiSayisi?: number;
   sehitOluSayisi?: number;
-  riskPuani?: number;
-  kaynakKurum?: string;
   evrakNumarasi?: string;
   aciklama?: string;
 }
@@ -42,6 +39,7 @@ interface OlayItem {
   imports: [CommonModule, FormsModule],
   templateUrl: './sokak-istatistik.html',
   styleUrl:    './sokak-istatistik.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SokakIstatistik implements OnInit {
 
@@ -51,7 +49,6 @@ export class SokakIstatistik implements OnInit {
   hata: string | null = null;
 
   // Filtreler
-  filtreBaslik       = '';
   filtreOlayTuru     = '';
   filtreOrganizator  = '';
   filtreKonu         = '';
@@ -62,7 +59,6 @@ export class SokakIstatistik implements OnInit {
   filtreDurum        = '';
   filtreTarih1       = '';
   filtreTarih2       = '';
-  filtreKaynakKurum  = '';
   filtreEvrakNo      = '';
 
   // Sayfalama
@@ -72,7 +68,7 @@ export class SokakIstatistik implements OnInit {
   readonly hassasiyetLabel = HASSASIYET_LABEL;
   readonly durumLabel      = DURUM_LABEL;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void { this.yukle(); }
 
@@ -85,10 +81,12 @@ export class SokakIstatistik implements OnInit {
         this.tumKayitlar = res.items ?? [];
         this.filtrele();
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.hata = 'Veriler yüklenirken hata oluştu.';
         this.yukleniyor = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -97,8 +95,6 @@ export class SokakIstatistik implements OnInit {
     this.mevcutSayfa = 1;
     let s = [...this.tumKayitlar];
 
-    if (this.filtreBaslik.trim())
-      s = s.filter(o => o.baslik?.toLowerCase().includes(this.filtreBaslik.trim().toLowerCase()));
     if (this.filtreOlayTuru.trim())
       s = s.filter(o => o.olayTuru?.toLowerCase().includes(this.filtreOlayTuru.trim().toLowerCase()));
     if (this.filtreOrganizator.trim())
@@ -121,8 +117,6 @@ export class SokakIstatistik implements OnInit {
       const t2 = new Date(this.filtreTarih2); t2.setHours(23, 59, 59);
       s = s.filter(o => o.tarih && new Date(o.tarih) <= t2);
     }
-    if (this.filtreKaynakKurum.trim())
-      s = s.filter(o => o.kaynakKurum?.toLowerCase().includes(this.filtreKaynakKurum.trim().toLowerCase()));
     if (this.filtreEvrakNo.trim())
       s = s.filter(o => o.evrakNumarasi?.toLowerCase().includes(this.filtreEvrakNo.trim().toLowerCase()));
 
@@ -130,10 +124,10 @@ export class SokakIstatistik implements OnInit {
   }
 
   filtreleriSifirla(): void {
-    this.filtreBaslik = this.filtreOlayTuru = this.filtreOrganizator = this.filtreKonu = '';
+    this.filtreOlayTuru = this.filtreOrganizator = this.filtreKonu = '';
     this.filtreIl = this.filtreIlce = this.filtreMekan = this.filtreHassasiyet = '';
     this.filtreDurum = this.filtreTarih1 = this.filtreTarih2 = '';
-    this.filtreKaynakKurum = this.filtreEvrakNo = '';
+    this.filtreEvrakNo = '';
     this.filtrele();
   }
 

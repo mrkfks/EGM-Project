@@ -90,7 +90,8 @@ namespace EGM.API.Controllers
             IcerikOzeti = s.IcerikOzeti, IlgiliKisiKurum = s.IlgiliKisiKurum,
             Il = s.Il, Ilce = s.Ilce,
             EkranGoruntusu = s.EkranGoruntusu,
-            Hassasiyet = s.Hassasiyet
+            Hassasiyet = s.Hassasiyet,
+            CreatedByUserId = s.CreatedByUserId, CreatedAt = s.CreatedAt
         };
     }
 }

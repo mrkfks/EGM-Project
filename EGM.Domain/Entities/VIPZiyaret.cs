@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using EGM.Domain.Enums;
 
 namespace EGM.Domain.Entities
@@ -16,8 +15,5 @@ namespace EGM.Domain.Entities
         public string? GuvenlikSeviyesi { get; set; }
         public string? GozlemNoktalari { get; set; }
         public ZiyaretDurumu ZiyaretDurumu { get; set; } = ZiyaretDurumu.Planlandi;
-
-        public ICollection<GuvenlikPlani> GuvenlikPlanlari { get; set; } = new List<GuvenlikPlani>();
-        public ICollection<Ekip> EkipAtamasi { get; set; } = new List<Ekip>();
     }
 }

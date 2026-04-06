@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { getIlceler } from '../../data/ilceler';
 import { OlayTuruService, OlayTuru } from '../../services/olay-turu.service';
 import { GerceklesmeSekliService, GerceklesmeSekli } from '../../services/gerceklesme-sekli.service';
 import { KonuService, Konu } from '../../services/konu.service';
@@ -83,6 +84,8 @@ export class Secim implements OnInit {
     'Diger'
   ];
 
+  filtreliIlceler: string[] = [];
+
   iller = [
     'Adana','Adiyaman','Afyonkarahisar','Agri','Amasya','Ankara','Antalya',
     'Artvin','Aydin','Balikesir','Bilecik','Bingol','Bitlis','Bolu','Burdur',
@@ -132,6 +135,11 @@ export class Secim implements OnInit {
         next: (data) => { this.kayitlar = data; this.yukleniyor = false; this.cdr.markForCheck(); },
         error: () => { this.hata = 'Kayitlar yuklenemedi.'; this.yukleniyor = false; this.cdr.markForCheck(); }
       });
+  }
+
+  ilDegisti(ilAdi: string): void {
+    this.filtreliIlceler = getIlceler(ilAdi);
+    this.ilce = '';
   }
 
   kategoriSec(k: string): void {

@@ -1,12 +1,12 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Subject, Subscription, debounceTime } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { OlayTuruService, OlayTuru as OlayTuruDto } from '../../services/olay-turu.service';
 import { GerceklesmeSekliService, GerceklesmeSekli as GerceklesmeSekliDto } from '../../services/gerceklesme-sekli.service';
+import { getIlceler } from '../../data/ilceler';
 
 const API = environment.apiUrl + '/api';
 
@@ -47,14 +47,8 @@ const IL_LISTESI: { id: number; ad: string }[] = [
 
 interface OrganizatorOption { id: string; ad: string; }
 interface KonuOption        { id: string; ad: string; }
-interface RiskPreview {
-  riskPuaniRaw: number;
-  riskPuaniNormalized: number;
-  seviye: string;
-}
 interface OlayListItem {
   id: string;
-  baslik?: string;
   olayTuru?: string;
   il?: string;
   ilce?: string;
@@ -73,18 +67,12 @@ interface OlayListItem {
   styleUrl: './sokak-olay-ekle.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SokakOlayEkle implements OnInit, OnDestroy {
+export class SokakOlayEkle implements OnInit {
 
   form!: FormGroup;
   isSaving    = false;
   formError:   string | null = null;
   formSuccess: string | null = null;
-
-  // Risk önizleme
-  riskPreview: RiskPreview | null = null;
-  isHighRisk   = false;
-  private riskSubject = new Subject<void>();
-  private riskSub?: Subscription;
 
   // Hassasiyet teması
   hassasiyetColor  = '#27ae60';
@@ -105,6 +93,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
 
   readonly HASSASIYET = HASSASIYET;
   readonly IL_LISTESI = IL_LISTESI;
+  filtreliIlceler: string[] = [];
 
   userPlans: OlayListItem[] = [];
   completedEvents: OlayListItem[] = [];
@@ -134,11 +123,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.loadLookups();
     this.loadPlannedEvents();
     this.loadCompletedEvents();
-
-    this.riskSub = this.riskSubject.pipe(debounceTime(600)).subscribe(() => this.fetchRisk());
   }
-
-  ngOnDestroy(): void { this.riskSub?.unsubscribe(); }
 
   // ── JWT decode ──────────────────────────────────────────────────────
   private decodeToken(): void {
@@ -164,10 +149,18 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     return ['IlPersoneli', 'IlYoneticisi'].includes(this.tokenRole ?? '');
   }
 
+  /**
+   * datetime-local input "YYYY-MM-DDTHH:mm" (16 karakter) döndürür.
+   * System.Text.Json DateTime binding için saniye zorunlu → eksikse ":00" ekle.
+   */
+  private normalizeDt(dt: string | null | undefined): string | null {
+    if (!dt) return null;
+    return dt.length === 16 ? dt + ':00' : dt;
+  }
+
   // ── Form ────────────────────────────────────────────────────────────
   private buildForm(): void {
     this.form = this.fb.group({
-      baslik:           ['', Validators.maxLength(250)],
       olayTuru:         ['', Validators.required],
       olayinGerceklesmeSekli: ['', Validators.required],
       organizatorId:    ['', Validators.required],
@@ -175,13 +168,14 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       tarih:            ['', Validators.required],
       il:               ['', Validators.required],
       ilce:             ['', Validators.maxLength(100)],
+      baslangicKonum:   ['', [Validators.pattern(/^-?\d{1,3}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/)]],
+      bitisKonum:       ['', [Validators.pattern(/^-?\d{1,3}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/)]],
       mekan:            ['', Validators.maxLength(250)],
       latitude:         [null, [Validators.min(-90),   Validators.max(90)]],
       longitude:        [null, [Validators.min(-180),  Validators.max(180)]],
       katilimciSayisi:  [null, Validators.min(0)],
       hassasiyet:       [0,    Validators.required],
       aciklama:         ['', Validators.maxLength(1000)],
-      kaynakKurum:      ['', Validators.maxLength(250)],
       cityId:           [this.tokenCityId],
       bitisTarihi:      [''],
       gerceklesenKatilimciSayisi: [null, Validators.min(0)],
@@ -199,9 +193,18 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     }
 
     this.form.get('hassasiyet')!.valueChanges.subscribe(v => this.onHassasiyetChange(+v));
-    ['katilimciSayisi', 'hassasiyet', 'olayTuru'].forEach(f =>
-      this.form.get(f)!.valueChanges.subscribe(() => this.riskSubject.next())
-    );
+
+    // İl değişince ilçeleri güncelle
+    this.form.get('il')!.valueChanges.subscribe((ilAdi: string) => {
+      this.filtreliIlceler = getIlceler(ilAdi);
+      this.form.get('ilce')!.setValue('');
+      this.cdr.markForCheck();
+    });
+    // Başlangıçta mevcut il değeri için ilçeleri yükle
+    const baslangicIl = this.form.get('il')!.value;
+    if (baslangicIl) {
+      this.filtreliIlceler = getIlceler(baslangicIl);
+    }
   }
 
   get f(): { [key: string]: AbstractControl } { return this.form.controls; }
@@ -209,6 +212,16 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
   fieldError(name: string): boolean {
     const c = this.form.get(name);
     return !!(c && c.invalid && c.touched);
+  }
+
+  parseKonum(val: string): { lat: number; lng: number } | null {
+    if (!val?.trim()) return null;
+    const parts = val.split(',');
+    if (parts.length !== 2) return null;
+    const lat = parseFloat(parts[0].trim());
+    const lng = parseFloat(parts[1].trim());
+    if (isNaN(lat) || isNaN(lng)) return null;
+    return { lat, lng };
   }
 
   private onHassasiyetChange(val: number): void {
@@ -250,36 +263,6 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
         this.filtreliGerceklesmeSekilleri = this.tumGerceklesmeSekilleri;
       }
     });
-  }
-
-  // ── Risk önizleme ───────────────────────────────────────────────────
-  private fetchRisk(): void {
-    if (!this.isBrowser) return;
-    const v = this.form.getRawValue();
-    this.http.post<RiskPreview>(`${API}/olay/risk-preview`, {
-      katilimciSayisi:   v.katilimciSayisi ?? null,
-      hassasiyet:        +v.hassasiyet,
-      olayTuru:          v.olayTuru ?? '',
-    }).subscribe({
-      next: res => {
-        this.riskPreview = res;
-        this.isHighRisk  = res.riskPuaniNormalized >= 0.8;
-        this.cdr.markForCheck();
-      },
-      error: () => {},
-    });
-  }
-
-  riskBarWidth(): string {
-    return this.riskPreview ? `${Math.round(this.riskPreview.riskPuaniNormalized * 100)}%` : '0%';
-  }
-
-  riskBarColor(): string {
-    const v = this.riskPreview?.riskPuaniNormalized ?? 0;
-    if (v >= 0.8) return '#e74c3c';
-    if (v >= 0.6) return '#f39c12';
-    if (v >= 0.4) return '#f1c40f';
-    return '#27ae60';
   }
 
   // ── Kaydet ──────────────────────────────────────────────────────────
@@ -354,8 +337,6 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
       this.form.get('il')!.setValue(ilAdi);
     }
-    this.form.get('baslik')?.clearValidators();
-    this.form.get('baslik')?.updateValueAndValidity();
   }
 
   switchToCompletedForm(): void {
@@ -381,18 +362,20 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.http.get<any>(`${API}/olay/${plan.id}`).subscribe({
       next: detail => {
         this.form.patchValue({
-          baslik:           detail.baslik ?? '',
-          olayTuru:         detail.olayTuru ?? '',
+          olayTuru:         this.olayTurleri.find(t => t.name === detail.olayTuru)?.id ?? '',
           organizatorId:    detail.organizatorId ?? '',
           konuId:           detail.konuId ?? '',
           tarih:            detail.tarih ? detail.tarih.substring(0, 16) : '',
           il:               detail.il ?? '',
           ilce:             detail.ilce ?? '',
+          baslangicKonum: detail.baslangicLat != null && detail.baslangicLng != null
+            ? `${detail.baslangicLat},${detail.baslangicLng}` : '',
+          bitisKonum:     detail.bitisLat != null && detail.bitisLng != null
+            ? `${detail.bitisLat},${detail.bitisLng}` : '',
           mekan:            detail.mekan ?? '',
           katilimciSayisi:  detail.katilimciSayisi ?? null,
           hassasiyet:       detail.hassasiyet ?? 0,
           aciklama:         detail.aciklama ?? '',
-          kaynakKurum:      detail.kaynakKurum ?? '',
         });
         // İl personeli ise il kilidi koru
         if (this.isCityScoped) {
@@ -403,7 +386,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       error: () => {
         // Detay çekilemezse mevcut özet veriyle doldur
         this.form.patchValue({
-          olayTuru:        plan.olayTuru ?? '',
+          olayTuru:        this.olayTurleri.find(t => t.name === (plan.olayTuru ?? ''))?.id ?? '',
           il:              plan.il ?? '',
           tarih:           plan.tarih ? plan.tarih.substring(0, 16) : '',
           katilimciSayisi: plan.katilimciSayisi ?? null,
@@ -422,13 +405,17 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     this.formError = null;
     const v = this.form.getRawValue();
     const payload = {
-      baslik:          v.baslik || null,
-      olayTuru:        v.olayTuru,
+      olayTuru:        this.olayTurleri.find(t => t.id === v.olayTuru)?.name ?? v.olayTuru,
       organizatorId:   v.organizatorId,
       konuId:          v.konuId,
-      tarih:           v.tarih,
+      tarih:           this.normalizeDt(v.tarih)!,
+      baslangicSaati:  v.tarih ? (this.normalizeDt(v.tarih)!.split('T')[1] ?? null) : null,
       il:              v.il,
       ilce:            v.ilce || null,
+      baslangicLat:     this.parseKonum(v.baslangicKonum)?.lat ?? null,
+      baslangicLng:     this.parseKonum(v.baslangicKonum)?.lng ?? null,
+      bitisLat:         this.parseKonum(v.bitisKonum)?.lat ?? null,
+      bitisLng:         this.parseKonum(v.bitisKonum)?.lng ?? null,
       mekan:           v.mekan || null,
       latitude:        v.latitude ?? null,
       longitude:       v.longitude ?? null,
@@ -436,13 +423,12 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
       gozaltiSayisi:   v.gozaltiSayisi ?? null,
       sehitOluSayisi:  null,
       aciklama:        v.aciklama || null,
-      kaynakKurum:     v.kaynakKurum || null,
       hassasiyet:      +v.hassasiyet,
       cityId:          v.cityId ?? null,
       durum:           2,
       gerceklesmeSekliId:           v.olayinGerceklesmeSekli || null,
       gerceklesenKatilimciSayisi:   v.gerceklesenKatilimciSayisi ?? null,
-      olayBitisTarihi:              v.bitisTarihi || null
+      olayBitisTarihi:              this.normalizeDt(v.bitisTarihi)
     };
     this.http.put<void>(`${API}/olay/${planId}`, payload).subscribe({
       next: () => {
@@ -462,9 +448,9 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
         }
         this.cdr.markForCheck();
       },
-      error: () => {
+      error: (err: any) => {
         this.isSaving = false;
-        this.formError = 'İptal işlemi sırasında bir hata oluştu.';
+        this.formError = err?.error?.detail ?? err?.error?.title ?? 'İptal işlemi sırasında bir hata oluştu.';
         this.cdr.markForCheck();
       }
     });
@@ -480,27 +466,30 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     const v = this.form.getRawValue();
     const durum = this.activeForm === 'planned' ? 0 : 1;
     const payload = {
-      baslik:          v.baslik || null,
-      olayTuru:        v.olayTuru,
+      olayTuru:        this.olayTurleri.find(t => t.id === v.olayTuru)?.name ?? v.olayTuru,
       organizatorId:   v.organizatorId,
       konuId:          v.konuId,
-      tarih:           v.tarih,
+      tarih:           this.normalizeDt(v.tarih)!,
+      baslangicSaati:  v.tarih ? (this.normalizeDt(v.tarih)!.split('T')[1] ?? null) : null,
       il:              v.il,
       ilce:            v.ilce || null,
+      baslangicLat:     this.parseKonum(v.baslangicKonum)?.lat ?? null,
+      baslangicLng:     this.parseKonum(v.baslangicKonum)?.lng ?? null,
+      bitisLat:         this.parseKonum(v.bitisKonum)?.lat ?? null,
+      bitisLng:         this.parseKonum(v.bitisKonum)?.lng ?? null,
       mekan:           v.mekan || null,
       latitude:        v.latitude ?? null,
       longitude:       v.longitude ?? null,
       katilimciSayisi: v.katilimciSayisi ?? null,
       gozaltiSayisi:   v.gozaltiSayisi ?? null,
-      sehitOluSayisi:  (v.sehitSayisi ?? 0) + (v.oluSayisi ?? 0) || null,
+      sehitOluSayisi:  (Number(v.sehitSayisi) || 0) + (Number(v.oluSayisi) || 0) || null,
       aciklama:        v.aciklama || null,
-      kaynakKurum:     v.kaynakKurum || null,
       hassasiyet:      +v.hassasiyet,
       cityId:          v.cityId ?? null,
       durum,
       gerceklesmeSekliId:           v.olayinGerceklesmeSekli || null,
       gerceklesenKatilimciSayisi:   v.gerceklesenKatilimciSayisi ?? null,
-      olayBitisTarihi:              v.bitisTarihi || null
+      olayBitisTarihi:              this.normalizeDt(v.bitisTarihi)
     };
 
     // Planlanan olay gerçekleşenlere taşınıyorsa → PUT
@@ -525,9 +514,9 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
           }
           this.cdr.markForCheck();
         },
-        error: () => {
+        error: (err: any) => {
           this.isSaving = false;
-          this.formError = 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+          this.formError = err?.error?.detail ?? err?.error?.title ?? 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
           this.cdr.markForCheck();
         }
       });
@@ -535,6 +524,7 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
     }
 
     // Yeni kayıt → POST
+    console.log('POST /api/olay payload:', JSON.stringify(payload, null, 2));
     this.http.post<OlayListItem>(`${API}/olay`, payload).subscribe({
       next: created => {
         this.isSaving = false;
@@ -553,9 +543,18 @@ export class SokakOlayEkle implements OnInit, OnDestroy {
         }
         this.cdr.markForCheck();
       },
-      error: () => {
+      error: (err: any) => {
         this.isSaving = false;
-        this.formError = 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+        console.error('POST /api/olay hata:', err?.error);
+        if (err?.error?.errors) {
+          const msgs: string[] = [];
+          for (const key of Object.keys(err.error.errors)) {
+            msgs.push(`${key}: ${(err.error.errors[key] as string[]).join(', ')}`);
+          }
+          this.formError = msgs.join(' | ');
+        } else {
+          this.formError = err?.error?.detail ?? err?.error?.title ?? 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+        }
         this.cdr.markForCheck();
       }
     });

@@ -38,45 +38,45 @@ namespace EGM.API.Controllers
             // ── Sokak Olayları ────────────────────────────────────────────
             rows.AddRange((await _context.Olaylar
                 .OrderByDescending(o => o.CreatedAt).Take(limit)
-                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Baslik, o.OlayTuru })
+                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.OlayTuru })
                 .ToListAsync())
-                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.Baslik, o.OlayTuru, "Sokak Olayı")));
+                .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.OlayTuru, o.OlayTuru, "Sokak Olayı")));
 
             // ── Sosyal Medya Olayları ─────────────────────────────────────
             rows.AddRange((await _context.SosyalMedyaOlaylar
                 .OrderByDescending(o => o.CreatedAt).Take(limit)
                 .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Konu, o.Platform })
                 .ToListAsync())
-                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.Konu, o.Platform, "Sosyal Medya Olayı")));
+                .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.Konu, o.Platform, "Sosyal Medya Olayı")));
 
             // ── VIP Ziyaret Olayları ──────────────────────────────────────
             rows.AddRange((await _context.VIPZiyaretler
                 .OrderByDescending(o => o.CreatedAt).Take(limit)
                 .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.ZiyaretEdenAdSoyad, o.Unvan })
                 .ToListAsync())
-                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.ZiyaretEdenAdSoyad, o.Unvan, "VIP Ziyaret")));
+                .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.ZiyaretEdenAdSoyad, o.Unvan, "VIP Ziyaret")));
 
             // ── Sandık Olayları ───────────────────────────────────────────
             rows.AddRange((await _context.SandikOlaylar
                 .OrderByDescending(o => o.CreatedAt).Take(limit)
                 .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Konu, o.OlayKategorisi })
                 .ToListAsync())
-                .Select(o => (o.CreatedByUserId, o.CreatedAt, o.Konu, o.OlayKategorisi, "Sandık Olayı")));
+                .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.Konu, o.OlayKategorisi, "Sandık Olayı")));
 
             // ── Konu Tanımları ────────────────────────────────────────────
             rows.AddRange((await _context.Konular
                 .OrderByDescending(k => k.CreatedAt).Take(limit)
                 .Select(k => new { k.CreatedByUserId, k.CreatedAt, k.Ad, k.Tur })
                 .ToListAsync())
-                .Select(k => (k.CreatedByUserId, k.CreatedAt, k.Ad, k.Tur, "Konu Tanımı")));
+                .Select(k => ((string?)k.CreatedByUserId, k.CreatedAt, (string?)k.Ad, k.Tur, "Konu Tanımı")));
 
             // ── Gerçekleşme Şekilleri ─────────────────────────────────────
             rows.AddRange((await _context.GerceklesmeSekilleri
                 .Include(g => g.OlayTuru)
                 .OrderByDescending(g => g.CreatedAt).Take(limit)
                 .ToListAsync())
-                .Select(g => (g.CreatedByUserId, g.CreatedAt,
-                    g.OlayTuru != null ? g.OlayTuru.Name : "-", (string?)g.Name, "Gerçekleşme Şekli")));
+                .Select(g => ((string?)g.CreatedByUserId, g.CreatedAt,
+                    (string?)(g.OlayTuru != null ? g.OlayTuru.Name : "-"), (string?)g.Name, "Gerçekleşme Şekli")));
 
             // ── Kullanıcı haritası ────────────────────────────────────────
             var sicilSet = rows.Select(r => r.UserId)

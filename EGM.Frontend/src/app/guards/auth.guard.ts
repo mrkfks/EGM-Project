@@ -14,16 +14,31 @@ export const ROLES = {
   Yetkili:            'Yetkili',
 } as const;
 
+/** Token payload'ını çözen yardımcı */
+function decodePayload(token: string): Record<string, any> | null {
+  try {
+    return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  } catch {
+    return null;
+  }
+}
+
+/** Token'ın süresi dolmuş mu? */
+function isTokenExpired(token: string): boolean {
+  const payload = decodePayload(token);
+  if (!payload) return true;
+  const exp = payload['exp'];
+  if (!exp) return false;
+  return Math.floor(Date.now() / 1000) >= exp;
+}
+
 /** Token'dan rolü çözen yardımcı */
 function getRoleFromToken(token: string): string {
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
-    return payload['role']
-      ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
-      ?? '';
-  } catch {
-    return '';
-  }
+  const payload = decodePayload(token);
+  if (!payload) return '';
+  return payload['role']
+    ?? payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
+    ?? '';
 }
 
 /**
@@ -40,11 +55,12 @@ export const authGuard: CanActivateFn = (_route, _state) => {
   }
 
   const token = localStorage.getItem('token');
-  if (token) {
+  if (token && !isTokenExpired(token)) {
     notifSvc.connect();
     return true;
   }
 
+  localStorage.removeItem('token');
   return router.createUrlTree(['/login']);
 };
 
@@ -59,7 +75,10 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => (_route, _st
   if (!isPlatformBrowser(platformId)) return true;
 
   const token = localStorage.getItem('token');
-  if (!token) return router.createUrlTree(['/login']);
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem('token');
+    return router.createUrlTree(['/login']);
+  }
 
   const role = getRoleFromToken(token);
   if (allowedRoles.includes(role)) return true;

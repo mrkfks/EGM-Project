@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 interface KurulusKaydi {
@@ -25,7 +27,6 @@ interface KurulusKaydi {
 
 interface OlayOzet {
   id: string;
-  baslik: string;
   olayTuru: string;
   tarih: string;
   il: string;
@@ -34,7 +35,6 @@ interface OlayOzet {
   katilimciSayisi: number | null;
   gozaltiSayisi: number | null;
   durum: number;
-  riskPuani: number;
   konuAd: string | null;
 }
 
@@ -44,8 +44,10 @@ interface OlayOzet {
   imports: [CommonModule, FormsModule],
   templateUrl: './kurulus-detay.html',
   styleUrls: ['./kurulus-detay.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KurulusDetay implements OnInit {
+export class KurulusDetay implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
   private readonly apiBase = `${environment.apiUrl}/api/organizator`;
   private readonly olayApiBase = `${environment.apiUrl}/api/olay`;
 
@@ -61,7 +63,6 @@ export class KurulusDetay implements OnInit {
   olayArama = '';
   olayTurFiltre = '';
   olayDurumFiltre = '';
-  olayRiskFiltre = '';
   olayIlFiltre = '';
   aktifSekme: 'bilgi' | 'olaylar' = 'bilgi';
 
@@ -90,6 +91,7 @@ export class KurulusDetay implements OnInit {
     private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -97,10 +99,15 @@ export class KurulusDetay implements OnInit {
     if (kayitli) {
       try { this.orgLogolari = JSON.parse(kayitli); } catch { this.orgLogolari = {}; }
     }
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const id = params.get('id');
       if (id) this.kurulusuGetir(id);
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private getHeaders(): HttpHeaders {
@@ -111,26 +118,39 @@ export class KurulusDetay implements OnInit {
   kurulusuGetir(id: string): void {
     this.yukleniyor = true;
     this.hataMesaji = '';
-    this.http.get<KurulusKaydi[]>(this.apiBase, { headers: this.getHeaders() }).subscribe({
-      next: (data) => {
-        const bulunan = data.find(k => k.id === id);
-        if (!bulunan) {
-          this.hataMesaji = 'Kuruluş bulunamadı.';
+
+    // Kuruluş detayını ve alt kuruluşları paralel çek
+    this.http.get<KurulusKaydi>(`${this.apiBase}/${id}`, { headers: this.getHeaders() })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (kurulus) => {
+          this.kurulus = kurulus;
+          if (kurulus.sosyalMedyaHesaplari) {
+            try { this.sosyalMedya = JSON.parse(kurulus.sosyalMedyaHesaplari); } catch { this.sosyalMedya = []; }
+          }
           this.yukleniyor = false;
-          return;
-        }
-        this.kurulus = bulunan;
-        this.altKuruluslar = data.filter(k => k.ustKurulusId === id);
-        if (bulunan.sosyalMedyaHesaplari) {
-          try { this.sosyalMedya = JSON.parse(bulunan.sosyalMedyaHesaplari); } catch { this.sosyalMedya = []; }
-        }
-        this.yukleniyor = false;
-      },
-      error: () => {
-        this.hataMesaji = 'Kuruluş bilgileri yüklenemedi.';
-        this.yukleniyor = false;
-      },
-    });
+          this.cdr.markForCheck();
+          // Alt kuruluşları ayrıca yükle
+          this.altKuruluslariGetir(id);
+        },
+        error: () => {
+          this.hataMesaji = 'Kuruluş bilgileri yüklenemedi.';
+          this.yukleniyor = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  private altKuruluslariGetir(ustId: string): void {
+    this.http.get<KurulusKaydi[]>(`${this.apiBase}?ustKurulusId=${ustId}`, { headers: this.getHeaders() })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.altKuruluslar = data;
+          this.cdr.markForCheck();
+        },
+        error: () => { this.altKuruluslar = []; },
+      });
   }
 
   sekmeGec(sekme: 'bilgi' | 'olaylar'): void {
@@ -149,22 +169,19 @@ export class KurulusDetay implements OnInit {
     this.http.get<OlayOzet[]>(
       `${this.olayApiBase}/by-organizator/${this.kurulus.id}`,
       { headers: this.getHeaders(), params }
-    ).subscribe({
-      next: (data) => { this.olaylar = data; this.olayYukleniyor = false; },
-      error: () => { this.olayYukleniyor = false; },
+    ).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (data) => { this.olaylar = data; this.olayYukleniyor = false; this.cdr.markForCheck(); },
+      error: () => { this.olayYukleniyor = false; this.cdr.markForCheck(); },
     });
   }
 
   get filtrelenmisOlaylar(): OlayOzet[] {
     let liste = this.olaylar;
     const ara = this.olayArama.toLowerCase().trim();
-    if (ara) liste = liste.filter(o => o.baslik.toLowerCase().includes(ara) || (o.il ?? '').toLowerCase().includes(ara));
+    if (ara) liste = liste.filter(o => (o.il ?? '').toLowerCase().includes(ara));
     if (this.olayTurFiltre)  liste = liste.filter(o => o.olayTuru === this.olayTurFiltre);
     if (this.olayDurumFiltre !== '') liste = liste.filter(o => o.durum === +this.olayDurumFiltre);
     if (this.olayIlFiltre)   liste = liste.filter(o => o.il === this.olayIlFiltre);
-    if (this.olayRiskFiltre === 'dusuk')   liste = liste.filter(o => o.riskPuani < 4);
-    if (this.olayRiskFiltre === 'orta')    liste = liste.filter(o => o.riskPuani >= 4 && o.riskPuani < 7);
-    if (this.olayRiskFiltre === 'yuksek')  liste = liste.filter(o => o.riskPuani >= 7);
     return liste;
   }
 
@@ -180,7 +197,6 @@ export class KurulusDetay implements OnInit {
     this.olayArama = '';
     this.olayTurFiltre = '';
     this.olayDurumFiltre = '';
-    this.olayRiskFiltre = '';
     this.olayIlFiltre = '';
     this.olayTarihBaslangic = '';
     this.olayTarihBitis = '';
@@ -188,7 +204,7 @@ export class KurulusDetay implements OnInit {
   }
 
   get aktifFiltreSayisi(): number {
-    return [this.olayArama, this.olayTurFiltre, this.olayDurumFiltre, this.olayRiskFiltre, this.olayIlFiltre,
+    return [this.olayArama, this.olayTurFiltre, this.olayDurumFiltre, this.olayIlFiltre,
             this.olayTarihBaslangic, this.olayTarihBitis].filter(Boolean).length;
   }
 

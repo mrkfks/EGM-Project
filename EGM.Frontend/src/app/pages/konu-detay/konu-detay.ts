@@ -22,7 +22,6 @@ interface KonuKaydi {
 
 interface OlayOzet {
   id: string;
-  baslik: string;
   olayTuru: string;
   tarih: string;
   il: string;
@@ -32,7 +31,6 @@ interface OlayOzet {
   gozaltiSayisi: number | null;
   sehitOluSayisi: number | null;
   durum: number;
-  riskPuani: number;
   hassasiyet: number;
   organizatorAd: string | null;
   konuAd: string | null;
@@ -146,7 +144,6 @@ export class KonuDetay implements OnInit, OnDestroy {
     const ara = this.aramaMetni.toLowerCase().trim();
     this.filtreliOlaylar = this.olaylar.filter(o => {
       const metinUygun = !ara ||
-        o.baslik.toLowerCase().includes(ara) ||
         (o.il ?? '').toLowerCase().includes(ara) ||
         (o.organizatorAd ?? '').toLowerCase().includes(ara);
       const turUygun = !this.turFiltresi || o.olayTuru === this.turFiltresi;

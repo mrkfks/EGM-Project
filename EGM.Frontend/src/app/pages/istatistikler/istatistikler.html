@@ -107,11 +107,6 @@
         <div class="kart-deger">{{ iptal }}</div>
         <div class="kart-etiket">Iptal</div>
       </div>
-      <div class="ist-kart ist-kart-orange">
-        <span class="kart-icon">&#9888;</span>
-        <div class="kart-deger">{{ ortalamaRisk | number:'1.2-2' }}</div>
-        <div class="kart-etiket">Ort. Risk Puani</div>
-      </div>
     </div>
 
     <!-- Grafik Izgara - 1. Satir -->
@@ -215,12 +210,6 @@
           </div>
         </div>
 
-        <!-- Scatter bilgi satırı -->
-        <div class="ozel-ayar-satir" *ngIf="secilenGrafikTuru === 'scatter'">
-          <span class="ozel-ayar-etiket">Eksen</span>
-          <span class="ozel-info-text">Risk Puanı (Y) ↔ Katılımcı Sayısı (X)</span>
-        </div>
-
         <!-- Oluştur Butonu -->
         <div class="ozel-ayar-aksiyon">
           <button class="btn-apply" (click)="ozelGrafikOlustur()">Grafik Oluştur</button>
@@ -245,19 +234,16 @@
         <table class="ist-tablo">
           <thead>
             <tr>
-              <th>Baslik</th>
               <th>Tur</th>
               <th>Tarih</th>
               <th>Il</th>
               <th>Hassasiyet</th>
               <th>Durum</th>
-              <th>Risk</th>
               <th>Katilimci</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let o of filtreliVeri">
-              <td>{{ o.baslik }}</td>
               <td>{{ o.olayTuru }}</td>
               <td>{{ o.tarih | date:'dd.MM.yyyy' }}</td>
               <td>{{ o.il }}</td>
@@ -267,11 +253,10 @@
               <td>
                 <span class="dur-badge dur-{{ o.durum }}">{{ durumEtiket(o.durum) }}</span>
               </td>
-              <td class="risk-cell">{{ o.riskPuani | number:'1.2-2' }}</td>
               <td>{{ o.katilimciSayisi | number }}</td>
             </tr>
             <tr *ngIf="filtreliVeri.length === 0">
-              <td colspan="8" class="no-data">Sonuc bulunamadi.</td>
+              <td colspan="6" class="no-data">Sonuc bulunamadi.</td>
             </tr>
           </tbody>
         </table>

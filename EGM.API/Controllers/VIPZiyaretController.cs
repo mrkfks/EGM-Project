@@ -16,7 +16,6 @@ namespace EGM.API.Controllers
         private readonly VIPZiyaretService _service;
         public VIPZiyaretController(VIPZiyaretService service) => _service = service;
 
-        // ── VIP Ziyaret ──────────────────────────────────────────────────
         [HttpGet]
         public async Task<IActionResult> GetAll()
             => Ok((await _service.GetAllAsync()).Select(MapToResponse));
@@ -78,53 +77,14 @@ namespace EGM.API.Controllers
         public async Task<IActionResult> Delete(Guid id)
             => await _service.DeleteAsync(id) ? NoContent() : NotFound();
 
-        // ── Güvenlik Planı ───────────────────────────────────────────────
-        [HttpGet("guvenlik-plani")]
-        public async Task<IActionResult> GetAllGuvenlikPlani()
-            => Ok(await _service.GetAllGuvenlikPlaniAsync());
-
-        [HttpPost("guvenlik-plani")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> CreateGuvenlikPlani([FromBody] GuvenlikPlaniCreateDto dto)
-            => Ok(await _service.CreateGuvenlikPlaniAsync(dto.VIPZiyaretId, dto.Ad!, dto.Aciklama));
-
-        [HttpPut("guvenlik-plani/{id}")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> UpdateGuvenlikPlani(Guid id, [FromBody] GuvenlikPlaniCreateDto dto)
-            => await _service.UpdateGuvenlikPlaniAsync(id, dto.Ad!, dto.Aciklama) ? NoContent() : NotFound();
-
-        [HttpDelete("guvenlik-plani/{id}")]
-        [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteGuvenlikPlani(Guid id)
-            => await _service.DeleteGuvenlikPlaniAsync(id) ? NoContent() : NotFound();
-
-        // ── Ekip ─────────────────────────────────────────────────────────
-        [HttpGet("ekip")]
-        public async Task<IActionResult> GetAllEkip()
-            => Ok(await _service.GetAllEkipAsync());
-
-        [HttpPost("ekip")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> CreateEkip([FromBody] EkipCreateDto dto)
-            => Ok(await _service.CreateEkipAsync(dto.VIPZiyaretId, dto.Ad!));
-
-        [HttpPut("ekip/{id}")]
-        [Authorize(Roles = $"{Roles.IlAdmin},{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> UpdateEkip(Guid id, [FromBody] EkipCreateDto dto)
-            => await _service.UpdateEkipAsync(id, dto.Ad!) ? NoContent() : NotFound();
-
-        [HttpDelete("ekip/{id}")]
-        [Authorize(Roles = $"{Roles.BaskanlikAdmin},{Roles.Yonetici}")]
-        public async Task<IActionResult> DeleteEkip(Guid id)
-            => await _service.DeleteEkipAsync(id) ? NoContent() : NotFound();
-
         private static VIPZiyaretResponseDto MapToResponse(VIPZiyaret v) => new()
         {
             Id = v.Id, ZiyaretEdenAdSoyad = v.ZiyaretEdenAdSoyad, Unvan = v.Unvan,
             BaslangicTarihi = v.BaslangicTarihi, BitisTarihi = v.BitisTarihi,
             Il = v.Il, Mekan = v.Mekan,
             Hassasiyet = v.Hassasiyet, GuvenlikSeviyesi = v.GuvenlikSeviyesi,
-            GozlemNoktalari = v.GozlemNoktalari, ZiyaretDurumu = v.ZiyaretDurumu
+            GozlemNoktalari = v.GozlemNoktalari, ZiyaretDurumu = v.ZiyaretDurumu,
+            CreatedByUserId = v.CreatedByUserId, CreatedAt = v.CreatedAt
         };
     }
 }

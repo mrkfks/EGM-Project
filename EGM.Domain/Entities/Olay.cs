@@ -6,7 +6,6 @@ namespace EGM.Domain.Entities
 {
     public class Olay : BaseEntity
     {
-        public string? Baslik { get; set; }
         public string? OlayTuru { get; set; }
 
         public Guid OrganizatorId { get; set; }
@@ -29,12 +28,10 @@ namespace EGM.Domain.Entities
         public int? GozaltiSayisi { get; set; }
         public int? SehitOluSayisi { get; set; }
         public string? Aciklama { get; set; }
-        public string? KaynakKurum { get; set; }
         public string? EvrakNumarasi { get; set; }
 
         public OlayDurum Durum { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
-        public double RiskPuani { get; set; }
 
         /// <summary>Olayın gerçekleştiği ilin plaka kodu. CityId filtresi bu alan üzerinden çalışır.</summary>
         public int? CityId { get; set; }
@@ -53,7 +50,6 @@ namespace EGM.Domain.Entities
         public GerceklesmeSekli? GerceklesmeSekli { get; set; }
 
         public ICollection<YuruyusRota> YuruyusRotasi { get; set; } = new List<YuruyusRota>();
-        public ICollection<OperasyonelFaaliyet> OperasyonelFaaliyetler { get; set; } = new List<OperasyonelFaaliyet>();
         public ICollection<SosyalMedyaOlay> SosyalMedyaOlaylar { get; set; } = new List<SosyalMedyaOlay>();
     }
 }

@@ -43,7 +43,6 @@ const HEAT_RADIUS: Record<number, number> = {
 // ── Veri modelleri ────────────────────────────────────────────────────────
 export interface OlayMapItem {
   id: string;
-  baslik: string;
   olayTuru?: string;
   tarih: string;
   il?: string;
@@ -52,14 +51,12 @@ export interface OlayMapItem {
   longitude?: number;
   hassasiyet: number;
   durum: number;
-  riskPuani: number;
   katilimciSayisi?: number;
 }
 
 export interface HubNotification {
   title: string;
   message: string;
-  riskPuani: number;
   type: string;
   olayId: string;
   hassasiyet?: number;
@@ -162,7 +159,7 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
 
     // Home banner bildirimi (reload + üst banner)
     this.notifSvc.toast$.pipe(takeUntil(this.destroy$)).subscribe(n => {
-      this.handleNotif({ ...n, riskPuani: n.riskPuaniRaw });
+      this.handleNotif({ ...n });
     });
   }
 
@@ -426,20 +423,17 @@ export class Home implements OnInit, AfterViewInit, OnDestroy {
     const yer = [item.il, item.ilce].filter(Boolean).join(' / ');
     const kp  = item.katilimciSayisi
       ? `<div class="pr"><span>Katılımcı</span><span>${item.katilimciSayisi.toLocaleString('tr-TR')}</span></div>` : '';
-    const rp  = item.riskPuani > 0
-      ? `<div class="pr"><span>Risk Puanı</span><span>${item.riskPuani.toFixed(1)}</span></div>` : '';
 
     return `<div class="egm-pop">
   <div class="egm-pop-head" style="border-left:4px solid ${c}">
-    <b>${item.baslik ?? 'Olay'}</b>
-    ${item.olayTuru ? `<small>${item.olayTuru}</small>` : ''}
+    <b>${item.olayTuru ?? 'Olay'}</b>
   </div>
   <div class="egm-pop-body">
     <div class="pr"><span>Tarih</span><span>${date}</span></div>
     ${yer ? `<div class="pr"><span>Yer</span><span>${yer}</span></div>` : ''}
     <div class="pr"><span>Hassasiyet</span><span style="color:${c};font-weight:700">${hl}</span></div>
     <div class="pr"><span>Durum</span><span>${dl}</span></div>
-    ${kp}${rp}
+    ${kp}
   </div>
   <div class="egm-pop-footer">
     <button class="egm-pop-btn" onclick="window['egmNavigate']('${item.id}')">Detayı Gör →</button>

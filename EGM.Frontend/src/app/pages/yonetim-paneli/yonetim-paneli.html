@@ -1,0 +1,57 @@
+<div class="yp-kapsam">
+
+  <!-- ── Sekmeler ─────────────────────────────────────────── -->
+  <div class="yp-sekmeler">
+    <button class="yp-sekme" [class.aktif]="aktifSekme==='kullanici'"  (click)="sekmeSec('kullanici')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Kullanıcı Yönetimi
+    </button>
+    <button class="yp-sekme" [class.aktif]="aktifSekme==='kurulus'"   (click)="sekmeSec('kurulus')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+        <polyline points="3 9.5 12 2 21 9.5"/>
+        <line x1="19" y1="22" x2="19" y2="9.5"/>
+        <line x1="5" y1="22" x2="5" y2="9.5"/>
+        <line x1="3" y1="22" x2="21" y2="22"/>
+        <rect x="9" y="14" width="6" height="8"/>
+      </svg>
+      Kuruluş Yönetimi
+    </button>
+    <button class="yp-sekme" [class.aktif]="aktifSekme==='konu'"      (click)="sekmeSec('konu')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Konu Yönetimi
+    </button>
+    <button class="yp-sekme" [class.aktif]="aktifSekme==='faaliyet'"  (click)="sekmeSec('faaliyet')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+        <rect x="2" y="7" width="20" height="14" rx="2"/>
+        <path d="M16 3h-4"/><path d="M8 3H6a2 2 0 0 0-2 2v2"/>
+        <path d="M20 3h-4"/>
+      </svg>
+      Faaliyet Yönetimi
+    </button>
+    <button *ngIf="veriSekmesiGorunsun" class="yp-sekme" [class.aktif]="aktifSekme==='veri'" (click)="sekmeSec('veri')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+      </svg>
+      Veri Yönetimi
+    </button>
+  </div>
+
+  <!-- ── İçerik ─────────────────────────────────────────── -->
+  <div class="yp-icerik">
+    <app-kullanicilar  *ngIf="aktifSekme==='kullanici'"></app-kullanicilar>
+    <app-organizasyon  *ngIf="aktifSekme==='kurulus'"></app-organizasyon>
+    <app-konu-islemleri *ngIf="aktifSekme==='konu'"></app-konu-islemleri>
+    <app-faaliyet-yonetimi *ngIf="aktifSekme==='faaliyet'"></app-faaliyet-yonetimi>
+    <app-veri-yonetimi *ngIf="aktifSekme==='veri'"></app-veri-yonetimi>
+  </div>
+
+</div>

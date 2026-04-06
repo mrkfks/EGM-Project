@@ -1,138 +1,320 @@
-﻿import { Component, OnInit } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
 
-interface VeriOzeti {
-  tur: string;
-  ikon: string;
-  renk: string;
-  sayi: number;
-  route: string;
+const API = 'http://localhost:5117/api';
+
+const HASSASIYET_LABELS = ['Düşük', 'Orta', 'Yüksek', 'Kritik'];
+const HASSASIYET_RENK   = ['#27ae60', '#f39c12', '#e74c3c', '#8e44ad'];
+
+// ── Tip tanımları ──────────────────────────────────────────────────────────
+interface SokakOlay {
+  id: string; olayTuru?: string; il?: string; ilce?: string;
+  tarih: string; hassasiyet: number; katilimciSayisi?: number;
+  organizatorAd?: string; konuAd?: string; durum: number;
+  aciklama?: string; mekan?: string; evrakNumarasi?: string;
+  gozaltiSayisi?: number; sehitOluSayisi?: number;
+  createdByUserId: string; cityId?: number;
 }
 
-interface VeriGirisi {
-  sicil: number;
-  adSoyad: string;
-  birim: string;
-  tarih: string;
-  konu: string;
-  faaliyet: string;
-  kaynak: string;
+interface SosyalOlay {
+  id: string; platform?: string; konu?: string; paylasimLinki?: string;
+  paylasimTarihi: string; icerikOzeti?: string; ilgiliKisiKurum?: string;
+  il?: string; ilce?: string; hassasiyet: number;
+  createdByUserId: string; createdAt: string;
 }
+
+interface SecimOlay {
+  id: string; musahitAdi?: string; il?: string; ilce?: string;
+  mahalle?: string; okul?: string; konu?: string; sandikNo: number;
+  olayKategorisi?: string; olaySaati: string; aciklama?: string;
+  tarih: string; createdAt: string; createdByUserId: string;
+  katilimciSayisi: number; sehitSayisi: number; oluSayisi: number; gozaltiSayisi: number;
+}
+
+interface VipOlay {
+  id: string; ziyaretEdenAdSoyad?: string; unvan?: string;
+  baslangicTarihi: string; bitisTarihi: string; il?: string; mekan?: string;
+  hassasiyet: number; guvenlikSeviyesi?: string; gozlemNoktalari?: string;
+  ziyaretDurumu: number; createdByUserId: string; createdAt: string;
+}
+
+type AktifSekme = 'sokak' | 'sosyal' | 'secim' | 'vip';
 
 @Component({
   selector: 'app-veri-yonetimi',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './veri-yonetimi.html',
   styleUrls: ['./veri-yonetimi.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VeriYonetimi implements OnInit {
+
+  aktifSekme: AktifSekme = 'sokak';
+
   yukleniyor = false;
-  tabloYukleniyor = false;
+  kaydediliyor = false;
   hata: string | null = null;
+  basari: string | null = null;
+  modalAcik = false;
 
-  readonly baseUrl = 'http://localhost:5117';
+  // Veritabanı listeleri
+  sokakOlaylar: SokakOlay[] = [];
+  sosyalOlaylar: SosyalOlay[] = [];
+  secimOlaylar: SecimOlay[] = [];
+  vipOlaylar: VipOlay[] = [];
 
-  ozet: VeriOzeti[] = [
-    { tur: 'Olay', ikon: 'alert', renk: '#e74c3c', sayi: 0, route: '/olay' },
-    { tur: 'Sokak Olayı', ikon: 'walk', renk: '#e67e22', sayi: 0, route: '/sokak-olay-ekle' },
-    { tur: 'Sosyal Medya', ikon: 'share', renk: '#8e44ad', sayi: 0, route: '/socialmedia' },
-    { tur: 'Seçim', ikon: 'vote', renk: '#2980b9', sayi: 0, route: '/secim' },
-    { tur: 'VIP Ziyaret', ikon: 'star', renk: '#f39c12', sayi: 0, route: '/vip' },
-    { tur: 'Kuruluş', ikon: 'org', renk: '#27ae60', sayi: 0, route: '/organizasyon' },
-    { tur: 'Konu', ikon: 'tag', renk: '#1a3a5c', sayi: 0, route: '/konu-islemleri' },
-    { tur: 'Kullanıcı', ikon: 'users', renk: '#16a085', sayi: 0, route: '/kullanicilar' },
+  // Seçilen kayıt
+  secilenKayit: any = null;
+
+  // Form modelleri (basit nesne, iki yönlü binding ile)
+  formSokak:  any = {};
+  formSosyal: any = {};
+  formSecim:  any = {};
+  formVip:    any = {};
+
+  readonly hassasiyetler = HASSASIYET_LABELS.map((l, i) => ({ value: i, label: l, renk: HASSASIYET_RENK[i] }));
+
+  readonly ILLER = [
+    'Adana','Adıyaman','Afyonkarahisar','Ağrı','Amasya','Ankara','Antalya','Artvin',
+    'Aydın','Balıkesir','Bilecik','Bingöl','Bitlis','Bolu','Burdur','Bursa',
+    'Çanakkale','Çankırı','Çorum','Denizli','Diyarbakır','Edirne','Elazığ','Erzincan',
+    'Erzurum','Eskişehir','Gaziantep','Giresun','Gümüşhane','Hakkari','Hatay','Isparta',
+    'Mersin','İstanbul','İzmir','Kars','Kastamonu','Kayseri','Kırklareli','Kırşehir',
+    'Kocaeli','Konya','Kütahya','Malatya','Manisa','Kahramanmaraş','Mardin','Muğla',
+    'Muş','Nevşehir','Niğde','Ordu','Rize','Sakarya','Samsun','Siirt','Sinop',
+    'Sivas','Tekirdağ','Tokat','Trabzon','Tunceli','Şanlıurfa','Uşak','Van',
+    'Yozgat','Zonguldak','Aksaray','Bayburt','Karaman','Kırıkkale','Batman',
+    'Şırnak','Bartın','Ardahan','Iğdır','Yalova','Karabük','Kilis','Osmaniye','Düzce',
   ];
 
-  veriGirisler: VeriGirisi[] = [];
-  aramaMetni = '';
+  readonly PLATFORMLAR = ['Twitter / X','Facebook','Instagram','YouTube','TikTok','Telegram','WhatsApp','LinkedIn','Diğer'];
+  readonly KATEGORILER = ['Müşahit Engellenmesi','Mükerrer Oy Denemesi','Seçmen Baskısı','Sandık Usulsüzlüğü','Fiziksel Çatışma','Kural İhlali','Diğer'];
+  readonly VIP_UNVANLAR = ['Bakan','Milletvekili','Vali','Kaymakam','Emniyet Müdürü','Parti Yetkilisi','Diğer'];
+  readonly GUVENLIK_SEVIYELERI = ['Normal','Yoğun Güvenlik','Kritik Durum'];
+  readonly VIP_DURUMLAR: Record<number, string> = { 0: 'Planlandı', 1: 'Varış Yapıldı', 2: 'Ayrıldı', 3: 'İptal Edildi' };
+  readonly OLAY_DURUMLAR: Record<number, string> = { 0: 'Planlandı', 1: 'Devam Ediyor', 2: 'Gerçekleşti', 3: 'İptal' };
 
-  readonly alanlar = [
-    { baslik: 'Olay Yönetimi', aciklama: 'Tüm olay kayıtlarını görüntüle ve yönet.', route: '/olay', renk: '#e74c3c', etiket: 'Olaylar' },
-    { baslik: 'Sokak Olayı Girişi', aciklama: 'Yeni sokak olayı ekle veya mevcut kayıtları düzenle.', route: '/sokak-olay-ekle', renk: '#e67e22', etiket: 'Veri Girişi' },
-    { baslik: 'Sosyal Medya Olayları', aciklama: 'Sosyal medya kaynaklı olay takibi.', route: '/socialmedia', renk: '#8e44ad', etiket: 'Takip' },
-    { baslik: 'Seçim Olayları', aciklama: 'Seçim dönemine ait olay ve faaliyetler.', route: '/secim', renk: '#2980b9', etiket: 'Seçim' },
-    { baslik: 'VIP Ziyaretler', aciklama: 'Önemli ziyaret kayıtları ve protokol.', route: '/vip', renk: '#f39c12', etiket: 'Protokol' },
-    { baslik: 'Kuruluş İşlemleri', aciklama: 'Organizasyon ve kuruluş bilgilerini yönet.', route: '/organizasyon', renk: '#27ae60', etiket: 'Yönetim' },
-    { baslik: 'Konu İşlemleri', aciklama: 'Olaylar için konu ve kategori hiyerarşisi.', route: '/konu-islemleri', renk: '#1a3a5c', etiket: 'Yönetim' },
-    { baslik: 'Kullanıcı Yönetimi', aciklama: 'Sistem kullanıcıları ve rol atamaları.', route: '/kullanicilar', renk: '#16a085', etiket: 'Yönetim' },
-  ];
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
-  constructor(private http: HttpClient) {}
+  ngOnInit(): void { this.tumVerileriYukle(); }
 
-  ngOnInit(): void {
-    this.verileriGetir();
+  private token(): HttpHeaders {
+    const t = localStorage.getItem('token') ?? '';
+    return new HttpHeaders({ Authorization: `Bearer ${t}` });
   }
 
-  verileriGetir(): void {
+  // ── Veri yükleme ────────────────────────────────────────────────────────
+  tumVerileriYukle(): void {
     this.yukleniyor = true;
     this.hata = null;
+    const opts = { headers: this.token() };
+    let kalan = 4;
+    const bitti = () => { if (--kalan === 0) { this.yukleniyor = false; this.cdr.markForCheck(); } };
 
-    const istekler: Promise<void>[] = [
-      this.sayiGetir('/api/olay', 0),
-      this.sayiGetir('/api/olay', 1),
-      this.sayiGetir('/api/sosyalmedyaolay', 2),
-      this.sayiGetir('/api/secim', 3),
-      this.sayiGetir('/api/vipziyaret', 4),
-      this.sayiGetir('/api/organizator', 5),
-      this.sayiGetir('/api/organizator/konu', 6),
-      this.sayiGetir('/api/user', 7),
-    ];
-
-    Promise.allSettled(istekler).then(() => {
-      this.yukleniyor = false;
+    this.http.get<any>(`${API}/olay?sayfa=1&sayfaBoyutu=500`, opts).subscribe({
+      next: r => { this.sokakOlaylar = r.items ?? []; bitti(); },
+      error: () => bitti(),
     });
-
-    this.tabloYukle();
-  }
-
-  tabloYukle(): void {
-    this.tabloYukleniyor = true;
-    this.http.get<VeriGirisi[]>(`${this.baseUrl}/api/raporlar/veri-girisler?limit=100`).subscribe({
-      next: data => {
-        this.veriGirisler = data;
-        this.tabloYukleniyor = false;
-      },
-      error: () => { this.tabloYukleniyor = false; }
+    this.http.get<SosyalOlay[]>(`${API}/sosyalmedyaolay`, opts).subscribe({
+      next: r => { this.sosyalOlaylar = r; bitti(); },
+      error: () => bitti(),
+    });
+    this.http.get<SecimOlay[]>(`${API}/secim/sandik-olay`, opts).subscribe({
+      next: r => { this.secimOlaylar = r; bitti(); },
+      error: () => bitti(),
+    });
+    this.http.get<VipOlay[]>(`${API}/vipziyaret`, opts).subscribe({
+      next: r => { this.vipOlaylar = r; bitti(); },
+      error: () => bitti(),
     });
   }
 
-  private sayiGetir(endpoint: string, index: number): Promise<void> {
-    return new Promise(resolve => {
-      this.http.get<any[]>(`${this.baseUrl}${endpoint}`).subscribe({
-        next: data => {
-          if (Array.isArray(data)) this.ozet[index].sayi = data.length;
-          resolve();
-        },
-        error: () => resolve()
+  // ── Sekme ────────────────────────────────────────────────────────────────
+  sekmeSec(s: AktifSekme): void { this.aktifSekme = s; this.modalKapat(); }
+
+  // ── Satıra tıklama → modal aç ────────────────────────────────────────────
+  satirSec(kayit: any): void {
+    this.secilenKayit = kayit;
+    this.hata = null;
+    this.basari = null;
+
+    if (this.aktifSekme === 'sokak') {
+      this.formSokak = {
+        olayTuru: kayit.olayTuru ?? '',
+        il: kayit.il ?? '',
+        ilce: kayit.ilce ?? '',
+        mekan: kayit.mekan ?? '',
+        tarih: kayit.tarih ? kayit.tarih.substring(0, 10) : '',
+        katilimciSayisi: kayit.katilimciSayisi ?? null,
+        gozaltiSayisi: kayit.gozaltiSayisi ?? null,
+        sehitOluSayisi: kayit.sehitOluSayisi ?? null,
+        hassasiyet: kayit.hassasiyet ?? 0,
+        aciklama: kayit.aciklama ?? '',
+        evrakNumarasi: kayit.evrakNumarasi ?? '',
+        durum: kayit.durum ?? 0,
+      };
+    } else if (this.aktifSekme === 'sosyal') {
+      this.formSosyal = {
+        platform: kayit.platform ?? '',
+        konu: kayit.konu ?? '',
+        paylasimLinki: kayit.paylasimLinki ?? '',
+        paylasimTarihi: kayit.paylasimTarihi ? kayit.paylasimTarihi.substring(0, 16) : '',
+        icerikOzeti: kayit.icerikOzeti ?? '',
+        ilgiliKisiKurum: kayit.ilgiliKisiKurum ?? '',
+        il: kayit.il ?? '',
+        ilce: kayit.ilce ?? '',
+        hassasiyet: kayit.hassasiyet ?? 0,
+      };
+    } else if (this.aktifSekme === 'secim') {
+      this.formSecim = {
+        musahitAdi: kayit.musahitAdi ?? '',
+        il: kayit.il ?? '',
+        ilce: kayit.ilce ?? '',
+        mahalle: kayit.mahalle ?? '',
+        okul: kayit.okul ?? '',
+        konu: kayit.konu ?? '',
+        sandikNo: kayit.sandikNo ?? 1,
+        olayKategorisi: kayit.olayKategorisi ?? '',
+        olaySaati: kayit.olaySaati ?? '00:00:00',
+        aciklama: kayit.aciklama ?? '',
+        tarih: kayit.tarih ? kayit.tarih.substring(0, 10) : '',
+        katilimciSayisi: kayit.katilimciSayisi ?? 0,
+        sehitSayisi: kayit.sehitSayisi ?? 0,
+        oluSayisi: kayit.oluSayisi ?? 0,
+        gozaltiSayisi: kayit.gozaltiSayisi ?? 0,
+      };
+    } else if (this.aktifSekme === 'vip') {
+      this.formVip = {
+        ziyaretEdenAdSoyad: kayit.ziyaretEdenAdSoyad ?? '',
+        unvan: kayit.unvan ?? '',
+        baslangicTarihi: kayit.baslangicTarihi ? kayit.baslangicTarihi.substring(0, 16) : '',
+        bitisTarihi: kayit.bitisTarihi ? kayit.bitisTarihi.substring(0, 16) : '',
+        il: kayit.il ?? '',
+        mekan: kayit.mekan ?? '',
+        hassasiyet: kayit.hassasiyet ?? 0,
+        guvenlikSeviyesi: kayit.guvenlikSeviyesi ?? 'Normal',
+        gozlemNoktalari: kayit.gozlemNoktalari ?? '',
+        ziyaretDurumu: kayit.ziyaretDurumu ?? 0,
+      };
+    }
+
+    this.modalAcik = true;
+    this.cdr.markForCheck();
+  }
+
+  modalKapat(): void { this.modalAcik = false; this.secilenKayit = null; this.cdr.markForCheck(); }
+
+  // ── Kaydet ──────────────────────────────────────────────────────────────
+  kaydet(): void {
+    if (!this.secilenKayit) return;
+    this.kaydediliyor = true;
+    this.hata = null;
+    this.basari = null;
+    const opts = { headers: this.token() };
+
+    if (this.aktifSekme === 'sokak') {
+      const body = {
+        olayTuru: this.formSokak.olayTuru,
+        il: this.formSokak.il,
+        ilce: this.formSokak.ilce,
+        mekan: this.formSokak.mekan,
+        tarih: new Date(this.formSokak.tarih).toISOString(),
+        katilimciSayisi: this.formSokak.katilimciSayisi,
+        gozaltiSayisi: this.formSokak.gozaltiSayisi,
+        sehitOluSayisi: this.formSokak.sehitOluSayisi,
+        hassasiyet: Number(this.formSokak.hassasiyet),
+        aciklama: this.formSokak.aciklama,
+        evrakNumarasi: this.formSokak.evrakNumarasi,
+        durum: Number(this.formSokak.durum),
+        organizatorId: this.secilenKayit.organizatorId,
+        konuId: this.secilenKayit.konuId,
+        cityId: this.secilenKayit.cityId,
+      };
+      this.http.put(`${API}/olay/${this.secilenKayit.id}`, body, opts).subscribe({
+        next: () => this.basariIsle('sokakOlaylar'),
+        error: e => this.hataIsle(e),
       });
-    });
+    } else if (this.aktifSekme === 'sosyal') {
+      const body = {
+        platform: this.formSosyal.platform,
+        konu: this.formSosyal.konu,
+        paylasimLinki: this.formSosyal.paylasimLinki,
+        paylasimTarihi: new Date(this.formSosyal.paylasimTarihi).toISOString(),
+        icerikOzeti: this.formSosyal.icerikOzeti,
+        ilgiliKisiKurum: this.formSosyal.ilgiliKisiKurum,
+        il: this.formSosyal.il,
+        ilce: this.formSosyal.ilce,
+        hassasiyet: Number(this.formSosyal.hassasiyet),
+      };
+      this.http.put(`${API}/sosyalmedyaolay/${this.secilenKayit.id}`, body, opts).subscribe({
+        next: () => this.basariIsle('sosyalOlaylar'),
+        error: e => this.hataIsle(e),
+      });
+    } else if (this.aktifSekme === 'secim') {
+      const [gun, ay, yil] = this.formSecim.tarih.split('-').map(Number);
+      const body = {
+        musahitAdi: this.formSecim.musahitAdi,
+        il: this.formSecim.il,
+        ilce: this.formSecim.ilce,
+        mahalle: this.formSecim.mahalle,
+        okul: this.formSecim.okul,
+        konu: this.formSecim.konu,
+        sandikNo: Number(this.formSecim.sandikNo),
+        olayKategorisi: this.formSecim.olayKategorisi,
+        olaySaati: this.formSecim.olaySaati,
+        aciklama: this.formSecim.aciklama,
+        tarih: new Date(this.formSecim.tarih).toISOString(),
+        katilimciSayisi: Number(this.formSecim.katilimciSayisi),
+        sehitSayisi: Number(this.formSecim.sehitSayisi),
+        oluSayisi: Number(this.formSecim.oluSayisi),
+        gozaltiSayisi: Number(this.formSecim.gozaltiSayisi),
+      };
+      this.http.put(`${API}/secim/sandik-olay/${this.secilenKayit.id}`, body, opts).subscribe({
+        next: () => this.basariIsle('secimOlaylar'),
+        error: e => this.hataIsle(e),
+      });
+    } else if (this.aktifSekme === 'vip') {
+      const body = {
+        ziyaretEdenAdSoyad: this.formVip.ziyaretEdenAdSoyad,
+        unvan: this.formVip.unvan,
+        baslangicTarihi: new Date(this.formVip.baslangicTarihi).toISOString(),
+        bitisTarihi: new Date(this.formVip.bitisTarihi).toISOString(),
+        il: this.formVip.il,
+        mekan: this.formVip.mekan,
+        hassasiyet: Number(this.formVip.hassasiyet),
+        guvenlikSeviyesi: this.formVip.guvenlikSeviyesi,
+        gozlemNoktalari: this.formVip.gozlemNoktalari,
+        ziyaretDurumu: Number(this.formVip.ziyaretDurumu),
+      };
+      this.http.put(`${API}/vipziyaret/${this.secilenKayit.id}`, body, opts).subscribe({
+        next: () => this.basariIsle('vipOlaylar'),
+        error: e => this.hataIsle(e),
+      });
+    }
   }
 
-  get filtrelenmis(): VeriGirisi[] {
-    if (!this.aramaMetni.trim()) return this.veriGirisler;
-    const ara = this.aramaMetni.toLowerCase();
-    return this.veriGirisler.filter(v =>
-      String(v.sicil).includes(ara) ||
-      v.adSoyad.toLowerCase().includes(ara) ||
-      v.birim.toLowerCase().includes(ara) ||
-      v.konu.toLowerCase().includes(ara) ||
-      v.faaliyet.toLowerCase().includes(ara) ||
-      v.kaynak.toLowerCase().includes(ara)
-    );
+  private basariIsle(liste: string): void {
+    this.kaydediliyor = false;
+    this.basari = 'Kayıt başarıyla güncellendi.';
+    this.tumVerileriYukle();
+    setTimeout(() => { this.modalKapat(); }, 1200);
+    this.cdr.markForCheck();
   }
 
-  tarihFormat(tarih: string): string {
-    if (!tarih) return '-';
-    return new Date(tarih).toLocaleDateString('tr-TR', {
-      day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
+  private hataIsle(e: any): void {
+    this.kaydediliyor = false;
+    this.hata = e?.error?.detail ?? e?.error?.title ?? 'Güncelleme başarısız.';
+    this.cdr.markForCheck();
   }
 
-  toplamKayit(): number {
-    return this.ozet.slice(0, 5).reduce((t, o) => t + o.sayi, 0);
+  // ── Yardımcılar ─────────────────────────────────────────────────────────
+  tarihFormat(t: string): string {
+    if (!t) return '-';
+    return new Date(t).toLocaleDateString('tr-TR', { day: '2-digit', month: 'short', year: 'numeric' });
   }
+  hassasiyetLabel(h: number): string { return HASSASIYET_LABELS[h] ?? '-'; }
+  hassasiyetRenk(h: number): string  { return HASSASIYET_RENK[h]   ?? '#888'; }
 }

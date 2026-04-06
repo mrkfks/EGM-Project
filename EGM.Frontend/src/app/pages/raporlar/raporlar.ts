@@ -111,7 +111,7 @@ export class Raporlar implements OnInit {
         this.tarih           = data.tarih;
         this.sonrakiGunTarih = data.sonrakiGunTarih;
 
-        this.icmalVerileri = data.icmalVerileri.map(v => ({
+        this.icmalVerileri = (data.icmalVerileri ?? []).map(v => ({
           tur:           v.tur,
           eylemSayisi:   v.eylemSayisi.toString(),
           katilimSayisi: v.katilimSayisi.toString(),
@@ -119,7 +119,7 @@ export class Raporlar implements OnInit {
           oluSayisi:     v.oluSayisi === 0     ? '(-)' : v.oluSayisi.toString(),
         }));
 
-        this.gerceklesenDetaylar = data.gerceklesenDetaylar.map(d => ({
+        this.gerceklesenDetaylar = (data.gerceklesenDetaylar ?? []).map(d => ({
           sn:            d.sn,
           il:            d.il,
           eylemEtkinlik: d.eylemEtkinlik,
@@ -129,7 +129,7 @@ export class Raporlar implements OnInit {
           katilimSayisi: d.katilimSayisi.toString(),
         }));
 
-        this.beklenenDetaylar = data.beklenenDetaylar.map(b => ({
+        this.beklenenDetaylar = (data.beklenenDetaylar ?? []).map(b => ({
           sn:            b.sn,
           il:            b.il,
           yer:           b.yer,
@@ -139,7 +139,7 @@ export class Raporlar implements OnInit {
           aciklama:      b.aciklama,
         }));
 
-        this.operasyonelFaaliyetler = data.operasyonelFaaliyetler.map(f => ({
+        this.operasyonelFaaliyetler = (data.operasyonelFaaliyetler ?? []).map(f => ({
           sn:            f.sn,
           il:            f.il,
           tarih:         f.tarih,

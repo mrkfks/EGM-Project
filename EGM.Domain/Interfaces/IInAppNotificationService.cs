@@ -6,7 +6,7 @@ namespace EGM.Domain.Interfaces
     {
         /// <summary>
         /// Bir olay oluşturulduğunda veya güncellendiğinde tetiklenir.
-        /// RiskPuani > 0 ise risk bildirimi; isSelfCorrection = true ise
+        /// Hassasiyet >= Orta ise bildirim; isSelfCorrection = true ise
         /// "Self-Correction" başlığıyla İl Yöneticilerine gönderilir.
         /// </summary>
         Task NotifyOlayRiskAsync(Olay olay, bool isSelfCorrection = false);

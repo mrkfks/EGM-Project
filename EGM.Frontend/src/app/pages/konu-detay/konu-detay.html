@@ -70,7 +70,7 @@
     <div class="filter-bar">
       <div class="filter-group">
         <label class="filter-label">Arama</label>
-        <input type="text" class="filter-input" placeholder="Başlık, il, kurum..."
+        <input type="text" class="filter-input" placeholder="İl, kurum..."
                [(ngModel)]="aramaMetni" (input)="filtrele()" />
       </div>
       <div class="filter-group">
@@ -110,7 +110,7 @@
           <div class="olay-kart">
             <div class="olay-kart-ust">
               <div class="olay-kart-sol">
-                <span class="olay-baslik">{{ olay.baslik }}</span>
+                <span class="olay-baslik">{{ olay.olayTuru || '—' }}</span>
                 <div class="olay-meta">
                   <span class="olay-meta-item">📅 {{ olay.tarih | date:'dd.MM.yyyy' }}</span>
                   <span class="olay-meta-item">📍 {{ olay.il }}{{ olay.ilce ? ' / ' + olay.ilce : '' }}</span>

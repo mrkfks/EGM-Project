@@ -26,7 +26,6 @@ namespace EGM.Application.DTOs
         public IReadOnlyList<IcmalVeriDto> IcmalVerileri { get; init; } = [];
         public IReadOnlyList<GerceklesenDetayDto> GerceklesenDetaylar { get; init; } = [];
         public IReadOnlyList<BeklenenDetayDto> BeklenenDetaylar { get; init; } = [];
-        public IReadOnlyList<OperasyonelFaaliyetBultenDto> OperasyonelFaaliyetler { get; init; } = [];
     }
 
     public class IcmalVeriDto
@@ -60,24 +59,11 @@ namespace EGM.Application.DTOs
         public string Aciklama { get; init; } = string.Empty;
     }
 
-    public class OperasyonelFaaliyetBultenDto
-    {
-        public int Sn { get; init; }
-        public string Il { get; init; } = string.Empty;
-        public string Tarih { get; init; } = string.Empty;
-        public int SupheliSayisi { get; init; }
-        public int GozaltiSayisi { get; init; }
-        public string Aciklama { get; init; } = string.Empty;
-    }
     // ─────────────────────────────────────────────────────────────────────
 
     // ── Olay ────────────────────────────────────────────────────────────
     public class OlayCreateDto
     {
-        [Required(ErrorMessage = "Başlık zorunludur.")]
-        [StringLength(250, ErrorMessage = "Başlık en fazla 250 karakter olabilir.")]
-        public string? Baslik { get; set; }
-
         [Required(ErrorMessage = "Olay türü zorunludur.")]
         [StringLength(100)]
         public string? OlayTuru { get; set; }
@@ -122,9 +108,6 @@ namespace EGM.Application.DTOs
         [StringLength(1000)]
         public string? Aciklama { get; set; }
 
-        [StringLength(250)]
-        public string? KaynakKurum { get; set; }
-
         [StringLength(100)]
         public string? EvrakNumarasi { get; set; }
 
@@ -148,7 +131,6 @@ namespace EGM.Application.DTOs
     public class OlayResponseDto
     {
         public Guid Id { get; set; }
-        public string? Baslik { get; set; }
         public string? OlayTuru { get; set; }
         public Guid OrganizatorId { get; set; }
         public string? OrganizatorAd { get; set; }
@@ -166,11 +148,9 @@ namespace EGM.Application.DTOs
         public int? GozaltiSayisi { get; set; }
         public int? SehitOluSayisi { get; set; }
         public string? Aciklama { get; set; }
-        public string? KaynakKurum { get; set; }
         public string? EvrakNumarasi { get; set; }
         public OlayDurum Durum { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
-        public double RiskPuani { get; set; }
         public DateTime? GercekBaslangicTarihi { get; set; }
         public DateTime? GercekBitisTarihi { get; set; }
         /// <summary>Kaydı oluşturan kullanıcının sicil numarası (RBAC sahiplik kontrolü için).</summary>
@@ -180,157 +160,6 @@ namespace EGM.Application.DTOs
         public DateTime? OlayBitisTarihi { get; set; }
         public int? GerceklesenKatilimciSayisi { get; set; }
         public Guid? GerceklesmeSekliId { get; set; }
-    }
-
-    // ── Risk Preview ────────────────────────────────────────────────────────
-    public class RiskPreviewRequestDto
-    {
-        public int? KatilimciSayisi { get; set; }
-        public Hassasiyet Hassasiyet { get; set; }
-        [StringLength(100)]
-        public string? OlayTuru { get; set; }
-    }
-
-    public class RiskPreviewResponseDto
-    {
-        public double RiskPuaniRaw { get; set; }
-        public double RiskPuaniNormalized { get; set; }
-        /// <summary>Düşük / Orta / Yüksek / Kritik</summary>
-        public string Seviye { get; set; } = string.Empty;
-    }
-
-    // ── OperasyonelFaaliyet ──────────────────────────────────────────────
-    public class OperasyonelFaaliyetCreateDto
-    {
-        [Required]
-        public Guid OlayId { get; set; }
-
-        [StringLength(1000)]
-        public string? Aciklama { get; set; }
-    }
-
-    public class OperasyonelFaaliyetResponseDto
-    {
-        public Guid Id { get; set; }
-        public Guid OlayId { get; set; }
-        public string? Aciklama { get; set; }
-        public int ToplamGrupSayisi { get; set; }
-        public int SupheliSayisi { get; set; }
-        public int GozaltiSayisi { get; set; }
-        public int SehitSayisi { get; set; }
-        public int OluSayisi { get; set; }
-    }
-
-    public class KatilimciGrupCreateDto
-    {
-        [Required(ErrorMessage = "Grup adı zorunludur.")]
-        [StringLength(250)]
-        public string? GrupAdi { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Katılımcı sayısı negatif olamaz.")]
-        public int KatilimciSayisi { get; set; }
-    }
-
-    // ── Supheli ─────────────────────────────────────────────────────────
-    public class SupheliCreateDto
-    {
-        [Required]
-        public Guid OperasyonelFaaliyetId { get; set; }
-
-        [Required(ErrorMessage = "Ad zorunludur.")]
-        [StringLength(100)]
-        public string? Ad { get; set; }
-
-        [Required(ErrorMessage = "Soyad zorunludur.")]
-        [StringLength(100)]
-        public string? Soyad { get; set; }
-
-        [RegularExpression(@"^\d{11}$", ErrorMessage = "TC Kimlik No 11 haneli rakamdan oluşmalıdır.")]
-        public string? TcKimlikNo { get; set; }
-
-        [Required(ErrorMessage = "Doğum tarihi zorunludur.")]
-        public DateTime DogumTarihi { get; set; }
-
-        public bool Gozaltinda { get; set; }
-    }
-
-    public class SupheliResponseDto
-    {
-        public Guid Id { get; set; }
-        public Guid OperasyonelFaaliyetId { get; set; }
-        public string? Ad { get; set; }
-        public string? Soyad { get; set; }
-        public DateTime DogumTarihi { get; set; }
-        public bool Gozaltinda { get; set; }
-        // TC Kimlik No kasitli olarak response'a dahil edilmedi (gizlilik)
-    }
-
-    // ── Sehit ───────────────────────────────────────────────────────────
-    public class SehitCreateDto
-    {
-        [Required]
-        public Guid OperasyonelFaaliyetId { get; set; }
-
-        [Required(ErrorMessage = "Ad zorunludur.")]
-        [StringLength(100)]
-        public string? Ad { get; set; }
-
-        [Required(ErrorMessage = "Soyad zorunludur.")]
-        [StringLength(100)]
-        public string? Soyad { get; set; }
-
-        [RegularExpression(@"^\d{11}$", ErrorMessage = "TC Kimlik No 11 haneli rakamdan oluşmalıdır.")]
-        public string? TcKimlikNo { get; set; }
-
-        [Required(ErrorMessage = "Doğum tarihi zorunludur.")]
-        public DateTime DogumTarihi { get; set; }
-
-        [StringLength(250)]
-        public string? Gorev { get; set; }
-    }
-
-    public class SehitResponseDto
-    {
-        public Guid Id { get; set; }
-        public Guid OperasyonelFaaliyetId { get; set; }
-        public string? Ad { get; set; }
-        public string? Soyad { get; set; }
-        public DateTime DogumTarihi { get; set; }
-        public string? Gorev { get; set; }
-    }
-
-    // ── Olu ─────────────────────────────────────────────────────────────
-    public class OluCreateDto
-    {
-        [Required]
-        public Guid OperasyonelFaaliyetId { get; set; }
-
-        [Required(ErrorMessage = "Ad zorunludur.")]
-        [StringLength(100)]
-        public string? Ad { get; set; }
-
-        [Required(ErrorMessage = "Soyad zorunludur.")]
-        [StringLength(100)]
-        public string? Soyad { get; set; }
-
-        [RegularExpression(@"^\d{11}$", ErrorMessage = "TC Kimlik No 11 haneli rakamdan oluşmalıdır.")]
-        public string? TcKimlikNo { get; set; }
-
-        [Required(ErrorMessage = "Doğum tarihi zorunludur.")]
-        public DateTime DogumTarihi { get; set; }
-
-        [StringLength(250)]
-        public string? KatilimciDurumu { get; set; }
-    }
-
-    public class OluResponseDto
-    {
-        public Guid Id { get; set; }
-        public Guid OperasyonelFaaliyetId { get; set; }
-        public string? Ad { get; set; }
-        public string? Soyad { get; set; }
-        public DateTime DogumTarihi { get; set; }
-        public string? KatilimciDurumu { get; set; }
     }
 
     // ── Sosyal Medya Olayi ───────────────────────────────────────────────
@@ -383,6 +212,8 @@ namespace EGM.Application.DTOs
         public string? Ilce { get; set; }
         public string? EkranGoruntusu { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
+        public string CreatedByUserId { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
     }
 
     // ── Organizator ──────────────────────────────────────────────────────
@@ -548,76 +379,11 @@ namespace EGM.Application.DTOs
         public string? KanitDosyasi { get; set; }
         public DateTime Tarih { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string CreatedByUserId { get; set; } = string.Empty;
         public int KatilimciSayisi { get; set; }
         public int SehitSayisi { get; set; }
         public int OluSayisi { get; set; }
         public int GozaltiSayisi { get; set; }
-    }
-
-    public class SecimSonucuCreateDto
-    {
-        [Required(ErrorMessage = "Seçim türü zorunludur.")]
-        [StringLength(100)]
-        public string? SecimTuru { get; set; }
-
-        [Required(ErrorMessage = "Tarih zorunludur.")]
-        public DateTime Tarih { get; set; }
-
-        [Required(ErrorMessage = "Bölge tipi zorunludur.")]
-        [StringLength(100)]
-        public string? BolgeTipi { get; set; }
-
-        [Range(1, int.MaxValue, ErrorMessage = "Geçerli bir BölgeId giriniz.")]
-        public int BolgeId { get; set; }
-
-        [Required]
-        public Guid AdayId { get; set; }
-
-        [Required]
-        public Guid PartiId { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Oy sayısı negatif olamaz.")]
-        public int OySayisi { get; set; }
-
-        [Range(0.0, 100.0, ErrorMessage = "Oy oranı 0-100 arasında olmalıdır.")]
-        public double OyOrani { get; set; }
-
-        [Required]
-        public Guid KaynakId { get; set; }
-
-        public bool KaynakOnayDurumu { get; set; }
-    }
-
-    public class SecimSonucuResponseDto
-    {
-        public Guid Id { get; set; }
-        public string? SecimTuru { get; set; }
-        public DateTime Tarih { get; set; }
-        public string? BolgeTipi { get; set; }
-        public int BolgeId { get; set; }
-        public Guid AdayId { get; set; }
-        public Guid PartiId { get; set; }
-        public int OySayisi { get; set; }
-        public double OyOrani { get; set; }
-        public bool KaynakOnayDurumu { get; set; }
-    }
-
-    public class AdayCreateDto
-    {
-        [Required(ErrorMessage = "Aday adı-soyadı zorunludur.")]
-        [StringLength(250)]
-        public string? AdSoyad { get; set; }
-
-        [Required(ErrorMessage = "Parti ismi zorunludur.")]
-        [StringLength(250)]
-        public string? PartiAdi { get; set; }
-    }
-
-    public class PartiCreateDto
-    {
-        [Required(ErrorMessage = "Parti adı zorunludur.")]
-        [StringLength(250)]
-        public string? Ad { get; set; }
     }
 
     // ── VIP Ziyaret ──────────────────────────────────────────────────────
@@ -675,29 +441,8 @@ namespace EGM.Application.DTOs
         public string? GuvenlikSeviyesi { get; set; }
         public string? GozlemNoktalari { get; set; }
         public ZiyaretDurumu ZiyaretDurumu { get; set; }
-    }
-
-    public class GuvenlikPlaniCreateDto
-    {
-        [Required]
-        public Guid VIPZiyaretId { get; set; }
-
-        [Required(ErrorMessage = "Güvenlik planı adı zorunludur.")]
-        [StringLength(250)]
-        public string? Ad { get; set; }
-
-        [StringLength(2000)]
-        public string? Aciklama { get; set; }
-    }
-
-    public class EkipCreateDto
-    {
-        [Required]
-        public Guid VIPZiyaretId { get; set; }
-
-        [Required(ErrorMessage = "Ekip adı zorunludur.")]
-        [StringLength(250)]
-        public string? Ad { get; set; }
+        public string CreatedByUserId { get; set; } = string.Empty;
+        public DateTime CreatedAt { get; set; }
     }
 
     // ── Yuruyu Rotasi ───────────────────────────────────────────────────

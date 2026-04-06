@@ -96,8 +96,6 @@ namespace EGM.Application.Services
             // Durum, controller'dan dto.Durum ile set edilir; sadece Planlandi(0) ise varsayılan kalır
             if (olay.Durum != OlayDurum.Gerceklesti)
                 olay.Durum = OlayDurum.Planlandi;
-            olay.RiskPuani = CalculateRisk(olay);
-
             // İl personeli → CityId otomatik atanır
             if (Roles.IsCityScoped(_currentUser.Role) && _currentUser.CityId.HasValue)
                 olay.CityId = _currentUser.CityId;
@@ -137,7 +135,6 @@ namespace EGM.Application.Services
             if (isStaffRole && existing.CreatedByUserId != _currentUser.UserId)
                 return (false, "Yalnızca kendi oluşturduğunuz kayıtları düzenleyebilirsiniz.");
 
-            existing.Baslik         = updated.Baslik;
             existing.OlayTuru       = updated.OlayTuru;
             existing.OrganizatorId  = updated.OrganizatorId;
             existing.KonuId         = updated.KonuId;
@@ -153,7 +150,6 @@ namespace EGM.Application.Services
             existing.GozaltiSayisi  = updated.GozaltiSayisi;
             existing.SehitOluSayisi = updated.SehitOluSayisi;
             existing.Aciklama       = updated.Aciklama;
-            existing.KaynakKurum    = updated.KaynakKurum;
             existing.EvrakNumarasi  = updated.EvrakNumarasi;
             existing.Hassasiyet     = updated.Hassasiyet;
             existing.Durum          = updated.Durum;
@@ -161,7 +157,6 @@ namespace EGM.Application.Services
             existing.OlayBitisTarihi            = updated.OlayBitisTarihi;
             existing.GerceklesenKatilimciSayisi  = updated.GerceklesenKatilimciSayisi;
             existing.GerceklesmeSekliId          = updated.GerceklesmeSekliId;
-            existing.RiskPuani      = CalculateRisk(existing);
 
             await _olayRepository.UpdateAsync(existing);
             var isSelfCorrection = isStaffRole && existing.CreatedByUserId == _currentUser.UserId;
@@ -215,18 +210,6 @@ namespace EGM.Application.Services
             return olay;
         }
 
-        // ── Risk hesaplama ───────────────────────────────────────────────
-        private static double CalculateRisk(Olay olay)
-        {
-            double risk = 0;
-            if (olay.KatilimciSayisi.HasValue && olay.KatilimciSayisi.Value > 1000)
-                risk += 10;
-            if (olay.Hassasiyet == Hassasiyet.Kritik)
-                risk += 20;
-            if (olay.OlayTuru == "Yürüyüş" && olay.YuruyusRotasi != null && olay.YuruyusRotasi.Count > 2)
-                risk += 15;
-            return risk;
-        }
 
         // ── Rota ─────────────────────────────────────────────────────────
         public async Task<YuruyusRota> AddRotaNoktasiAsync(Guid olayId, string noktaAdi, double lat, double lng, int siraNo)

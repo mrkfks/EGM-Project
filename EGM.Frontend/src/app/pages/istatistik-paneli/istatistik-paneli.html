@@ -1,0 +1,43 @@
+<div class="ip-kapsayici">
+  <div class="ip-sekmeler">
+    <button class="ip-sekme" [class.aktif]="aktifSekme === 'kurulus'" (click)="sekmeSec('kurulus')">
+      <span class="ip-sekme-ikon">📊</span> Kuruluş İstatistikleri
+    </button>
+    <button class="ip-sekme" [class.aktif]="aktifSekme === 'konu'" (click)="sekmeSec('konu')">
+      <span class="ip-sekme-ikon">🥧</span> Konu İstatistikleri
+    </button>
+    <button class="ip-sekme" [class.aktif]="aktifSekme === 'sokak'" (click)="sekmeSec('sokak')">
+      <span class="ip-sekme-ikon">📈</span> Sokak Olayları İstatistikleri
+    </button>
+    <button class="ip-sekme" [class.aktif]="aktifSekme === 'sosyal'" (click)="sekmeSec('sosyal')">
+      <span class="ip-sekme-ikon">#</span> Sosyal Medya Olayları İstatistikleri
+    </button>
+    <button class="ip-sekme" [class.aktif]="aktifSekme === 'secim'" (click)="sekmeSec('secim')">
+      <span class="ip-sekme-ikon">☑️</span> Seçim Olayları İstatistikleri
+    </button>
+    <button class="ip-sekme" [class.aktif]="aktifSekme === 'vip'" (click)="sekmeSec('vip')">
+      <span class="ip-sekme-ikon">👤</span> Ziyaretçi Olayları İstatistikleri
+    </button>
+  </div>
+
+  <div class="ip-icerik">
+    <ng-container *ngIf="aktifSekme === 'kurulus'">
+      <app-rapor-kuruluslar></app-rapor-kuruluslar>
+    </ng-container>
+    <ng-container *ngIf="aktifSekme === 'konu'">
+      <app-konular></app-konular>
+    </ng-container>
+    <ng-container *ngIf="aktifSekme === 'sokak'">
+      <app-sokak-istatistik></app-sokak-istatistik>
+    </ng-container>
+    <ng-container *ngIf="aktifSekme === 'sosyal'">
+      <app-sosyal-medya-istatistik></app-sosyal-medya-istatistik>
+    </ng-container>
+    <ng-container *ngIf="aktifSekme === 'secim'">
+      <app-secim-istatistik></app-secim-istatistik>
+    </ng-container>
+    <ng-container *ngIf="aktifSekme === 'vip'">
+      <app-vip-istatistik></app-vip-istatistik>
+    </ng-container>
+  </div>
+</div>

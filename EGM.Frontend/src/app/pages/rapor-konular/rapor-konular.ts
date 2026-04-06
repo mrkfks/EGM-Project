@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -24,8 +26,10 @@ interface KonuKaydi {
   imports: [CommonModule, FormsModule],
   templateUrl: './rapor-konular.html',
   styleUrls: ['./rapor-konular.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RaporKonular implements OnInit {
+export class RaporKonular implements OnInit, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
       readonly turRenkleri: Record<string, { bg: string; color: string; border: string }> = {
         'Ana Konu':                      { bg: '#eaf2ff', color: '#1a5276', border: '#a9cce3' },
         'Ekonomik ve Sosyal Haklar':     { bg: '#fef9e7', color: '#b7950b', border: '#f9e79f' },
@@ -41,6 +45,7 @@ export class RaporKonular implements OnInit {
         'Diger':                         { bg: '#f0f3f4', color: '#7f8c8d', border: '#d5d8dc' },
       };
     ustKonuId: string | null = null;
+  ustKonuAdDeger: string = '';
   tumKayitlar: KonuKaydi[] = [];
   filtrelenmis: KonuKaydi[] = [];
 
@@ -50,22 +55,26 @@ export class RaporKonular implements OnInit {
   hataMesaji = '';
 
   get turler(): string[] {
-    return [...new Set(this.tumKayitlar
-      .filter(k => this.ustKonuId ? k.ustKonuId === this.ustKonuId : false)
-      .map(k => k.tur ?? '').filter(Boolean))];
+    return [...new Set(this.tumKayitlar.map(k => k.tur ?? '').filter(Boolean))];
   }
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, public router: Router) {}
+  constructor(private http: HttpClient, private route: ActivatedRoute, public router: Router, private cdr: ChangeDetectorRef) {}
 
   konuDetayaGit(id: string): void {
     this.router.navigate(['/konu-detay', id]);
   }
 
   ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
       this.ustKonuId = params['ustKonuId'] || null;
+      this.ustKonuAdDeger = params['ustKonuAd'] || '';
       this.verileriYukle();
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private getHeaders(): HttpHeaders {
@@ -74,18 +83,31 @@ export class RaporKonular implements OnInit {
   }
 
   verileriYukle(): void {
+    if (!this.ustKonuId) {
+      this.tumKayitlar = [];
+      this.filtrelenmis = [];
+      this.yukleniyor = false;
+      this.cdr.markForCheck();
+      return;
+    }
     this.yukleniyor = true;
     this.hataMesaji = '';
-    this.http.get<KonuKaydi[]>(`${API}/api/organizator/konu`, { headers: this.getHeaders() })
+    this.http.get<KonuKaydi[]>(`${API}/api/organizator/konu`, {
+      headers: this.getHeaders(),
+      params: { ustKonuId: this.ustKonuId }
+    })
+      .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
           this.tumKayitlar = data;
           this.filtrele();
           this.yukleniyor = false;
+          this.cdr.markForCheck();
         },
         error: () => {
           this.hataMesaji = 'Konu verileri yüklenemedi. Bağlantıyı kontrol edin.';
           this.yukleniyor = false;
+          this.cdr.markForCheck();
         }
       });
   }
@@ -94,16 +116,20 @@ export class RaporKonular implements OnInit {
     const ara = this.aramaMetni.toLowerCase().trim();
     this.filtrelenmis = this.tumKayitlar.filter(k => {
       const metinUygun = !ara ||
-        k.ad.toLowerCase().includes(ara) ||
+        (k.ad ?? '').toLowerCase().includes(ara) ||
         (k.aciklama ?? '').toLowerCase().includes(ara);
       const turUygun = !this.turFiltresi || k.tur === this.turFiltresi;
-      const altKonuUygun = this.ustKonuId ? k.ustKonuId === this.ustKonuId : false;
-      return metinUygun && turUygun && altKonuUygun;
+      return metinUygun && turUygun;
     });
   }
 
   get ustKonuAd(): string {
-    return this.filtrelenmis[0]?.ustKonuAd ?? '';
+    // queryParams'tan gelen ad veya yedek olarak alt konulardan oku
+    return this.ustKonuAdDeger || this.tumKayitlar[0]?.ustKonuAd || '';
+  }
+
+  altKonuSayisiGetir(anaKonuId: string): number {
+    return this.tumKayitlar.filter(k => k.ustKonuId === anaKonuId).length;
   }
 
   trackById(_index: number, item: KonuKaydi): string {

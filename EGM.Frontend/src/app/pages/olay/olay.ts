@@ -53,7 +53,6 @@ export const IL_LISTESI: { id: number; ad: string }[] = [
 // ── Arayüzler ────────────────────────────────────────────────────────────────
 export interface OlayRow {
   id: string;
-  baslik?: string;
   olayTuru?: string;
   tarih: string;
   baslangicSaati?: string;
@@ -63,7 +62,6 @@ export interface OlayRow {
   mekan?: string;
   hassasiyet: number;
   durum: number;
-  riskPuani: number;
   katilimciSayisi?: number;
   gozaltiSayisi?: number;
   sehitOluSayisi?: number;
@@ -197,7 +195,6 @@ export class Olay implements OnInit {
       next: res => {
         this.allRows = (res.items ?? []).map((o: any): OlayRow => ({
           id:              o.id,
-          baslik:          o.baslik,
           olayTuru:        o.olayTuru,
           tarih:           o.tarih,
           baslangicSaati:  o.baslangicSaati ?? '',
@@ -207,7 +204,6 @@ export class Olay implements OnInit {
           mekan:           o.mekan,
           hassasiyet:      o.hassasiyet,
           durum:           o.durum,
-          riskPuani:       o.riskPuani,
           katilimciSayisi: o.katilimciSayisi,
           gozaltiSayisi:   o.gozaltiSayisi,
           sehitOluSayisi:  o.sehitOluSayisi,

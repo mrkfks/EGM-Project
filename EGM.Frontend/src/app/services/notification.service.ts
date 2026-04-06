@@ -9,9 +9,8 @@ export interface NotifItem {
   id?: string;
   title: string;
   message: string;
-  riskPuaniRaw: number;
-  riskNorm: number;       // 0–1 (riskPuaniRaw / 55)
   hassasiyet: number;     // 0=Düşük, 1=Orta, 2=Yüksek, 3=Kritik
+  riskNorm: number;       // hassasiyet / 3 (0–1 arası normalize değer)
   latitude?: number;
   longitude?: number;
   type: string;
@@ -62,9 +61,8 @@ export class NotificationService {
           id:           n.id,
           title:        n.title        ?? '',
           message:      n.message      ?? '',
-          riskPuaniRaw: n.riskScore    ?? 0,
-          riskNorm:     Math.min((n.riskScore ?? 0) / 55, 1),
           hassasiyet:   0,
+          riskNorm:     0,
           type:         n.type         ?? 'Risk',
           olayId:       n.id           ?? '',
           timestamp:    new Date(n.createdAt),
@@ -100,9 +98,8 @@ export class NotificationService {
     const item: NotifItem = {
       title:        data.title      ?? 'Bildirim',
       message:      data.message    ?? '',
-      riskPuaniRaw: data.riskPuani  ?? 0,
-      riskNorm:     Math.min((data.riskPuani ?? 0) / 55, 1),
       hassasiyet:   data.hassasiyet ?? 0,
+      riskNorm:     (data.hassasiyet ?? 0) / 3,
       latitude:     data.latitude,
       longitude:    data.longitude,
       type:         data.type       ?? 'Risk',

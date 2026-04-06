@@ -1,0 +1,49 @@
+.ip-kapsayici {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #f4f6f9;
+}
+
+.ip-sekmeler {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  background: #1a3a5c;
+  padding: 8px 16px 0;
+}
+
+.ip-sekme {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ip-sekme:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.ip-sekme.aktif {
+  background: #fff;
+  color: #1a3a5c;
+  font-weight: 600;
+}
+
+.ip-sekme-ikon {
+  font-size: 16px;
+}
+
+.ip-icerik {
+  flex: 1;
+  overflow-y: auto;
+  background: #fff;
+}

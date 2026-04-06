@@ -1,5 +1,4 @@
-using EGM.Application.DTOs;
-using EGM.Domain.Entities;
+﻿using EGM.Application.DTOs;
 using EGM.Domain.Enums;
 using EGM.Domain.Interfaces;
 
@@ -8,22 +7,12 @@ namespace EGM.Application.Services
     public class RaporlarService
     {
         private readonly IOlayRepository _olayRepository;
-        private readonly IRepository<OperasyonelFaaliyet> _faaliyetRepository;
 
-        public RaporlarService(
-            IOlayRepository olayRepository,
-            IRepository<OperasyonelFaaliyet> faaliyetRepository)
+        public RaporlarService(IOlayRepository olayRepository)
         {
-            _olayRepository     = olayRepository;
-            _faaliyetRepository = faaliyetRepository;
+            _olayRepository = olayRepository;
         }
 
-        /// <summary>
-        /// Belirtilen tarihe ait günlük bülten verisini döner.
-        /// Gerçekleşen olaylar (Durum = Gerceklesti, aynı gün),
-        /// beklenen olaylar (Durum = Planlandi, ertesi gün),
-        /// operasyonel faaliyetler (aynı günün olaylarına bağlı).
-        /// </summary>
         public async Task<GunlukBultenDto> GetGunlukBultenAsync(DateTime tarih)
         {
             var gunBaslangic = tarih.Date;
@@ -31,34 +20,29 @@ namespace EGM.Application.Services
             var sonrakiGun   = gunBaslangic.AddDays(1);
             var sonrakiGunBitis = sonrakiGun.AddDays(1).AddTicks(-1);
 
-            // Gerçekleşen olaylar
+            // GerÃ§ekleÅŸen olaylar
             var (gerceklesen, _) = await _olayRepository.GetFilteredPagedAsync(
                 OlayDurum.Gerceklesti, gunBaslangic, gunBitis, null, 1, 500);
 
-            // Beklenen olaylar (ertesi gün planlanmış)
+            // Beklenen olaylar (ertesi gÃ¼n planlanmÄ±ÅŸ)
             var (beklenen, _) = await _olayRepository.GetFilteredPagedAsync(
                 OlayDurum.Planlandi, sonrakiGun, sonrakiGunBitis, null, 1, 500);
 
-            // Operasyonel faaliyetler (bugünkü olaylara bağlı)
-            var gerceklesenIds = gerceklesen.Select(o => o.Id).ToHashSet();
-            var gunlukFaaliyetler = await _faaliyetRepository.FindAsync(
-                f => gerceklesenIds.Contains(f.OlayId));
-
-            // İcmal: olay türüne göre grupla
+            // Ä°cmal: olay tÃ¼rÃ¼ne gÃ¶re grupla
             var icmal = gerceklesen
-                .GroupBy(o => o.OlayTuru ?? "DİĞER")
+                .GroupBy(o => o.OlayTuru ?? "DÄ°ÄER")
                 .OrderBy(g => g.Key)
                 .Select((g, i) => new IcmalVeriDto
                 {
-                    Tur          = g.Key.ToUpperInvariant(),
-                    EylemSayisi  = g.Count(),
+                    Tur           = g.Key.ToUpperInvariant(),
+                    EylemSayisi   = g.Count(),
                     KatilimSayisi = g.Sum(o => o.KatilimciSayisi ?? 0),
                     GozaltiSayisi = g.Sum(o => o.GozaltiSayisi ?? 0),
-                    OluSayisi    = g.Sum(o => o.SehitOluSayisi ?? 0)
+                    OluSayisi     = g.Sum(o => o.SehitOluSayisi ?? 0)
                 })
                 .ToList();
 
-            // Gerçekleşen detaylar
+            // GerÃ§ekleÅŸen detaylar
             var gerceklesenDetay = gerceklesen
                 .OrderBy(o => o.BaslangicSaati)
                 .Select((o, i) => new GerceklesenDetayDto
@@ -92,27 +76,13 @@ namespace EGM.Application.Services
                 })
                 .ToList();
 
-            // Operasyonel faaliyetler
-            var faaliyetDetay = gunlukFaaliyetler
-                .Select((f, i) => new OperasyonelFaaliyetBultenDto
-                {
-                    Sn            = i + 1,
-                    Il            = f.Olay?.Il ?? string.Empty,
-                    Tarih         = f.Olay?.Tarih.ToString("dd.MM.yyyy") ?? string.Empty,
-                    SupheliSayisi = f.SupheliSayisi,
-                    GozaltiSayisi = f.GozaltiSayisi,
-                    Aciklama      = f.Aciklama ?? string.Empty
-                })
-                .ToList();
-
             return new GunlukBultenDto
             {
                 Tarih           = tarih.ToString("dd MMMM yyyy dddd", new System.Globalization.CultureInfo("tr-TR")),
                 SonrakiGunTarih = sonrakiGun.ToString("dd MMMM yyyy dddd", new System.Globalization.CultureInfo("tr-TR")),
-                IcmalVerileri   = icmal,
+                IcmalVerileri       = icmal,
                 GerceklesenDetaylar = gerceklesenDetay,
                 BeklenenDetaylar    = beklenenDetay,
-                OperasyonelFaaliyetler = faaliyetDetay
             };
         }
     }

@@ -59,7 +59,7 @@
   @if (!yukleniyor && !hataMesaji) {
     <div class="ana-konu-kart-row">
       @for (ana of filtrelenmis.filter(k => !k.ustKonuId); track ana.id) {
-        <div class="ana-konu-kart" (click)="altKonularaGit(ana.id)" style="cursor:pointer;">
+        <div class="ana-konu-kart" (click)="altKonularaGit(ana.id, ana.ad)" style="cursor:pointer;">
           <div class="ana-konu-kart-baslik">
             <span class="ana-konu-kart-ad">{{ ana.ad }}</span>
             <span class="badge"
@@ -70,7 +70,7 @@
             </span>
           </div>
           <div class="ana-konu-kart-alt">
-            <span class="ana-konu-kart-altkonu">Alt Konu: <b>{{ ana.altKonuSayisi }}</b></span>
+            <span class="ana-konu-kart-altkonu">Alt Konu: <b>{{ altKonuSayisiGetir(ana.id) }}</b></span>
           </div>
           <div class="ana-konu-kart-aciklama">{{ ana.aciklama || '—' }}</div>
         </div>

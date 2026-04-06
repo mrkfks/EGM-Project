@@ -8,11 +8,13 @@ namespace EGM.API.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IWebHostEnvironment env)
         {
             _next   = next;
             _logger = logger;
+            _env    = env;
         }
 
         public async Task InvokeAsync(HttpContext context)
@@ -73,9 +75,13 @@ namespace EGM.API.Middleware
             catch (Exception ex)
             {
                 _logger.LogError(ex, "İşlenmeyen hata.");
+                var isDev = _env?.IsDevelopment() == true;
+                var detail = isDev
+                    ? $"{ex.GetType().Name}: {ex.Message} | {ex.InnerException?.Message}"
+                    : "Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.";
                 await WriteProblemAsync(context, HttpStatusCode.InternalServerError,
                     "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-                    "Sunucu Hatası", "Sunucu tarafında bir hata oluştu. Lütfen daha sonra tekrar deneyiniz.");
+                    "Sunucu Hatası", detail);
             }
         }
 

@@ -1,0 +1,128 @@
+<div class="ajanda-kapsayici">
+
+  <!-- Başlık & Navigasyon -->
+  <div class="ajanda-baslik">
+    <button class="nav-btn" (click)="oncekiAy()">&#8592;</button>
+    <h2>{{ ayAdi }} {{ yil }}</h2>
+    <button class="nav-btn" (click)="sonrakiAy()">&#8594;</button>
+  </div>
+
+  <!-- Yükleniyor -->
+  <div *ngIf="yukleniyor" class="yukleniyor">Yükleniyor...</div>
+
+  <!-- Takvim -->
+  <div class="takvim" *ngIf="!yukleniyor">
+    <!-- Gün başlıkları -->
+    <div class="gun-baslik" *ngFor="let g of gunAdlari">{{ g }}</div>
+
+    <!-- Hücreler -->
+    <div
+      *ngFor="let h of takvimHucreleri"
+      class="gun-hucresi"
+      [class.bos]="!h.gun"
+      [class.bugun]="h.bugun"
+      [class.secili]="secilenGun?.tarih?.getTime() === h.tarih?.getTime()"
+      [class.olayvar]="h.olaylar.length > 0"
+      (click)="gunSec(h)"
+    >
+      <span class="gun-no" *ngIf="h.gun">{{ h.gun }}</span>
+      <div class="olay-noktalar" *ngIf="h.olaylar.length > 0">
+        <span
+          *ngFor="let o of h.olaylar.slice(0, 3)"
+          class="nokta"
+          [style.background]="hassasiyetRenk[o.hassasiyet]"
+        ></span>
+        <span *ngIf="h.olaylar.length > 3" class="nokta-fazla">+{{ h.olaylar.length - 3 }}</span>
+      </div>
+      <div class="onemli-isaretler" *ngIf="h.tarih && getOnemliGunler(h.tarih).length > 0">
+        <span
+          *ngFor="let og of getOnemliGunler(h.tarih).slice(0, 3)"
+          class="onemli-nokta"
+          [style.background]="og.renk"
+          title="{{ og.baslik }}"
+        >★</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seçili gün olaylar paneli -->
+  <div class="olay-panel" *ngIf="secilenGun && secilenGun.gun">
+    <div class="olay-panel-baslik">
+      {{ secilenGun.gun }} {{ ayAdi }} {{ yil }} &mdash; {{ secilenGun.olaylar.length }} olay
+    </div>
+
+    <!-- Önemli Günler Bölümü -->
+    <div class="onemli-bolum">
+      <div class="onemli-bolum-baslik">
+        <span>⭐ Önemli Günler</span>
+        <button class="onemli-ekle-btn" type="button" (click)="ekleFormAcik = !ekleFormAcik">
+          {{ ekleFormAcik ? '✕ İptal' : '+ Ekle' }}
+        </button>
+      </div>
+
+      <!-- Ekleme Formu -->
+      <div class="onemli-form" *ngIf="ekleFormAcik">
+        <input
+          class="onemli-input"
+          type="text"
+          placeholder="Önemli günün açıklaması..."
+          [(ngModel)]="yeniBaslik"
+          (keyup.enter)="onemliGunEkle()"
+          (keyup.escape)="ekleFormAcik = false; yeniBaslik = ''"
+          maxlength="150"
+          autofocus
+        />
+        <div class="renk-secici">
+          <span
+            *ngFor="let r of renkSecenekleri"
+            class="renk-yuvarlak"
+            [style.background]="r"
+            [class.secili]="yeniRenk === r"
+            (click)="yeniRenk = r"
+          ></span>
+        </div>
+        <button class="onemli-kaydet-btn" type="button" (click)="onemliGunEkle()" [disabled]="!yeniBaslik.trim()">
+          Kaydet
+        </button>
+      </div>
+
+      <!-- Kayıtlı Önemli Günler -->
+      <div class="onemli-liste">
+        <div *ngIf="getOnemliGunler(secilenGun.tarih).length === 0 && !ekleFormAcik" class="onemli-bos">
+          Bu gün için önemli gün eklenmemiş.
+        </div>
+        <div
+          *ngFor="let og of getOnemliGunler(secilenGun.tarih)"
+          class="onemli-item"
+        >
+          <span class="onemli-renk-bar" [style.background]="og.renk"></span>
+          <span class="onemli-item-baslik">{{ og.baslik }}</span>
+          <button class="onemli-sil-btn" type="button" (click)="onemliGunSil(og, $event)" title="Sil">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="secilenGun.olaylar.length === 0" class="bos-mesaj">
+      Bu gün için kayıtlı olay bulunmuyor.
+    </div>
+
+    <div
+      *ngFor="let o of secilenGun.olaylar"
+      class="olay-kart"
+      (click)="olayDetay(o.id)"
+    >
+      <div class="olay-sol">
+        <span class="olay-renk" [style.background]="hassasiyetRenk[o.hassasiyet]"></span>
+      </div>
+      <div class="olay-bilgi">
+        <div class="olay-baslik">{{ o.olayTuru || 'Olay' }}</div>
+        <div class="olay-detay">
+          <span *ngIf="o.baslangicSaati">{{ o.baslangicSaati }}<span *ngIf="o.bitisSaati"> – {{ o.bitisSaati }}</span></span>
+          <span *ngIf="o.il"> &bull; {{ o.il }}<span *ngIf="o.ilce">/{{ o.ilce }}</span></span>
+        </div>
+        <div class="olay-durum">{{ durumEtiket[o.durum] }}</div>
+      </div>
+    </div>
+  </div>
+
+</div>

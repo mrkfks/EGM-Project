@@ -3,10 +3,6 @@
   <!-- ── Filtreler ──────────────────────────────────────── -->
   <div class="filtre-bar">
     <div class="filtre-group">
-      <label>Başlık</label>
-      <input type="text" [(ngModel)]="filtreBaslik" placeholder="Başlık ara..." (input)="filtrele()" />
-    </div>
-    <div class="filtre-group">
       <label>Olay Türü</label>
       <input type="text" [(ngModel)]="filtreOlayTuru" placeholder="Olay türü..." (input)="filtrele()" />
     </div>
@@ -50,10 +46,6 @@
       <input type="text" [(ngModel)]="filtreMekan" placeholder="Mekan..." (input)="filtrele()" />
     </div>
     <div class="filtre-group">
-      <label>Kaynak Kurum</label>
-      <input type="text" [(ngModel)]="filtreKaynakKurum" placeholder="Kurum..." (input)="filtrele()" />
-    </div>
-    <div class="filtre-group">
       <label>Evrak No</label>
       <input type="text" [(ngModel)]="filtreEvrakNo" placeholder="Evrak no..." (input)="filtrele()" />
     </div>
@@ -75,7 +67,6 @@
     <table class="tablo">
       <thead>
         <tr>
-          <th>Başlık</th>
           <th>Olay Türü</th>
           <th>Organizatör</th>
           <th>Konu</th>
@@ -88,14 +79,11 @@
           <th class="sayi">Katılımcı</th>
           <th class="sayi">Gözaltı</th>
           <th class="sayi">şehit/Ölü</th>
-          <th class="sayi">Risk</th>
-          <th>Kaynak</th>
           <th>Evrak No</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let o of sayfaKayitlari">
-          <td class="baslik-cell">{{ o.baslik || '—' }}</td>
           <td>{{ o.olayTuru || '—' }}</td>
           <td>{{ o.organizatorAd || '—' }}</td>
           <td>{{ o.konuAd || '—' }}</td>
@@ -112,12 +100,10 @@
           <td class="sayi">{{ o.katilimciSayisi ?? '—' }}</td>
           <td class="sayi">{{ o.gozaltiSayisi ?? '—' }}</td>
           <td class="sayi">{{ o.sehitOluSayisi ?? '—' }}</td>
-          <td class="sayi">{{ o.riskPuani != null ? (o.riskPuani | number:'1.0-0') : '—' }}</td>
-          <td class="kisa-cell">{{ o.kaynakKurum || '—' }}</td>
           <td class="kisa-cell">{{ o.evrakNumarasi || '—' }}</td>
         </tr>
         <tr *ngIf="sayfaKayitlari.length === 0">
-          <td colspan="16" class="bos-satir">Kayıt bulunamadı.</td>
+          <td colspan="13" class="bos-satir">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>

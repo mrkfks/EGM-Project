@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
+import { environment } from '../../environments/environment';
 
 export interface OlayTuru {
   id: string;
@@ -10,7 +11,7 @@ export interface OlayTuru {
 
 @Injectable({ providedIn: 'root' })
 export class OlayTuruService {
-  private apiUrl = '/api/OlayTuru';
+  private apiUrl = environment.apiUrl + '/api/OlayTuru';
   private cache$?: Observable<OlayTuru[]>;
 
   constructor(private http: HttpClient) {}

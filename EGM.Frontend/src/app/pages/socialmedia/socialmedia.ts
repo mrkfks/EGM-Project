@@ -1,6 +1,6 @@
 ﻿import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { KonuService, Konu } from '../../services/konu.service';
 
@@ -24,6 +24,7 @@ interface SosyalMedyaForm {
   imports: [CommonModule, FormsModule],
   templateUrl: './socialmedia.html',
   styleUrls: ['./socialmedia.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Socialmedia implements OnInit {
   private apiBase = 'http://localhost:5117/api';
@@ -93,13 +94,13 @@ export class Socialmedia implements OnInit {
     if (this.form.platform === p) this.form.platform = '';
   }
 
-  constructor(private http: HttpClient, private konuService: KonuService) {}
+  constructor(private http: HttpClient, private konuService: KonuService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.konularYukleniyor = true;
     this.konuService.getAll().subscribe({
-      next: res => { this.konular = res; this.konularYukleniyor = false; },
-      error: () => { this.konularYukleniyor = false; }
+      next: res => { this.konular = res; this.konularYukleniyor = false; this.cdr.markForCheck(); },
+      error: () => { this.konularYukleniyor = false; this.cdr.markForCheck(); }
     });
   }
 
@@ -120,6 +121,7 @@ export class Socialmedia implements OnInit {
     const reader = new FileReader();
     reader.onload = (e) => {
       this.form.ekranGoruntusuBase64 = e.target?.result as string;
+      this.cdr.markForCheck();
     };
     reader.readAsDataURL(file);
   }
@@ -161,7 +163,9 @@ export class Socialmedia implements OnInit {
       il: this.form.il || null,
       ilce: this.form.ilce || null,
       paylasimLinki: this.form.paylasimLinki,
-      paylasimTarihi: this.form.paylasimTarihi,
+      paylasimTarihi: this.form.paylasimTarihi.length === 16
+        ? this.form.paylasimTarihi + ':00'
+        : this.form.paylasimTarihi,
       icerikOzeti: this.form.icerikOzeti,
       ilgiliKisiKurum: this.form.kullaniciAdi,
       ekranGoruntusu: this.form.ekranGoruntusuBase64 || null,
@@ -175,10 +179,12 @@ export class Socialmedia implements OnInit {
           this.basariMesaji = 'Sosyal medya olayi basariyla kaydedildi.';
           this.kaydediliyor = false;
           this.formSifirla();
+          this.cdr.markForCheck();
         },
         error: (err) => {
           this.hataMesaji = err?.error?.title || 'Kayit sirasinda hata olustu.';
           this.kaydediliyor = false;
+          this.cdr.markForCheck();
         },
       });
   }

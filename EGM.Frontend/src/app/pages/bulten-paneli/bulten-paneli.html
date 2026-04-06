@@ -1,0 +1,19 @@
+<div class="bp-kapsayici">
+  <div class="bp-sekmeler">
+
+    <button class="bp-sekme" [class.aktif]="aktifSekme === 'gunluk'" (click)="sekmeSec('gunluk')">
+      <span class="bp-sekme-ikon">📄</span> Günlük Bülten
+    </button>
+
+
+  </div>
+
+  <div class="bp-icerik">
+
+    <ng-container *ngIf="aktifSekme === 'gunluk'">
+      <app-raporlar></app-raporlar>
+    </ng-container>
+
+
+  </div>
+</div>

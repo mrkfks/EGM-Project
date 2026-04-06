@@ -17,8 +17,14 @@ namespace EGM.API.Controllers
 
         // ── Organizatör ──────────────────────────────────────────────────
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-            => Ok((await _service.GetAllAsync()).Select(MapToResponse));
+        public async Task<IActionResult> GetAll([FromQuery] Guid? ustKurulusId = null)
+        {
+            var list = await _service.GetAllAsync();
+            var result = ustKurulusId.HasValue
+                ? list.Where(o => o.UstKurulusId == ustKurulusId)
+                : list.AsEnumerable();
+            return Ok(result.Select(MapToResponse));
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
@@ -95,8 +101,14 @@ namespace EGM.API.Controllers
 
         // ── Konu ─────────────────────────────────────────────────────────
         [HttpGet("konu")]
-        public async Task<IActionResult> GetAllKonu()
-            => Ok((await _service.GetAllKonuAsync()).Select(MapKonuToResponse));
+        public async Task<IActionResult> GetAllKonu([FromQuery] Guid? ustKonuId = null)
+        {
+            var list = await _service.GetAllKonuAsync();
+            var result = ustKonuId.HasValue
+                ? list.Where(k => k.UstKonuId == ustKonuId)
+                : list.AsEnumerable();
+            return Ok(result.Select(MapKonuToResponse));
+        }
 
         [HttpGet("konu/{id}")]
         public async Task<IActionResult> GetKonuById(Guid id)
