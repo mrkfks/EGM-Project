@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EGM.Tests")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bc43b0c41ae0735b905be02cdab0c4e3cfaabe85")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d183b432857a8d95f5735ea8e467ded5d9845495")]
 [assembly: System.Reflection.AssemblyProductAttribute("EGM.Tests")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EGM.Tests")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
