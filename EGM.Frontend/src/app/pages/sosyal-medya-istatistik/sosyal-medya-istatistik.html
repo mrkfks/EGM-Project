@@ -49,8 +49,21 @@
   <!-- ── Tablo ────────────────────────────────────────────── -->
   <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
     <table class="tablo">
+      <colgroup>
+        <col style="width: 150px"> <!-- Takip No -->
+        <col style="width: 120px"> <!-- Platform -->
+        <col style="width: 140px"> <!-- Konu -->
+        <col style="width: 200px"> <!-- İçerik Özeti -->
+        <col style="width: 185px"> <!-- İlgili Kişi / Kurum -->
+        <col style="width: 80px">  <!-- İl -->
+        <col style="width: 80px">  <!-- İlçe -->
+        <col style="width: 155px"> <!-- Paylaşım Tarihi -->
+        <col style="width: 120px"> <!-- Hassasiyet -->
+        <col style="width: 70px">  <!-- Link -->
+      </colgroup>
       <thead>
         <tr>
+          <th>Takip No</th>
           <th>Platform</th>
           <th>Konu</th>
           <th>İçerik Özeti</th>
@@ -64,6 +77,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let s of sayfaKayitlari">
+          <td class="takipno-cell">{{ s.takipNo || '—' }}</td>
           <td><span class="platform-badge">{{ s.platform || '—' }}</span></td>
           <td>{{ s.konu || '—' }}</td>
           <td class="ozet-cell">{{ s.icerikOzeti || '—' }}</td>
@@ -78,7 +92,7 @@
           </td>
         </tr>
         <tr *ngIf="sayfaKayitlari.length === 0">
-          <td colspan="9" class="bos-satir">Kayıt bulunamadı.</td>
+          <td colspan="10" class="bos-satir">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>

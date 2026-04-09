@@ -126,6 +126,9 @@ namespace EGM.Application.DTOs
 
         /// <summary>Gerçekleşme şekli FK Id'si.</summary>
         public Guid? GerceklesmeSekliId { get; set; }
+
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Servis tarafından atanır, gönderilmesi gerekmez.</summary>
+        public string? TakipNo { get; set; }
     }
 
     public class OlayResponseDto
@@ -160,6 +163,8 @@ namespace EGM.Application.DTOs
         public DateTime? OlayBitisTarihi { get; set; }
         public int? GerceklesenKatilimciSayisi { get; set; }
         public Guid? GerceklesmeSekliId { get; set; }
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Örnek: SO-2026040806-001</summary>
+        public string? TakipNo { get; set; }
     }
 
     // ── Sosyal Medya Olayi ───────────────────────────────────────────────
@@ -214,6 +219,8 @@ namespace EGM.Application.DTOs
         public Hassasiyet Hassasiyet { get; set; }
         public string CreatedByUserId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Örnek: SM-2026040834-001</summary>
+        public string? TakipNo { get; set; }
     }
 
     // ── Organizator ──────────────────────────────────────────────────────
@@ -384,6 +391,8 @@ namespace EGM.Application.DTOs
         public int SehitSayisi { get; set; }
         public int OluSayisi { get; set; }
         public int GozaltiSayisi { get; set; }
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Örnek: SC-2026040806-001</summary>
+        public string? TakipNo { get; set; }
     }
 
     // ── VIP Ziyaret ──────────────────────────────────────────────────────
@@ -443,6 +452,8 @@ namespace EGM.Application.DTOs
         public ZiyaretDurumu ZiyaretDurumu { get; set; }
         public string CreatedByUserId { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Örnek: VZ-2026040806-001</summary>
+        public string? TakipNo { get; set; }
     }
 
     // ── Yuruyu Rotasi ───────────────────────────────────────────────────

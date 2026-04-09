@@ -102,7 +102,8 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 0.84rem;
-  min-width: 1000px;
+  min-width: 1300px;
+  table-layout: fixed;
 }
 .tablo thead tr { background: #f4f7fb; }
 .tablo th {
@@ -115,17 +116,30 @@
   color: #5a667a;
   border-bottom: 1px solid #e8ecf0;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tablo td {
   padding: 10px 14px;
   border-bottom: 1px solid #f0f3f7;
   color: #2d3748;
   vertical-align: middle;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .tablo tbody tr:last-child td { border-bottom: none; }
 .tablo tbody tr:hover { background: #f9fbfd; }
 .ozet-cell { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tarih-cell { white-space: nowrap; }
+.takipno-cell {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.78rem;
+  color: #2563eb;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
 .bos-satir { text-align: center; color: #aab; padding: 24px; }
 
 .platform-badge {

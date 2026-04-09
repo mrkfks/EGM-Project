@@ -15,7 +15,7 @@ import {
   ChartConfiguration,
   registerables,
 } from 'chart.js';
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
 import { IL_LISTESI } from '../olay/olay';
 
 Chart.register(...registerables);
@@ -395,7 +395,24 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
     return ['Dusuk', 'Orta', 'Yuksek', 'Kritik'][h] ?? 'Bilinmiyor';
   }
 
-  excelExport(): void {
+  async excelExport(): Promise<void> {
+    const wb = new ExcelJS.Workbook();
+
+    // Olaylar sayfası
+    const ws = wb.addWorksheet('Olaylar');
+    ws.columns = [
+      { header: 'Tur', key: 'Tur' },
+      { header: 'Tarih', key: 'Tarih' },
+      { header: 'Baslangic Saati', key: 'Baslangic Saati' },
+      { header: 'Bitis Saati', key: 'Bitis Saati' },
+      { header: 'Il', key: 'Il' },
+      { header: 'Ilce', key: 'Ilce' },
+      { header: 'Hassasiyet', key: 'Hassasiyet' },
+      { header: 'Durum', key: 'Durum' },
+      { header: 'Katilimci Sayisi', key: 'Katilimci Sayisi' },
+      { header: 'Organizator', key: 'Organizator' },
+      { header: 'Konu', key: 'Konu' },
+    ];
     const satirlar = this.filtreliVeri.map(o => ({
       'Tur': o.olayTuru,
       'Tarih': o.tarih ? new Date(o.tarih).toLocaleDateString('tr-TR') : '',
@@ -409,22 +426,30 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
       'Organizator': o.organizatorAd ?? '',
       'Konu': o.konuAd ?? '',
     }));
+    ws.addRows(satirlar);
 
-    const ws = XLSX.utils.json_to_sheet(satirlar);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Olaylar');
-
-    const ozet = [
+    // Özet sayfası
+    const wsOzet = wb.addWorksheet('Ozet');
+    wsOzet.columns = [
+      { header: 'Metrik', key: 'Metrik' },
+      { header: 'Deger', key: 'Deger' },
+    ];
+    wsOzet.addRows([
       { 'Metrik': 'Toplam Olay', 'Deger': this.toplamOlay },
       { 'Metrik': 'Gerceklesti', 'Deger': this.gerceklesti },
       { 'Metrik': 'Planlanmis', 'Deger': this.planlandiSayisi },
       { 'Metrik': 'Iptal', 'Deger': this.iptal },
-    ];
-    const wsOzet = XLSX.utils.json_to_sheet(ozet);
-    XLSX.utils.book_append_sheet(wb, wsOzet, 'Ozet');
+    ]);
 
     const tarih = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(wb, `EGM_Istatistikler_${tarih}.xlsx`);
+    const buffer = await wb.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `EGM_Istatistikler_${tarih}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   grafigIndir(chartRef: ElementRef<HTMLCanvasElement>, dosyaAdi: string): void {

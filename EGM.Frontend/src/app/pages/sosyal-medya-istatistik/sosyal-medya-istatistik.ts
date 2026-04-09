@@ -21,6 +21,7 @@ interface SosyalMedyaItem {
   il?: string;
   ilce?: string;
   hassasiyet: number;
+  takipNo?: string;
 }
 
 @Component({

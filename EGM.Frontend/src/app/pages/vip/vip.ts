@@ -15,6 +15,7 @@ interface VIPZiyaretRecord {
   guvenlikSeviyesi: string;
   gozlemNoktalari: string;
   ziyaretDurumu: number;
+  takipNo?: string | null;
 }
 
 @Component({
@@ -45,6 +46,7 @@ export class VIP implements OnInit {
   gonderiliyor = false;
   hata = '';
   basari = '';
+  takipNo: string | null = null;
   yukleniyor = true;
 
   activeForm: 'planned' | 'completed' = 'planned';
@@ -236,6 +238,7 @@ export class VIP implements OnInit {
           next: (guncellenen) => {
             const idx = this.kayitlar.findIndex(k => k.id === this.selectedPlanId);
             if (idx !== -1) this.kayitlar[idx] = guncellenen;
+            this.takipNo = guncellenen.takipNo ?? null;
             this.basari = 'Ziyaret gerçekleşti olarak kaydedildi.';
             this.gonderiliyor = false;
             this.switchToPlannedForm();
@@ -252,6 +255,7 @@ export class VIP implements OnInit {
         .subscribe({
           next: (yeni) => {
             this.kayitlar.unshift(yeni);
+            this.takipNo = yeni.takipNo ?? null;
             this.formuSifirla();
             this.basari = 'Ziyaret kaydi basariyla olusturuldu.';
             this.gonderiliyor = false;

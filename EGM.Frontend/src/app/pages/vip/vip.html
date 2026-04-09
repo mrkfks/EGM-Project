@@ -1,5 +1,12 @@
 ﻿<div class="ekle-page">
 
+  <!-- Takip No Bandı -->
+  <div class="takip-no-banner takip-vz" *ngIf="takipNo">
+    <span class="takip-no-etiket">Takip No</span>
+    <span class="takip-no-deger">{{ takipNo }}</span>
+    <button type="button" class="takip-no-kapat" (click)="takipNo = null" title="Kapat">&#10005;</button>
+  </div>
+
   <!-- ── Sol Panel: Planlanan Ziyaretler ──────────────────────── -->
   <div class="side-panel">
     <h3 class="side-panel-title">
@@ -21,6 +28,10 @@
       <div class="side-card-baslik">{{ kayit.ziyaretEdenAdSoyad }}</div>
       <div class="side-card-meta">
         <span>{{ kayit.mekan }}</span>
+      </div>
+      <div class="side-card-takipno">
+        <span class="takipno-label">Takip No:</span>
+        <span class="takipno-value">{{ kayit.takipNo || '—' }}</span>
       </div>
       <div class="side-card-hint">Gerceklesti olarak isaretle &rarr;</div>
     </div>
@@ -202,6 +213,10 @@
       <div class="side-card-baslik">{{ kayit.ziyaretEdenAdSoyad }}</div>
       <div class="side-card-meta">
         <span>{{ kayit.mekan }}</span>
+      </div>
+      <div class="side-card-takipno">
+        <span class="takipno-label">Takip No:</span>
+        <span class="takipno-value">{{ kayit.takipNo || '—' }}</span>
       </div>
       <span class="side-card-status cancelled" *ngIf="kayit.ziyaretDurumu === 3">Iptal Edildi</span>
       <span class="side-card-status completed" *ngIf="kayit.ziyaretDurumu === 1 || kayit.ziyaretDurumu === 2">Tamamlandi</span>

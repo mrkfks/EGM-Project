@@ -4,15 +4,24 @@
   <div class="filtre-bar">
     <div class="filtre-group">
       <label>Olay Türü</label>
-      <input type="text" [(ngModel)]="filtreOlayTuru" placeholder="Olay türü..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreOlayTuru" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of olayTuruSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Organizatör</label>
-      <input type="text" [(ngModel)]="filtreOrganizator" placeholder="Organizatör..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreOrganizator" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of organizatorSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Konu</label>
-      <input type="text" [(ngModel)]="filtreKonu" placeholder="Konu..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreKonu" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of konuSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Hassasiyet</label>
@@ -35,19 +44,25 @@
     </div>
     <div class="filtre-group">
       <label>İl</label>
-      <input type="text" [(ngModel)]="filtreIl" placeholder="İl..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIl" (change)="filtreIlce = ''; filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of ilSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>İlçe</label>
-      <input type="text" [(ngModel)]="filtreIlce" placeholder="İlçe..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIlce" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of ilceSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Mekan</label>
       <input type="text" [(ngModel)]="filtreMekan" placeholder="Mekan..." (input)="filtrele()" />
     </div>
     <div class="filtre-group">
-      <label>Evrak No</label>
-      <input type="text" [(ngModel)]="filtreEvrakNo" placeholder="Evrak no..." (input)="filtrele()" />
+      <label>Takip No</label>
+      <input type="text" [(ngModel)]="filtreTakipNo" placeholder="Takip no..." (input)="filtrele()" />
     </div>
     <div class="filtre-group">
       <label>Başlangıç Tarihi</label>
@@ -65,8 +80,25 @@
   <!-- ── Tablo ────────────────────────────────────────────── -->
   <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
     <table class="tablo">
+      <colgroup>
+        <col style="width: 150px"> <!-- Takip No -->
+        <col style="width: 110px"> <!-- Olay Türü -->
+        <col style="width: 160px"> <!-- Organizatör -->
+        <col style="width: 130px"> <!-- Konu -->
+        <col style="width: 135px"> <!-- İl / İlçe -->
+        <col style="width: 145px"> <!-- Mekan -->
+        <col style="width: 100px"> <!-- Tarih -->
+        <col style="width: 85px">  <!-- Saat -->
+        <col style="width: 100px"> <!-- Hassasiyet -->
+        <col style="width: 120px"> <!-- Durum -->
+        <col style="width: 85px">  <!-- Katılımcı -->
+        <col style="width: 75px">  <!-- Gözaltı -->
+        <col style="width: 85px">  <!-- Şehit/Ölü -->
+        <col style="width: 120px"> <!-- Evrak No -->
+      </colgroup>
       <thead>
         <tr>
+          <th>Takip No</th>
           <th>Olay Türü</th>
           <th>Organizatör</th>
           <th>Konu</th>
@@ -84,6 +116,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let o of sayfaKayitlari">
+          <td class="takipno-cell">{{ o.takipNo || '—' }}</td>
           <td>{{ o.olayTuru || '—' }}</td>
           <td>{{ o.organizatorAd || '—' }}</td>
           <td>{{ o.konuAd || '—' }}</td>
@@ -103,7 +136,7 @@
           <td class="kisa-cell">{{ o.evrakNumarasi || '—' }}</td>
         </tr>
         <tr *ngIf="sayfaKayitlari.length === 0">
-          <td colspan="13" class="bos-satir">Kayıt bulunamadı.</td>
+          <td colspan="14" class="bos-satir">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>

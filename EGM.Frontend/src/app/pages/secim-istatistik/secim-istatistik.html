@@ -50,8 +50,26 @@
   <!-- ── Tablo ─────────────────────────────────────────────── -->
   <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
     <table class="tablo">
+      <colgroup>
+        <col style="width: 150px"> <!-- Takip No -->
+        <col style="width: 120px"> <!-- Müşahit -->
+        <col style="width: 80px">  <!-- İl -->
+        <col style="width: 90px">  <!-- İlçe -->
+        <col style="width: 100px"> <!-- Mahalle -->
+        <col style="width: 100px"> <!-- Okul -->
+        <col style="width: 85px">  <!-- Sandık No -->
+        <col style="width: 170px"> <!-- Kategori -->
+        <col style="width: 100px"> <!-- Tarih -->
+        <col style="width: 80px">  <!-- Saat -->
+        <col style="width: 120px"> <!-- Konu -->
+        <col style="width: 80px">  <!-- Katılımcı -->
+        <col style="width: 75px">  <!-- Gözaltı -->
+        <col style="width: 65px">  <!-- Ölü -->
+        <col style="width: 65px">  <!-- Şehit -->
+      </colgroup>
       <thead>
         <tr>
+          <th>Takip No</th>
           <th>Müşahit</th>
           <th>İl</th>
           <th>İlçe</th>
@@ -70,6 +88,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let s of sayfaKayitlari">
+          <td class="takipno-cell">{{ s.takipNo || '—' }}</td>
           <td>{{ s.musahitAdi || '—' }}</td>
           <td>{{ s.il || '—' }}</td>
           <td>{{ s.ilce || '—' }}</td>
@@ -86,7 +105,7 @@
           <td class="sayi">{{ s.sehitSayisi ?? '—' }}</td>
         </tr>
         <tr *ngIf="sayfaKayitlari.length === 0">
-          <td colspan="14" class="bos-satir">Kayıt bulunamadı.</td>
+          <td colspan="15" class="bos-satir">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>

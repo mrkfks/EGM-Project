@@ -83,7 +83,8 @@ namespace EGM.API.Controllers
             OlaySaati = s.OlaySaati, Aciklama = s.Aciklama, KanitDosyasi = s.KanitDosyasi,
             Tarih = s.Tarih, CreatedAt = s.CreatedAt, CreatedByUserId = s.CreatedByUserId,
             KatilimciSayisi = s.KatilimciSayisi, SehitSayisi = s.SehitSayisi,
-            OluSayisi = s.OluSayisi, GozaltiSayisi = s.GozaltiSayisi
+            OluSayisi = s.OluSayisi, GozaltiSayisi = s.GozaltiSayisi,
+            TakipNo = s.TakipNo
         };
     }
 }

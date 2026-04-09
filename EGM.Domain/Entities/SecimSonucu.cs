@@ -20,5 +20,8 @@ namespace EGM.Domain.Entities
         public int SehitSayisi { get; set; }
         public int OluSayisi { get; set; }
         public int GozaltiSayisi { get; set; }
+
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Format: SC-YYYYMMDDPP-SSS</summary>
+        public string? TakipNo { get; set; }
     }
 }

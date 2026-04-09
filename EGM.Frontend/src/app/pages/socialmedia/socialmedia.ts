@@ -32,6 +32,7 @@ export class Socialmedia implements OnInit {
   kaydediliyor = false;
   basariMesaji = '';
   hataMesaji = '';
+  takipNo: string | null = null;
 
   konular: Konu[] = [];
   konularYukleniyor = false;
@@ -173,9 +174,10 @@ export class Socialmedia implements OnInit {
     };
 
     this.http
-      .post(`${this.apiBase}/sosyalmedyaolay`, payload, { headers })
+      .post<any>(`${this.apiBase}/sosyalmedyaolay`, payload, { headers })
       .subscribe({
-        next: () => {
+        next: (res) => {
+          this.takipNo = res?.takipNo ?? null;
           this.basariMesaji = 'Sosyal medya olayi basariyla kaydedildi.';
           this.kaydediliyor = false;
           this.formSifirla();

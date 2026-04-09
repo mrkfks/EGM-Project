@@ -27,6 +27,7 @@
       <thead>
         <tr>
           <th>Sicil</th>
+          <th>Takip No</th>
           <th>Olay Türü</th>
           <th>İl</th>
           <th>Tarih</th>
@@ -37,6 +38,7 @@
       <tbody>
         <tr *ngFor="let r of sokakOlaylar" class="vy-satir" (click)="satirSec(r)">
           <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td class="vy-takipno">{{ r.takipNo || '—' }}</td>
           <td>{{ r.olayTuru || '-' }}</td>
           <td>{{ r.il || '-' }}</td>
           <td class="vy-tarih">{{ tarihFormat(r.tarih) }}</td>
@@ -60,6 +62,7 @@
       <thead>
         <tr>
           <th>Sicil</th>
+          <th>Takip No</th>
           <th>Platform</th>
           <th>Konu</th>
           <th>İl</th>
@@ -71,6 +74,7 @@
       <tbody>
         <tr *ngFor="let r of sosyalOlaylar" class="vy-satir" (click)="satirSec(r)">
           <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td class="vy-takipno">{{ r.takipNo || '—' }}</td>
           <td>{{ r.platform || '-' }}</td>
           <td class="vy-elips" title="{{ r.konu }}">{{ r.konu || '-' }}</td>
           <td>{{ r.il || '-' }}</td>
@@ -83,7 +87,7 @@
           <td class="vy-tarih">{{ tarihFormat(r.createdAt) }}</td>
         </tr>
         <tr *ngIf="sosyalOlaylar.length === 0">
-          <td colspan="7" class="vy-bos">Kayıt yok.</td>
+          <td colspan="8" class="vy-bos">Kayıt yok.</td>
         </tr>
       </tbody>
     </table>
@@ -95,6 +99,7 @@
       <thead>
         <tr>
           <th>Sicil</th>
+          <th>Takip No</th>
           <th>Müşahit Adı</th>
           <th>İl / İlçe</th>
           <th>Okul / Sandık</th>
@@ -106,6 +111,7 @@
       <tbody>
         <tr *ngFor="let r of secimOlaylar" class="vy-satir" (click)="satirSec(r)">
           <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td class="vy-takipno">{{ r.takipNo || '—' }}</td>
           <td>{{ r.musahitAdi || '-' }}</td>
           <td>{{ r.il || '-' }}{{ r.ilce ? ' / ' + r.ilce : '' }}</td>
           <td>{{ r.okul || '-' }} – {{ r.sandikNo }}</td>
@@ -114,7 +120,7 @@
           <td class="vy-tarih">{{ tarihFormat(r.createdAt) }}</td>
         </tr>
         <tr *ngIf="secimOlaylar.length === 0">
-          <td colspan="7" class="vy-bos">Kayıt yok.</td>
+          <td colspan="8" class="vy-bos">Kayıt yok.</td>
         </tr>
       </tbody>
     </table>
@@ -126,6 +132,7 @@
       <thead>
         <tr>
           <th>Sicil</th>
+          <th>Takip No</th>
           <th>Ad Soyad</th>
           <th>Unvan</th>
           <th>İl / Mekan</th>
@@ -137,6 +144,7 @@
       <tbody>
         <tr *ngFor="let r of vipOlaylar" class="vy-satir" (click)="satirSec(r)">
           <td><span class="vy-sicil">{{ r.createdByUserId || '-' }}</span></td>
+          <td class="vy-takipno">{{ r.takipNo || '—' }}</td>
           <td>{{ r.ziyaretEdenAdSoyad || '-' }}</td>
           <td>{{ r.unvan || '-' }}</td>
           <td>{{ r.il || '-' }}{{ r.mekan ? ' · ' + r.mekan : '' }}</td>
@@ -149,7 +157,7 @@
           <td>{{ VIP_DURUMLAR[r.ziyaretDurumu] || '-' }}</td>
         </tr>
         <tr *ngIf="vipOlaylar.length === 0">
-          <td colspan="7" class="vy-bos">Kayıt yok.</td>
+          <td colspan="8" class="vy-bos">Kayıt yok.</td>
         </tr>
       </tbody>
     </table>
@@ -174,6 +182,10 @@
 
       <!-- ── SOKAK FORM ── -->
       <ng-container *ngIf="aktifSekme==='sokak'">
+        <div class="vy-takipno-bilgi" *ngIf="secilenKayit?.takipNo">
+          <span class="vy-takipno-etiket">Takip No</span>
+          <span class="vy-takipno-deger">{{ secilenKayit.takipNo }}</span>
+        </div>
         <div class="vy-form-grid">
           <div class="vy-form-alan">
             <label>İl</label>
@@ -234,6 +246,10 @@
 
       <!-- ── SOSYAL MEDYA FORM ── -->
       <ng-container *ngIf="aktifSekme==='sosyal'">
+        <div class="vy-takipno-bilgi" *ngIf="secilenKayit?.takipNo">
+          <span class="vy-takipno-etiket">Takip No</span>
+          <span class="vy-takipno-deger">{{ secilenKayit.takipNo }}</span>
+        </div>
         <div class="vy-form-grid">
           <div class="vy-form-alan">
             <label>Platform</label>
@@ -284,6 +300,10 @@
 
       <!-- ── SEÇİM FORM ── -->
       <ng-container *ngIf="aktifSekme==='secim'">
+        <div class="vy-takipno-bilgi" *ngIf="secilenKayit?.takipNo">
+          <span class="vy-takipno-etiket">Takip No</span>
+          <span class="vy-takipno-deger">{{ secilenKayit?.takipNo }}</span>
+        </div>
         <div class="vy-form-grid">
           <div class="vy-form-alan">
             <label>Müşahit Adı</label>
@@ -356,6 +376,10 @@
 
       <!-- ── VIP FORM ── -->
       <ng-container *ngIf="aktifSekme==='vip'">
+        <div class="vy-takipno-bilgi" *ngIf="secilenKayit?.takipNo">
+          <span class="vy-takipno-etiket">Takip No</span>
+          <span class="vy-takipno-deger">{{ secilenKayit.takipNo }}</span>
+        </div>
         <div class="vy-form-grid">
           <div class="vy-form-alan">
             <label>Ad Soyad</label>

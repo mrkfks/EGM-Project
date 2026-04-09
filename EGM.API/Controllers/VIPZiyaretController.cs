@@ -69,7 +69,9 @@ namespace EGM.API.Controllers
                 GozlemNoktalari = dto.GozlemNoktalari,
                 ZiyaretDurumu = dto.ZiyaretDurumu
             };
-            return await _service.UpdateAsync(id, updated) ? NoContent() : NotFound();
+            var result = await _service.UpdateAsync(id, updated);
+            if (result == null) return NotFound();
+            return Ok(MapToResponse(result));
         }
 
         [HttpDelete("{id}")]
@@ -84,7 +86,8 @@ namespace EGM.API.Controllers
             Il = v.Il, Mekan = v.Mekan,
             Hassasiyet = v.Hassasiyet, GuvenlikSeviyesi = v.GuvenlikSeviyesi,
             GozlemNoktalari = v.GozlemNoktalari, ZiyaretDurumu = v.ZiyaretDurumu,
-            CreatedByUserId = v.CreatedByUserId, CreatedAt = v.CreatedAt
+            CreatedByUserId = v.CreatedByUserId, CreatedAt = v.CreatedAt,
+            TakipNo = v.TakipNo
         };
     }
 }

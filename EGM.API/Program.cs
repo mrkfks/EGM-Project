@@ -208,8 +208,12 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
+    {
         options.JsonSerializerOptions.ReferenceHandler =
-            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
+            System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.PropertyNamingPolicy =
+            System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
 
 // Model validation hatalarını loglat (geliştirme aşaması için)
 builder.Services.Configure<Microsoft.AspNetCore.Mvc.ApiBehaviorOptions>(options =>

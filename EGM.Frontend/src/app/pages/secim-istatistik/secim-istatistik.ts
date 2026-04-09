@@ -23,6 +23,7 @@ interface SandikOlayItem {
   sehitSayisi?: number;
   oluSayisi?: number;
   gozaltiSayisi?: number;
+  takipNo?: string;
 }
 
 @Component({

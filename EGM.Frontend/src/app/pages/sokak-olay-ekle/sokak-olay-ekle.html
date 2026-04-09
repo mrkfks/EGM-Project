@@ -23,11 +23,22 @@
         <span>{{ plan.tarih | date:'dd.MM.yyyy' }}</span>
         <span *ngIf="plan.katilimciSayisi">· {{ plan.katilimciSayisi | number }} kişi</span>
       </div>
+      <div class="side-card-takipno">
+        <span class="takipno-label">Takip No:</span>
+        <span class="takipno-value">{{ plan.takipNo || '—' }}</span>
+      </div>
       <div class="side-card-hint">Gerçekleşti olarak işaretle →</div>
     </div>
   </div>
 
   <div class="content" [formGroup]="form">
+    <!-- Takip No Bandı -->
+    <div class="takip-no-banner takip-so" *ngIf="takipNo">
+      <span class="takip-no-etiket">Takip No</span>
+      <span class="takip-no-deger">{{ takipNo }}</span>
+      <button type="button" class="takip-no-kapat" (click)="takipNo = null" title="Kapat">&#10005;</button>
+    </div>
+
     <!-- Hangi planın doldurulduğunu gösteren bilgi bandı -->
     <div class="selected-plan-banner" *ngIf="selectedPlanId">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -53,6 +64,12 @@
     <!-- Temel Bilgiler -->
     <fieldset class="form-section">
       <legend>Temel Bilgiler</legend>
+
+      <div class="form-takipno-satir" *ngIf="activeForm === 'completed' && takipNo">
+        <span class="form-takipno-etiket">Takip No</span>
+        <span class="form-takipno-deger">{{ takipNo }}</span>
+      </div>
+
       <div class="form-grid">
 
         <div class="form-field">
@@ -100,8 +117,10 @@
 
         <div class="form-field">
           <label>Başlangıç Tarihi &amp; Saati <span class="req">*</span></label>
-          <input type="datetime-local" formControlName="tarih" [class.is-invalid]="fieldError('tarih')">
-          <div class="field-error" *ngIf="fieldError('tarih')">Tarih zorunludur.</div>
+          <input type="datetime-local" formControlName="tarih" [class.is-invalid]="fieldError('tarih')"
+                 [min]="activeForm === 'planned' ? minTarih : ''" [attr.min]="activeForm === 'planned' ? minTarih : null">
+          <div class="field-error" *ngIf="form.get('tarih')?.errors?.['required'] && form.get('tarih')?.touched">Tarih zorunludur.</div>
+          <div class="field-error" *ngIf="form.get('tarih')?.errors?.['gecmisTarih']">Planlanan olay geçmiş bir tarihe girilemez.</div>
         </div>
 
         <!-- Gerçekleşenler formuna özel: Bitiş Tarihi & Saati -->
@@ -175,6 +194,10 @@
           <label>Gözaltı Sayısı</label>
           <input type="number" formControlName="gozaltiSayisi" min="0" placeholder="0">
         </div>
+        <div class="form-field" *ngIf="activeForm === 'completed'">
+          <label>Evrak Numarası</label>
+          <input type="text" formControlName="evrakNumarasi" placeholder="Örn: 2026/1234" autocomplete="off">
+        </div>
         <div class="form-field span-2">
           <label>Açıklama</label>
           <textarea formControlName="aciklama" rows="3"
@@ -219,6 +242,10 @@
       <div class="side-card-meta">
         <span>{{ event.tarih | date:'dd.MM.yyyy' }}</span>
         <span *ngIf="event.katilimciSayisi">· {{ event.katilimciSayisi | number }} kişi</span>
+      </div>
+      <div class="side-card-takipno">
+        <span class="takipno-label">Takip No:</span>
+        <span class="takipno-value">{{ event.takipNo || '—' }}</span>
       </div>
       <span class="side-card-status cancelled" *ngIf="event.durum === 2">İptal Edildi</span>
       <span class="side-card-status completed" *ngIf="event.durum === 1">Gerçekleşti</span>

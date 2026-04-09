@@ -136,6 +136,52 @@
   transition: opacity 0.15s;
 }
 
+/* ── Takip No in side cards ── */
+.side-card-takipno {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  font-size: 0.72rem;
+}
+.takipno-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+.takipno-value {
+  font-family: "Consolas", "Courier New", monospace;
+  color: #2563eb;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* ── Takip No in form ── */
+.form-takipno-satir {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 7px 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+.form-takipno-etiket {
+  color: #3b82f6;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.form-takipno-deger {
+  font-family: "Consolas", "Courier New", monospace;
+  color: #1d4ed8;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+}
+
 .side-card {
   cursor: pointer;
 }
@@ -441,12 +487,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  padding-top: 4px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 18px 24px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  border: 1px solid #e8ecf0;
+  padding: 16px 0 4px 0;
 }
 
 .btn-ghost {

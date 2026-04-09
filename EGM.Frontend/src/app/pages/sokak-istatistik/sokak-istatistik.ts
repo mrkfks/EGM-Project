@@ -31,6 +31,7 @@ interface OlayItem {
   sehitOluSayisi?: number;
   evrakNumarasi?: string;
   aciklama?: string;
+  takipNo?: string;
 }
 
 @Component({
@@ -60,6 +61,7 @@ export class SokakIstatistik implements OnInit {
   filtreTarih1       = '';
   filtreTarih2       = '';
   filtreEvrakNo      = '';
+  filtreTakipNo      = '';
 
   // Sayfalama
   readonly sayfaBoyutu = 20;
@@ -95,16 +97,16 @@ export class SokakIstatistik implements OnInit {
     this.mevcutSayfa = 1;
     let s = [...this.tumKayitlar];
 
-    if (this.filtreOlayTuru.trim())
-      s = s.filter(o => o.olayTuru?.toLowerCase().includes(this.filtreOlayTuru.trim().toLowerCase()));
-    if (this.filtreOrganizator.trim())
-      s = s.filter(o => o.organizatorAd?.toLowerCase().includes(this.filtreOrganizator.trim().toLowerCase()));
-    if (this.filtreKonu.trim())
-      s = s.filter(o => o.konuAd?.toLowerCase().includes(this.filtreKonu.trim().toLowerCase()));
-    if (this.filtreIl.trim())
-      s = s.filter(o => o.il?.toLowerCase().includes(this.filtreIl.trim().toLowerCase()));
-    if (this.filtreIlce.trim())
-      s = s.filter(o => o.ilce?.toLowerCase().includes(this.filtreIlce.trim().toLowerCase()));
+    if (this.filtreOlayTuru)
+      s = s.filter(o => o.olayTuru === this.filtreOlayTuru);
+    if (this.filtreOrganizator)
+      s = s.filter(o => o.organizatorAd === this.filtreOrganizator);
+    if (this.filtreKonu)
+      s = s.filter(o => o.konuAd === this.filtreKonu);
+    if (this.filtreIl)
+      s = s.filter(o => o.il === this.filtreIl);
+    if (this.filtreIlce)
+      s = s.filter(o => o.ilce === this.filtreIlce);
     if (this.filtreMekan.trim())
       s = s.filter(o => o.mekan?.toLowerCase().includes(this.filtreMekan.trim().toLowerCase()));
     if (this.filtreHassasiyet !== '')
@@ -119,6 +121,8 @@ export class SokakIstatistik implements OnInit {
     }
     if (this.filtreEvrakNo.trim())
       s = s.filter(o => o.evrakNumarasi?.toLowerCase().includes(this.filtreEvrakNo.trim().toLowerCase()));
+    if (this.filtreTakipNo.trim())
+      s = s.filter(o => o.takipNo?.toLowerCase().includes(this.filtreTakipNo.trim().toLowerCase()));
 
     this.filtreli = s;
   }
@@ -128,7 +132,25 @@ export class SokakIstatistik implements OnInit {
     this.filtreIl = this.filtreIlce = this.filtreMekan = this.filtreHassasiyet = '';
     this.filtreDurum = this.filtreTarih1 = this.filtreTarih2 = '';
     this.filtreEvrakNo = '';
+    this.filtreTakipNo = '';
     this.filtrele();
+  }
+
+  get olayTuruSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.olayTuru ?? '').filter(v => v))].sort();
+  }
+  get organizatorSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.organizatorAd ?? '').filter(v => v))].sort();
+  }
+  get konuSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.konuAd ?? '').filter(v => v))].sort();
+  }
+  get ilSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.il ?? '').filter(v => v))].sort();
+  }
+  get ilceSecenekler(): string[] {
+    const base = this.filtreIl ? this.tumKayitlar.filter(o => o.il === this.filtreIl) : this.tumKayitlar;
+    return [...new Set(base.map(o => o.ilce ?? '').filter(v => v))].sort();
   }
 
   get toplamSayfa(): number {

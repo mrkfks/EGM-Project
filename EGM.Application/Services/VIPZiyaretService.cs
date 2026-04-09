@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EGM.Application.Helpers;
 using EGM.Domain.Entities;
 using EGM.Domain.Enums;
 using EGM.Domain.Interfaces;
@@ -25,12 +26,22 @@ namespace EGM.Application.Services
             => await _vipRepository.GetByIdAsync(id);
 
         public async Task<VIPZiyaret> CreateAsync(VIPZiyaret ziyaret)
-            => await _vipRepository.AddAsync(ziyaret);
+        {
+            // TakipNo üret: VZ-YYYYMMDDPP-SSS
+            var tarih        = ziyaret.BaslangicTarihi.Date;
+            var tarihBitis   = tarih.AddDays(1);
+            var ilAdi        = ziyaret.Il ?? string.Empty;
+            var plakaKodu    = IlPlakaHelper.GetPlaka(ilAdi);
+            var mevcutSayisi = (await _vipRepository.FindAsync(
+                v => v.BaslangicTarihi >= tarih && v.BaslangicTarihi < tarihBitis && v.Il == ilAdi)).Count;
+            ziyaret.TakipNo = TakipNoHelper.Generate(TakipNoHelper.VipZiyaret, ziyaret.BaslangicTarihi, plakaKodu, mevcutSayisi + 1);
+            return await _vipRepository.AddAsync(ziyaret);
+        }
 
-        public async Task<bool> UpdateAsync(Guid id, VIPZiyaret updated)
+        public async Task<VIPZiyaret?> UpdateAsync(Guid id, VIPZiyaret updated)
         {
             var existing = await _vipRepository.GetByIdAsync(id);
-            if (existing == null) return false;
+            if (existing == null) return null;
 
             existing.ZiyaretEdenAdSoyad = updated.ZiyaretEdenAdSoyad;
             existing.Unvan = updated.Unvan;
@@ -44,7 +55,7 @@ namespace EGM.Application.Services
             existing.ZiyaretDurumu = updated.ZiyaretDurumu;
 
             await _vipRepository.UpdateAsync(existing);
-            return true;
+            return existing;
         }
 
         public async Task<bool> DeleteAsync(Guid id)

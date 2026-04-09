@@ -213,7 +213,8 @@ namespace EGM.API.Controllers
             CityId = o.CityId,
             OlayBitisTarihi = o.OlayBitisTarihi,
             GerceklesenKatilimciSayisi = o.GerceklesenKatilimciSayisi,
-            GerceklesmeSekliId = o.GerceklesmeSekliId
+            GerceklesmeSekliId = o.GerceklesmeSekliId,
+            TakipNo = o.TakipNo
         };
     }
 }

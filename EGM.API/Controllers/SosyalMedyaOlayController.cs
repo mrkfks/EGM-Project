@@ -91,7 +91,8 @@ namespace EGM.API.Controllers
             Il = s.Il, Ilce = s.Ilce,
             EkranGoruntusu = s.EkranGoruntusu,
             Hassasiyet = s.Hassasiyet,
-            CreatedByUserId = s.CreatedByUserId, CreatedAt = s.CreatedAt
+            CreatedByUserId = s.CreatedByUserId, CreatedAt = s.CreatedAt,
+            TakipNo = s.TakipNo
         };
     }
 }

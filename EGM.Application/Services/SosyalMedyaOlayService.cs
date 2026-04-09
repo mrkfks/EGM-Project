@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EGM.Application.Helpers;
 using EGM.Domain.Entities;
 using EGM.Domain.Enums;
 using EGM.Domain.Interfaces;
@@ -43,7 +44,17 @@ namespace EGM.Application.Services
 
         // Yeni kayıt ekle
         public async Task<SosyalMedyaOlay> CreateAsync(SosyalMedyaOlay kayit)
-            => await _sosyalMedyaRepository.AddAsync(kayit);
+        {
+            // TakipNo üret: SM-YYYYMMDDPP-SSS
+            var tarih          = kayit.PaylasimTarihi.Date;
+            var tarihBitis     = tarih.AddDays(1);
+            var ilAdi          = kayit.Il ?? string.Empty;
+            var plakaKodu      = IlPlakaHelper.GetPlaka(ilAdi);
+            var mevcutSayisi   = (await _sosyalMedyaRepository.FindAsync(
+                s => s.PaylasimTarihi >= tarih && s.PaylasimTarihi < tarihBitis && s.Il == ilAdi)).Count;
+            kayit.TakipNo = TakipNoHelper.Generate(TakipNoHelper.SosyalMedya, kayit.PaylasimTarihi, plakaKodu, mevcutSayisi + 1);
+            return await _sosyalMedyaRepository.AddAsync(kayit);
+        }
 
         // Güncelle
         public async Task<bool> UpdateAsync(Guid id, SosyalMedyaOlay updated)

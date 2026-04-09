@@ -51,6 +51,9 @@ namespace EGM.Domain.Entities
 
         public ICollection<YuruyusRota> YuruyusRotasi { get; set; } = new List<YuruyusRota>();
         public ICollection<SosyalMedyaOlay> SosyalMedyaOlaylar { get; set; } = new List<SosyalMedyaOlay>();
+
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Format: SO-YYYYMMDDPP-SSS</summary>
+        public string? TakipNo { get; set; }
     }
 }
 

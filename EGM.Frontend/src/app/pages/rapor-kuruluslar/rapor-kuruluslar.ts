@@ -51,7 +51,7 @@ export class RaporKuruluslar implements OnInit {
 
   orgLogolari: Record<string, string> = {};
 
-  readonly turler = [
+  private readonly turSirasi = [
     'Konfederasyon', 'Sendika', 'Siyasi Parti', 'Dernek', 'Vakif', 'STK', 'Kamu Kurumu', 'Diger',
   ];
 
@@ -197,6 +197,13 @@ export class RaporKuruluslar implements OnInit {
 
   turSayisi(tur: string): number {
     return this.tumKuruluslar.filter(k => k.tur === tur).length;
+  }
+
+  get turler(): string[] {
+    const mevcutlar = new Set(this.tumKuruluslar.map(k => k.tur).filter(Boolean));
+    const sonuc = this.turSirasi.filter(t => mevcutlar.has(t));
+    mevcutlar.forEach(t => { if (!this.turSirasi.includes(t)) sonuc.push(t); });
+    return sonuc;
   }
 
   get toplamAltKurulusSayisi(): number {

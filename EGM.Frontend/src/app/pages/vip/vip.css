@@ -250,6 +250,27 @@
   opacity: 1;
 }
 
+/* ── Takip No in side cards ─────────────────────────────────────── */
+.side-card-takipno {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  font-size: 0.72rem;
+}
+
+.takipno-label {
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.takipno-value {
+  font-family: "Consolas", "Courier New", monospace;
+  color: #2563eb;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 /* ── Danger butonu ──────────────────────────────────────────── */
 .btn-danger {
   background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);

@@ -51,7 +51,7 @@ namespace EGM.Application.Services
                     Il            = o.Il ?? string.Empty,
                     EylemEtkinlik = o.OlayTuru ?? string.Empty,
                     Saat          = o.BaslangicSaati.HasValue
-                                        ? o.BaslangicSaati.Value.ToString(@"HH\:mm")
+                                        ? o.BaslangicSaati.Value.ToString(@"hh\:mm")
                                         : string.Empty,
                     OrganizeEden  = o.Organizator?.Ad ?? string.Empty,
                     Aciklama      = o.Aciklama ?? string.Empty,
@@ -69,7 +69,7 @@ namespace EGM.Application.Services
                     Yer           = o.Mekan ?? string.Empty,
                     EylemEtkinlik = o.OlayTuru ?? string.Empty,
                     Saat          = o.BaslangicSaati.HasValue
-                                        ? o.BaslangicSaati.Value.ToString(@"HH\:mm")
+                                        ? o.BaslangicSaati.Value.ToString(@"hh\:mm")
                                         : string.Empty,
                     OrganizeEden  = o.Organizator?.Ad ?? string.Empty,
                     Aciklama      = o.Aciklama ?? string.Empty

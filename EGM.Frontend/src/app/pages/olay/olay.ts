@@ -71,6 +71,7 @@ export interface OlayRow {
   cityId?: number;
   organizatorAd?: string;
   konuAd?: string;
+  takipNo?: string;
 }
 
 export interface OrganizatorOption {
@@ -213,6 +214,7 @@ export class Olay implements OnInit {
           cityId:          o.cityId,
           organizatorAd:   o.organizatorAd ?? '',
           konuAd:          o.konuAd ?? '',
+          takipNo:         o.takipNo ?? '',
         }));
         this.applyClientFilters();
         this.isLoading = false;

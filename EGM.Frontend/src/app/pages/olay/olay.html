@@ -118,9 +118,25 @@
       <span>Yükleniyor…</span>
     </div>
     <table class="data-table" *ngIf="!isLoading">
+      <colgroup>
+        <col style="width: 52px">
+        <col style="width: 130px">
+        <col style="width: 130px">
+        <col style="width: 160px">
+        <col style="width: 150px">
+        <col style="width: 130px">
+        <col style="width: 140px">
+        <col style="width: 140px">
+        <col style="width: 90px">
+        <col style="width: 80px">
+        <col style="width: 90px">
+        <col style="width: 100px">
+        <col style="width: 120px">
+      </colgroup>
       <thead>
         <tr>
           <th class="col-sn">S.N.</th>
+          <th>Takip No</th>
           <th>Tür</th>
           <th>Konu</th>
           <th>Organize Eden</th>
@@ -137,6 +153,7 @@
       <tbody>
         <tr *ngFor="let row of rows; let i = index; trackBy: trackById">
           <td class="col-sn td-center">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+          <td class="td-takipno">{{ row.takipNo || '—' }}</td>
           <td>{{ row.olayTuru ?? '—' }}</td>
           <td>{{ row.konuAd || '—' }}</td>
           <td>{{ row.organizatorAd || '—' }}</td>
@@ -166,7 +183,7 @@
           <td class="td-evrak">{{ row.evrakNumarasi || '—' }}</td>
         </tr>
         <tr *ngIf="rows.length === 0">
-          <td colspan="12" class="empty-row">Kayıt bulunamadı.</td>
+          <td colspan="13" class="empty-row">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>

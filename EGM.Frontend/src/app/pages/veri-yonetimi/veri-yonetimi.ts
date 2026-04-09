@@ -16,6 +16,7 @@ interface SokakOlay {
   aciklama?: string; mekan?: string; evrakNumarasi?: string;
   gozaltiSayisi?: number; sehitOluSayisi?: number;
   createdByUserId: string; cityId?: number;
+  takipNo?: string;
 }
 
 interface SosyalOlay {
@@ -23,6 +24,7 @@ interface SosyalOlay {
   paylasimTarihi: string; icerikOzeti?: string; ilgiliKisiKurum?: string;
   il?: string; ilce?: string; hassasiyet: number;
   createdByUserId: string; createdAt: string;
+  takipNo?: string;
 }
 
 interface SecimOlay {
@@ -31,6 +33,7 @@ interface SecimOlay {
   olayKategorisi?: string; olaySaati: string; aciklama?: string;
   tarih: string; createdAt: string; createdByUserId: string;
   katilimciSayisi: number; sehitSayisi: number; oluSayisi: number; gozaltiSayisi: number;
+  takipNo?: string;
 }
 
 interface VipOlay {
@@ -38,6 +41,7 @@ interface VipOlay {
   baslangicTarihi: string; bitisTarihi: string; il?: string; mekan?: string;
   hassasiyet: number; guvenlikSeviyesi?: string; gozlemNoktalari?: string;
   ziyaretDurumu: number; createdByUserId: string; createdAt: string;
+  takipNo?: string;
 }
 
 type AktifSekme = 'sokak' | 'sosyal' | 'secim' | 'vip';

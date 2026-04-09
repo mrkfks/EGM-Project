@@ -28,6 +28,7 @@ interface VIPZiyaretItem {
   guvenlikSeviyesi: number;
   gozlemNoktalari?: string;
   ziyaretDurumu: number;
+  takipNo?: string;
 }
 
 @Component({

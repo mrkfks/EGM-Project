@@ -41,8 +41,21 @@
   <!-- ── Tablo ─────────────────────────────────────────────── -->
   <div class="tablo-sarici" *ngIf="!yukleniyor && !hata">
     <table class="tablo">
+      <colgroup>
+        <col style="width: 150px"> <!-- Takip No -->
+        <col style="width: 150px"> <!-- Ad Soyad -->
+        <col style="width: 120px"> <!-- Ünvan -->
+        <col style="width: 90px">  <!-- İl -->
+        <col style="width: 130px"> <!-- Mekan -->
+        <col style="width: 120px"> <!-- Başlangıç -->
+        <col style="width: 120px"> <!-- Bitiş -->
+        <col style="width: 120px"> <!-- Hassasiyet -->
+        <col style="width: 170px"> <!-- Güvenlik Seviyesi -->
+        <col style="width: 110px"> <!-- Durum -->
+      </colgroup>
       <thead>
         <tr>
+          <th>Takip No</th>
           <th>Ad Soyad</th>
           <th>Ünvan</th>
           <th>İl</th>
@@ -56,6 +69,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let v of sayfaKayitlari">
+          <td class="takipno-cell">{{ v.takipNo || '—' }}</td>
           <td class="ad-cell">{{ v.ziyaretEdenAdSoyad || '—' }}</td>
           <td>{{ v.unvan || '—' }}</td>
           <td>{{ v.il || '—' }}</td>
@@ -67,7 +81,7 @@
           <td><span class="badge" [class]="durumClass(v.ziyaretDurumu)">{{ durumLabel[v.ziyaretDurumu] }}</span></td>
         </tr>
         <tr *ngIf="sayfaKayitlari.length === 0">
-          <td colspan="9" class="bos-satir">Kayıt bulunamadı.</td>
+          <td colspan="10" class="bos-satir">Kayıt bulunamadı.</td>
         </tr>
       </tbody>
     </table>

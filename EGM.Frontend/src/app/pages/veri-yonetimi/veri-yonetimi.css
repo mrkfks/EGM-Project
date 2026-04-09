@@ -127,6 +127,42 @@
   border-radius: 6px;
   letter-spacing: 0.5px;
 }
+
+/* ── Takip No - tablo hücresi ── */
+.vy-takipno {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.78rem;
+  color: #2563eb;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+/* ── Takip No - modal başlığı ── */
+.vy-takipno-bilgi {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-bottom: 14px;
+}
+.vy-takipno-etiket {
+  font-size: 0.78rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.vy-takipno-deger {
+  font-family: "Consolas", "Courier New", monospace;
+  font-size: 0.95rem;
+  color: #1d4ed8;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
 .vy-badge {
   display: inline-block;
   color: #fff;

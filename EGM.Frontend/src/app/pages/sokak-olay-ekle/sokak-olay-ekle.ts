@@ -57,6 +57,7 @@ interface OlayListItem {
   katilimciSayisi?: number;
   organizatorAd?: string;
   durum: number;
+  takipNo?: string;
 }
 
 @Component({
@@ -73,6 +74,13 @@ export class SokakOlayEkle implements OnInit {
   isSaving    = false;
   formError:   string | null = null;
   formSuccess: string | null = null;
+  takipNo:     string | null = null;
+
+  get minTarih(): string {
+    const now = new Date();
+    now.setSeconds(0, 0);
+    return now.toISOString().slice(0, 16);
+  }
 
   // Hassasiyet teması
   hassasiyetColor  = '#27ae60';
@@ -182,6 +190,7 @@ export class SokakOlayEkle implements OnInit {
       sehitSayisi:      [null, Validators.min(0)],
       oluSayisi:        [null, Validators.min(0)],
       gozaltiSayisi:    [null, Validators.min(0)],
+      evrakNumarasi:    [''],
     });
 
     if (this.isCityScoped && this.tokenCityId) {
@@ -376,6 +385,7 @@ export class SokakOlayEkle implements OnInit {
           katilimciSayisi:  detail.katilimciSayisi ?? null,
           hassasiyet:       detail.hassasiyet ?? 0,
           aciklama:         detail.aciklama ?? '',
+          evrakNumarasi:    detail.evrakNumarasi ?? '',
         });
         // İl personeli ise il kilidi koru
         if (this.isCityScoped) {
@@ -421,6 +431,7 @@ export class SokakOlayEkle implements OnInit {
       longitude:       v.longitude ?? null,
       katilimciSayisi: v.katilimciSayisi ?? null,
       gozaltiSayisi:   v.gozaltiSayisi ?? null,
+      evrakNumarasi:   v.evrakNumarasi || null,
       sehitOluSayisi:  null,
       aciklama:        v.aciklama || null,
       hassasiyet:      +v.hassasiyet,
@@ -461,9 +472,23 @@ export class SokakOlayEkle implements OnInit {
       this.formError = 'Lütfen tüm zorunlu alanları doldurun.';
       return;
     }
+
+    const v = this.form.getRawValue();
+
+    // Planlanan formda geçmiş tarih girilemesin
+    if (this.activeForm === 'planned' && v.tarih) {
+      const secilenTarih = new Date(v.tarih);
+      const simdi = new Date();
+      if (secilenTarih < simdi) {
+        this.form.get('tarih')!.setErrors({ gecmisTarih: true });
+        this.form.markAllAsTouched();
+        this.formError = 'Planlanan olay geçmiş bir tarihe girilemez.';
+        return;
+      }
+    }
+
     this.isSaving = true;
     this.formError = null;
-    const v = this.form.getRawValue();
     const durum = this.activeForm === 'planned' ? 0 : 1;
     const payload = {
       olayTuru:        this.olayTurleri.find(t => t.id === v.olayTuru)?.name ?? v.olayTuru,
@@ -482,6 +507,7 @@ export class SokakOlayEkle implements OnInit {
       longitude:       v.longitude ?? null,
       katilimciSayisi: v.katilimciSayisi ?? null,
       gozaltiSayisi:   v.gozaltiSayisi ?? null,
+      evrakNumarasi:   v.evrakNumarasi || null,
       sehitOluSayisi:  (Number(v.sehitSayisi) || 0) + (Number(v.oluSayisi) || 0) || null,
       aciklama:        v.aciklama || null,
       hassasiyet:      +v.hassasiyet,
@@ -528,6 +554,7 @@ export class SokakOlayEkle implements OnInit {
     this.http.post<OlayListItem>(`${API}/olay`, payload).subscribe({
       next: created => {
         this.isSaving = false;
+        this.takipNo = (created as any).takipNo ?? null;
         this.formSuccess = this.activeForm === 'planned'
           ? 'Olay planlananlara kaydedildi.'
           : 'Olay gerçekleşenlere kaydedildi.';

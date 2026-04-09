@@ -15,5 +15,8 @@ namespace EGM.Domain.Entities
         public string? GuvenlikSeviyesi { get; set; }
         public string? GozlemNoktalari { get; set; }
         public ZiyaretDurumu ZiyaretDurumu { get; set; } = ZiyaretDurumu.Planlandi;
+
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Format: VZ-YYYYMMDDPP-SSS</summary>
+        public string? TakipNo { get; set; }
     }
 }

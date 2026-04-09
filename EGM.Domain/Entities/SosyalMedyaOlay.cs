@@ -19,5 +19,8 @@ namespace EGM.Domain.Entities
         public string? EkranGoruntusu { get; set; }
 
         public Hassasiyet Hassasiyet { get; set; }
+
+        /// <summary>Otomatik üretilen benzersiz takip numarası. Format: SM-YYYYMMDDPP-SSS</summary>
+        public string? TakipNo { get; set; }
     }
 }

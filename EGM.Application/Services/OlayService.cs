@@ -1,5 +1,6 @@
 
 using EGM.Application.DTOs;
+using EGM.Application.Helpers;
 using EGM.Domain.Constants;
 using EGM.Domain.Entities;
 using EGM.Domain.Enums;
@@ -99,6 +100,15 @@ namespace EGM.Application.Services
             // İl personeli → CityId otomatik atanır
             if (Roles.IsCityScoped(_currentUser.Role) && _currentUser.CityId.HasValue)
                 olay.CityId = _currentUser.CityId;
+
+            // TakipNo üret: SO-YYYYMMDDPP-SSS
+            var tarihBaslangic = olay.Tarih.Date;
+            var tarihBitis     = tarihBaslangic.AddDays(1);
+            var ilAdi          = olay.Il ?? string.Empty;
+            var plakaKodu      = olay.CityId ?? IlPlakaHelper.GetPlaka(ilAdi);
+            var mevcutSayisi   = (await _olayRepository.FindAsync(
+                o => o.Tarih >= tarihBaslangic && o.Tarih < tarihBitis && o.Il == ilAdi)).Count;
+            olay.TakipNo = TakipNoHelper.Generate(TakipNoHelper.SokakOlay, olay.Tarih, plakaKodu, mevcutSayisi + 1);
 
             var created = await _olayRepository.AddAsync(olay);
 

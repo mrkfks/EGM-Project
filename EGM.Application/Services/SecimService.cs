@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using EGM.Application.Helpers;
 using EGM.Domain.Entities;
 using EGM.Domain.Interfaces;
 
@@ -23,7 +24,17 @@ namespace EGM.Application.Services
             => await _sandikOlayRepository.GetByIdAsync(id);
 
         public async Task<SandikOlay> CreateSandikOlayAsync(SandikOlay kayit)
-            => await _sandikOlayRepository.AddAsync(kayit);
+        {
+            // TakipNo üret: SC-YYYYMMDDPP-SSS
+            var tarih        = kayit.Tarih.Date;
+            var tarihBitis   = tarih.AddDays(1);
+            var ilAdi        = kayit.Il ?? string.Empty;
+            var plakaKodu    = IlPlakaHelper.GetPlaka(ilAdi);
+            var mevcutSayisi = (await _sandikOlayRepository.FindAsync(
+                s => s.Tarih >= tarih && s.Tarih < tarihBitis && s.Il == ilAdi)).Count;
+            kayit.TakipNo = TakipNoHelper.Generate(TakipNoHelper.SecimOlay, kayit.Tarih, plakaKodu, mevcutSayisi + 1);
+            return await _sandikOlayRepository.AddAsync(kayit);
+        }
 
         public async Task<bool> UpdateSandikOlayAsync(Guid id, SandikOlay updated)
         {

@@ -21,6 +21,7 @@ interface SandikOlayRecord {
   kanitDosyasi: string | null;
   tarih: string;
   createdAt: string;
+  takipNo?: string | null;
 }
 
 @Component({
@@ -72,6 +73,7 @@ export class Secim implements OnInit {
   gonderiliyor = false;
   hata = '';
   basari = '';
+  takipNo: string | null = null;
   yukleniyor = true;
   secilenKayit: SandikOlayRecord | null = null;
   modalAcik = false;
@@ -222,6 +224,7 @@ export class Secim implements OnInit {
       .subscribe({
         next: (yeni) => {
           this.kayitlar.unshift(yeni);
+          this.takipNo = yeni.takipNo ?? null;
           this.formuSifirla();
           this.basari = 'Sandik olayi basariyla kaydedildi.';
           this.gonderiliyor = false;

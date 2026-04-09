@@ -1,5 +1,12 @@
 ﻿<section class="sm-page">
 
+  <!-- Takip No Bandı -->
+  <div class="takip-no-banner takip-sm" *ngIf="takipNo">
+    <span class="takip-no-etiket">Takip No</span>
+    <span class="takip-no-deger">{{ takipNo }}</span>
+    <button type="button" class="takip-no-kapat" (click)="takipNo = null" title="Kapat">&#10005;</button>
+  </div>
+
   <!-- Basari / Hata Mesajlari -->
   <div class="alert alert-basari" *ngIf="basariMesaji">
     <span>&#10003;</span> {{ basariMesaji }}

@@ -1,4 +1,11 @@
 ﻿<div class="secim-container">
+  <!-- Takip No Bandı -->
+  <div class="takip-no-banner takip-sc" *ngIf="takipNo">
+    <span class="takip-no-etiket">Takip No</span>
+    <span class="takip-no-deger">{{ takipNo }}</span>
+    <button type="button" class="takip-no-kapat" (click)="takipNo = null" title="Kapat">&#10005;</button>
+  </div>
+
   <!-- Uyari mesajlari -->
   <div class="alert alert-hata" *ngIf="hata">
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
