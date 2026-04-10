@@ -46,8 +46,6 @@ export class Sidebar implements OnInit, OnDestroy {
     {
       title: '',
       items: [
-        // İzleyici dahil tüm roller erişebilir
-        { label: 'Harita',    route: '/home',    icon: 'map' },
         { label: 'Ajanda',    route: '/ajanda',   icon: 'calendar' },
         { label: 'Bültenler', route: '/rapor-gunluk-bulten', icon: 'file-text' },
       ]

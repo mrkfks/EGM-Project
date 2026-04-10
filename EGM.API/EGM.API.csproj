@@ -24,5 +24,12 @@
     <ProjectReference Include="..\EGM.Infrastructure\EGM.Infrastructure.csproj" />
     <ProjectReference Include="..\EGM.Application\EGM.Application.csproj" />
   </ItemGroup>
-
+  <ItemGroup>
+    <None Update="TurkiyeRehber.sqlite">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="mod_spatialite.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

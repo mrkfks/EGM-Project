@@ -58,7 +58,7 @@ export class Login implements OnInit, OnDestroy {
       next: res => {
         localStorage.setItem('token', res.token);
         this.loading = false;
-        this.router.navigate(['/home']);
+        this.router.navigate(['/ajanda']);
       },
       error: err => {
         this.loading  = false;

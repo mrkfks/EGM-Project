@@ -83,5 +83,5 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => (_route, _st
   const role = getRoleFromToken(token);
   if (allowedRoles.includes(role)) return true;
 
-  return router.createUrlTree(['/home']);
+  return router.createUrlTree(['/ajanda']);
 };

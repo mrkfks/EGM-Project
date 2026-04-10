@@ -17,7 +17,7 @@ export const routes: Routes = [
     { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
 
     // ── Herkese açık (sadece giriş gerekli) ──────────────────────────────
-    { path: 'home',              loadComponent: () => import('./pages/home/home').then(m => m.Home),                         canActivate: [authGuard] },
+
     { path: 'ajanda',            loadComponent: () => import('./pages/ajanda/ajanda').then(m => m.Ajanda),                     canActivate: [authGuard] },
     { path: 'olay',              loadComponent: () => import('./pages/olay/olay').then(m => m.Olay),                         canActivate: [authGuard] },
     { path: 'istatistikler',     loadComponent: () => import('./pages/istatistikler/istatistikler').then(m => m.Istatistikler), canActivate: [authGuard] },
@@ -34,7 +34,7 @@ export const routes: Routes = [
     { path: 'sosyal-medya-istatistik', loadComponent: () => import('./pages/sosyal-medya-istatistik/sosyal-medya-istatistik').then(m => m.SosyalMedyaIstatistik), canActivate: [authGuard] },
     { path: 'secim-istatistik',        loadComponent: () => import('./pages/secim-istatistik/secim-istatistik').then(m => m.SecimIstatistik),              canActivate: [authGuard] },
     { path: 'vip-istatistik',          loadComponent: () => import('./pages/vip-istatistik/vip-istatistik').then(m => m.VipIstatistik),                    canActivate: [authGuard] },
-    { path: 'province/:id',      loadComponent: () => import('./pages/province/province').then(m => m.Province),            canActivate: [authGuard] },
+
 
     // ── İl Personeli ve üzeri ────────────────────────────────────────────
     { path: 'olay-bildirim-paneli', loadComponent: () => import('./pages/olay-bildirim-paneli/olay-bildirim-paneli').then(m => m.OlayBildirimPaneli), canActivate: [authGuard, roleGuard(IL_PERSONELI_VE_UZERI)] },
