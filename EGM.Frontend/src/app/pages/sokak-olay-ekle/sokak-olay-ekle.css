@@ -569,6 +569,95 @@
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── Ek Konumlar ───────────────────────────────────────────────── */
+.ek-konumlar-section {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 18px 24px;
+}
+
+.ek-konumlar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ek-konum-baslik {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #2c5f8a;
+}
+
+.ek-konum-sayi {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #2563eb;
+  background: #dbeafe;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.ek-konum-ekle-btn {
+  margin-left: auto;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.ek-konum-ekle-btn:hover { background: #1d4ed8; }
+
+.ek-konum-kart {
+  background: #f8fafc;
+  border: 1px solid #dde4ec;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 14px;
+}
+
+.ek-konum-kart-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.ek-konum-sira {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #1a3a5c;
+}
+
+.ek-konum-sil-btn {
+  margin-left: auto;
+  background: none;
+  border: 1px solid #fca5a5;
+  color: #ef4444;
+  border-radius: 7px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.ek-konum-sil-btn:hover { background: #fee2e2; }
+
+.ek-konum-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
 /* ── Responsive ───────────────────────────────────────────────── */
 @media (max-width: 640px) {
   .ekle-page { padding: 14px; }
@@ -576,4 +665,5 @@
   .span-2 { grid-column: span 1; }
   .page-header { padding: 18px 16px; }
   .page-header h1 { font-size: 1.1rem; }
+  .ek-konum-form-grid { grid-template-columns: 1fr; }
 }

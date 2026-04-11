@@ -2,10 +2,12 @@
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { getIlceler } from '../../data/ilceler';
+import { catchError, of } from 'rxjs';
 import { OlayTuruService, OlayTuru } from '../../services/olay-turu.service';
 import { GerceklesmeSekliService, GerceklesmeSekli } from '../../services/gerceklesme-sekli.service';
 import { KonuService, Konu } from '../../services/konu.service';
+
+const API = 'http://localhost:5117/api';
 
 interface SandikOlayRecord {
   id: string;
@@ -33,7 +35,8 @@ interface SandikOlayRecord {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Secim implements OnInit {
-  private apiBase = 'http://localhost:5117/api';
+  private apiBase = API;
+  tumIller: { name: string; osmId: number }[] = [];
 
   // Form alanlar (ASCII guvenli property isimleri)
   musahitAdi = '';
@@ -86,22 +89,14 @@ export class Secim implements OnInit {
     'Diger'
   ];
 
-  filtreliIlceler: string[] = [];
+  filtreliIlceler: { name: string; osmId: number }[] = [];
+  filtreliMahalleler: { name: string; osmId: number }[] = [];
 
-  iller = [
-    'Adana','Adiyaman','Afyonkarahisar','Agri','Amasya','Ankara','Antalya',
-    'Artvin','Aydin','Balikesir','Bilecik','Bingol','Bitlis','Bolu','Burdur',
-    'Bursa','Canakkale','Cankiri','Corum','Denizli','Diyarbakir','Edirne',
-    'Elazig','Erzincan','Erzurum','Eskisehir','Gaziantep','Giresun',
-    'Gumushane','Hakkari','Hatay','Isparta','Mersin','Istanbul','Izmir',
-    'Kars','Kastamonu','Kayseri','Kirklareli','Kirsehir','Kocaeli','Konya',
-    'Kutahya','Malatya','Manisa','Kahramanmaras','Mardin','Mugla','Mus',
-    'Nevsehir','Nigde','Ordu','Rize','Sakarya','Samsun','Siirt','Sinop',
-    'Sivas','Tekirdag','Tokat','Trabzon','Tunceli','Sanliurfa','Usak',
-    'Van','Yozgat','Zonguldak','Aksaray','Bayburt','Karaman','Kirikkale',
-    'Batman','Sirnak','Bartin','Ardahan','Igdir','Yalova','Karabuk',
-    'Kilis','Osmaniye','Duzce'
-  ];
+
+
+  get iller(): string[] {
+    return this.tumIller.map(i => i.name);
+  }
 
   constructor(private http: HttpClient,
               private olayTuruService: OlayTuruService,
@@ -123,6 +118,10 @@ export class Secim implements OnInit {
       next: res => { this.gerceklesmeSekilleri = res; this.cdr.markForCheck(); },
       error: () => {}
     });
+    this.http.get<any[]>(`${API}/geo/provinces-geopackage`).subscribe({
+      next: res => { this.tumIller = res; this.cdr.markForCheck(); },
+      error: () => {}
+    });
   }
 
   private getHeaders(): HttpHeaders {
@@ -140,8 +139,27 @@ export class Secim implements OnInit {
   }
 
   ilDegisti(ilAdi: string): void {
-    this.filtreliIlceler = getIlceler(ilAdi);
+    this.filtreliIlceler = [];
+    this.filtreliMahalleler = [];
     this.ilce = '';
+    this.mahalle = '';
+    if (!ilAdi) { this.cdr.markForCheck(); return; }
+    this.http.get<any[]>(`${API}/geo/districts-geopackage?province=${encodeURIComponent(ilAdi)}`)
+      .pipe(catchError(() => of([])))
+      .subscribe(districts => { this.filtreliIlceler = districts; this.cdr.markForCheck(); });
+  }
+
+  ilceDegisti(ilceAdi: string): void {
+    this.filtreliMahalleler = [];
+    this.mahalle = '';
+    if (!ilceAdi) { this.cdr.markForCheck(); return; }
+    this.http.get<any[]>(`${API}/geo/neighborhoods-geopackage?district=${encodeURIComponent(ilceAdi)}`)
+      .pipe(catchError(() => of([])))
+      .subscribe(neighborhoods => { this.filtreliMahalleler = neighborhoods; this.cdr.markForCheck(); });
+  }
+
+  mahalleDegisti(): void {
+    // Placeholder for future coordinate auto-fill
   }
 
   kategoriSec(k: string): void {

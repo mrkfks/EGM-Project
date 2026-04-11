@@ -46,6 +46,7 @@ export class Sidebar implements OnInit, OnDestroy {
     {
       title: '',
       items: [
+        { label: 'Harita',    route: '/harita',   icon: 'map' },
         { label: 'Ajanda',    route: '/ajanda',   icon: 'calendar' },
         { label: 'Bültenler', route: '/rapor-gunluk-bulten', icon: 'file-text' },
       ]

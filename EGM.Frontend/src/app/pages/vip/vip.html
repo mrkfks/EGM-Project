@@ -148,14 +148,35 @@
 
         <div class="form-field">
           <label>Il <span class="req">*</span></label>
-          <select [(ngModel)]="il">
+          <select [(ngModel)]="il" (ngModelChange)="ilDegisti($event)">
             <option value="">--- Seciniz ---</option>
             <option *ngFor="let i of iller" [value]="i">{{ i }}</option>
           </select>
         </div>
 
         <div class="form-field">
-          <label>Ziyaret Konumu <span class="req">*</span></label>
+          <label>Ilce</label>
+          <select [(ngModel)]="ilce" (ngModelChange)="ilceDegisti($event)" [disabled]="!il">
+            <option value="">--- Seciniz ---</option>
+            <option *ngFor="let d of filtreliIlceler" [value]="d.name">{{ d.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Mahalle</label>
+          <select [(ngModel)]="mahalle" (ngModelChange)="mahalleDegisti(mahalle)" [disabled]="!ilce">
+            <option value="">--- Seciniz ---</option>
+            <option *ngFor="let m of filtreliMahalleler" [value]="m.name">{{ m.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Konum Bilgisi (Otomatik)</label>
+          <input type="text" [(ngModel)]="konum" placeholder="Il/Ilce/Mahalle secimine gore otomatik doldurulacak" readonly />
+        </div>
+
+        <div class="form-field">
+          <label>Mekan <span class="req">*</span></label>
           <input type="text" [(ngModel)]="mekan" placeholder="Okul adi, sandik no veya mekan..." />
         </div>
 
@@ -169,14 +190,84 @@
           <input type="datetime-local" [(ngModel)]="bitisTarihi" />
         </div>
 
+      </div>
+    </fieldset>
+
+    <!-- Ek Mekanlar -->
+    <fieldset class="form-section">
+      <legend>Ek Ziyaret Mekanları</legend>
+      
+      <!-- Yeni mekan ekleme formu -->
+      <div class="form-grid" style="margin-bottom: 24px; padding: 16px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e0e0e0;">
+        <div class="form-field">
+          <label>Il</label>
+          <select [(ngModel)]="ekMekanIl" (ngModelChange)="ekMekanIlDegisti()">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let i of iller" [value]="i">{{ i }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Ilce</label>
+          <select [(ngModel)]="ekMekanIlce" (ngModelChange)="ekMekanIlceDegisti()" [disabled]="!ekMekanIl">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let d of ekMekanFiltreleIlceler" [value]="d.name">{{ d.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label>Mahalle</label>
+          <select [(ngModel)]="ekMekanMahalle" [disabled]="!ekMekanIlce">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let m of ekMekanFiltreleMahalleler" [value]="m.name">{{ m.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-field span-1">
+          <label>Mekan Adi</label>
+          <input type="text" [(ngModel)]="ekMekanMekan" placeholder="Okul adi, sandik no vb..." maxlength="150" />
+        </div>
+
         <div class="form-field span-2">
-          <label>Gozlemler ve Onemli Gelismeler</label>
+          <button type="button" class="btn-primary" (click)="ekMekanEkle()" 
+            [disabled]="!ekMekanIl || !ekMekanIlce || !ekMekanMahalle || !ekMekanMekan.trim()">
+            ✚ Mekan Ekle
+          </button>
+        </div>
+      </div>
+
+      <!-- Eklenen mekanlar listesi -->
+      <div *ngIf="ekMekanlar.length > 0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;">
+        <div *ngFor="let m of ekMekanlar; let i = index" 
+          style="padding: 14px; background: #f5f5f5; border-radius: 6px; border-left: 4px solid #3498db;">
+          
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+            <span style="font-weight: bold; color: #333;">{{ m.il }} / {{ m.ilce }}</span>
+            <button type="button" class="btn-icon-danger" (click)="ekMekanSil(i)" title="Sil">✕</button>
+          </div>
+
+          <div style="font-size: 13px; line-height: 1.6; color: #555;">
+            <div><strong>Mahalle:</strong> {{ m.mahalle }}</div>
+            <div><strong>Mekan:</strong> {{ m.mekan }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="ekMekanlar.length === 0" style="text-align: center; padding: 24px; color: #999;">
+        Henüz ek mekan eklenmemis.
+      </div>
+    </fieldset>
+
+    <!-- Gozlemler -->
+    <fieldset class="form-section">
+      <legend>Gozlemler ve Onemli Gelismeler</legend>
+      <div class="form-grid">
+        <div class="form-field span-2">
           <textarea [(ngModel)]="gozlemNoktalari" rows="4"
             placeholder="Ziyaret sirasinda yasanan onemli gelismeleri, diyaloglar ve gozlemleri giriniz..."
             maxlength="2000"></textarea>
           <small class="karakter-sayac">{{ gozlemNoktalari.length }} / 2000</small>
         </div>
-
       </div>
     </fieldset>
 

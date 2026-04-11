@@ -53,6 +53,14 @@ export class SecimIstatistik implements OnInit {
   filtreTarih1     = '';
   filtreTarih2     = '';
 
+  // Seçenek listeleri
+  tumMusahitler: string[] = [];
+  tumMahalleler: string[] = [];
+  tumOkullar: string[] = [];
+  tumSandikNolari: string[] = [];
+  tumKonular: string[] = [];
+  tumKategoriler: string[] = [];
+
   // Sayfalama
   readonly sayfaBoyutu = 20;
   mevcutSayfa = 1;
@@ -67,6 +75,7 @@ export class SecimIstatistik implements OnInit {
     this.http.get<SandikOlayItem[]>(`${API}/secim/sandik-olay`).subscribe({
       next: res => {
         this.tumKayitlar = res;
+        this.secenekleriCekil();
         this.filtrele();
         this.yukleniyor = false;
         this.cdr.markForCheck();
@@ -79,26 +88,35 @@ export class SecimIstatistik implements OnInit {
     });
   }
 
+  secenekleriCekil(): void {
+    this.tumMusahitler = [...new Set(this.tumKayitlar.map(o => o.musahitAdi ?? '').filter(v => v))].sort();
+    this.tumMahalleler = [...new Set(this.tumKayitlar.map(o => o.mahalle ?? '').filter(v => v))].sort();
+    this.tumOkullar = [...new Set(this.tumKayitlar.map(o => o.okul ?? '').filter(v => v))].sort();
+    this.tumSandikNolari = [...new Set(this.tumKayitlar.map(o => o.sandikNo ?? '').filter(v => v))].sort();
+    this.tumKonular = [...new Set(this.tumKayitlar.map(o => o.konu ?? '').filter(v => v))].sort();
+    this.tumKategoriler = [...new Set(this.tumKayitlar.map(o => o.olayKategorisi ?? '').filter(v => v))].sort();
+  }
+
   filtrele(): void {
     this.mevcutSayfa = 1;
     let sonuc = [...this.tumKayitlar];
 
-    if (this.filtreMusahit.trim())
-      sonuc = sonuc.filter(s => s.musahitAdi?.toLowerCase().includes(this.filtreMusahit.trim().toLowerCase()));
-    if (this.filtreIl.trim())
-      sonuc = sonuc.filter(s => s.il?.toLowerCase().includes(this.filtreIl.trim().toLowerCase()));
-    if (this.filtreIlce.trim())
-      sonuc = sonuc.filter(s => s.ilce?.toLowerCase().includes(this.filtreIlce.trim().toLowerCase()));
-    if (this.filtreMahalle.trim())
-      sonuc = sonuc.filter(s => s.mahalle?.toLowerCase().includes(this.filtreMahalle.trim().toLowerCase()));
-    if (this.filtreOkul.trim())
-      sonuc = sonuc.filter(s => s.okul?.toLowerCase().includes(this.filtreOkul.trim().toLowerCase()));
-    if (this.filtreSandikNo.trim())
-      sonuc = sonuc.filter(s => s.sandikNo?.toLowerCase().includes(this.filtreSandikNo.trim().toLowerCase()));
-    if (this.filtreKonu.trim())
-      sonuc = sonuc.filter(s => s.konu?.toLowerCase().includes(this.filtreKonu.trim().toLowerCase()));
-    if (this.filtreKategori.trim())
-      sonuc = sonuc.filter(s => s.olayKategorisi?.toLowerCase().includes(this.filtreKategori.trim().toLowerCase()));
+    if (this.filtreMusahit)
+      sonuc = sonuc.filter(s => s.musahitAdi === this.filtreMusahit);
+    if (this.filtreIl)
+      sonuc = sonuc.filter(s => s.il === this.filtreIl);
+    if (this.filtreIlce)
+      sonuc = sonuc.filter(s => s.ilce === this.filtreIlce);
+    if (this.filtreMahalle)
+      sonuc = sonuc.filter(s => s.mahalle === this.filtreMahalle);
+    if (this.filtreOkul)
+      sonuc = sonuc.filter(s => s.okul === this.filtreOkul);
+    if (this.filtreSandikNo)
+      sonuc = sonuc.filter(s => s.sandikNo === this.filtreSandikNo);
+    if (this.filtreKonu)
+      sonuc = sonuc.filter(s => s.konu === this.filtreKonu);
+    if (this.filtreKategori)
+      sonuc = sonuc.filter(s => s.olayKategorisi === this.filtreKategori);
     if (this.filtreTarih1) {
       const t1 = new Date(this.filtreTarih1);
       sonuc = sonuc.filter(s => s.tarih && new Date(s.tarih) >= t1);
@@ -132,6 +150,15 @@ export class SecimIstatistik implements OnInit {
 
   sayfayaGit(p: number): void {
     if (p >= 1 && p <= this.toplamSayfa) this.mevcutSayfa = p;
+  }
+
+  get ilSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.il ?? '').filter(v => v))].sort();
+  }
+
+  get ilceSecenekler(): string[] {
+    const base = this.filtreIl ? this.tumKayitlar.filter(o => o.il === this.filtreIl) : this.tumKayitlar;
+    return [...new Set(base.map(o => o.ilce ?? '').filter(v => v))].sort();
   }
 
   get sayfaNumaralari(): number[] {

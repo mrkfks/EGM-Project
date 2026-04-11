@@ -142,34 +142,52 @@
           <select formControlName="il" [class.is-invalid]="fieldError('il')"
                    *ngIf="!isCityScoped">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let il of IL_LISTESI" [value]="il.ad">{{ il.ad }}</option>
+            <option *ngFor="let il of tumIller" [value]="il.name">{{ il.name }}</option>
           </select>
           <input type="text" formControlName="il" readonly *ngIf="isCityScoped"
                  class="locked-input" title="Yetki alanınızdaki il otomatik seçilmiştir.">
           <div class="field-error" *ngIf="fieldError('il')">İl zorunludur.</div>
+          <small style="color:#666;margin-top:4px;display:block">💡 İl seçilirse koordinat otomatik doldurulur</small>
         </div>
 
         <div class="form-field">
           <label>İlçe</label>
           <select formControlName="ilce" *ngIf="filtreliIlceler.length > 0">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let ilce of filtreliIlceler" [value]="ilce">{{ ilce }}</option>
+            <option *ngFor="let ilce of filtreliIlceler" [value]="ilce.name">{{ ilce.name }}</option>
           </select>
           <input type="text" formControlName="ilce" placeholder="İlçe adı…" *ngIf="filtreliIlceler.length === 0">
+          <small style="color:#666;margin-top:4px;display:block">💡 İlçe seçilirse koordinat daha hassas doldurulur</small>
         </div>
 
         <div class="form-field">
-          <label>Başlangıç Konum <small style="font-weight:400;color:#888">(enlem, boylam)</small></label>
-          <input type="text" formControlName="baslangicKonum" placeholder="Örn: 39.925533, 32.866287"
+          <label>Mahalle</label>
+          <select formControlName="mahalle" 
+                  [disabled]="!form.get('ilce')?.value"
+                  *ngIf="filtreliMahalleler.length > 0">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let mahalle of filtreliMahalleler" [value]="mahalle.name">{{ mahalle.name }}</option>
+          </select>
+          <input type="text" formControlName="mahalle" 
+                 [disabled]="!form.get('ilce')?.value"
+                 [placeholder]="form.get('ilce')?.value ? 'Mahalle adı…' : 'İlçe seçiniz'"
+                 title="Mahalle alanı ilçe seçildikten sonra aktif olur"
+                 *ngIf="filtreliMahalleler.length === 0">
+          <small style="color:#666;margin-top:4px;display:block">💡 Koordinat bilgisinden otomatik doldurulur</small>
+        </div>
+
+        <div class="form-field">
+          <label>
+            Konum
+            <small style="font-weight:400;color:#888;margin-left:8px">
+              (otomatik veya manuel: enlem, boylam)
+            </small>
+          </label>
+          <input type="text" formControlName="baslangicKonum" 
+                 placeholder="Otomatik doldurulur veya: 39.925533, 32.866287"
                  inputmode="decimal" autocomplete="off">
           <div class="field-error" *ngIf="fieldError('baslangicKonum')">Geçerli format: enlem, boylam (örn: 39.925, 32.866)</div>
-        </div>
-
-        <div class="form-field">
-          <label>Bitiş Konum <small style="font-weight:400;color:#888">(enlem, boylam)</small></label>
-          <input type="text" formControlName="bitisKonum" placeholder="Örn: 39.930000, 32.870000"
-                 inputmode="decimal" autocomplete="off">
-          <div class="field-error" *ngIf="fieldError('bitisKonum')">Geçerli format: enlem, boylam (örn: 39.930, 32.870)</div>
+          <small style="color:#666;margin-top:4px;display:block">💡 İl/İlçe seçerseniz otomatik doldurulur, manuel de yazabilirsiniz</small>
         </div>
 
         <div class="form-field">
@@ -207,6 +225,68 @@
       </div>
     </fieldset>
 
+    <!-- Ek Konumlar -->
+    <div class="ek-konumlar-section">
+      <div class="ek-konumlar-header">
+        <span class="ek-konum-baslik">Ek Konumlar</span>
+        <span class="ek-konum-sayi" *ngIf="ekKonumlar.length > 0">({{ ekKonumlar.length }})</span>
+        <button type="button" class="ek-konum-ekle-btn" (click)="ekKonumEkle()">+ Yeni Konum Ekle</button>
+      </div>
+
+      <div *ngFor="let ek of ekKonumlar; let i = index" class="ek-konum-kart">
+        <div class="ek-konum-kart-header">
+          <span class="ek-konum-sira">Konum {{ i + 2 }}</span>
+          <button type="button" class="ek-konum-sil-btn" (click)="ekKonumSil(i)">&#10005; Kaldır</button>
+        </div>
+        <div class="ek-konum-form-grid">
+          <div class="form-field">
+            <label>İl</label>
+            <select [(ngModel)]="ek.il" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="ekKonumIlDegisti(i)">
+              <option value="">— Seçiniz —</option>
+              <option *ngFor="let il of tumIller" [value]="il.name">{{ il.name }}</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>İlçe</label>
+            <select [(ngModel)]="ek.ilce" [ngModelOptions]="{standalone: true}"
+                    (ngModelChange)="ekKonumIlceDegisti(i)"
+                    *ngIf="ek.ilceler.length > 0">
+              <option value="">— Seçiniz —</option>
+              <option *ngFor="let ilce of ek.ilceler" [value]="ilce.name">{{ ilce.name }}</option>
+            </select>
+            <input type="text" [(ngModel)]="ek.ilce" [ngModelOptions]="{standalone: true}"
+                   placeholder="İlçe adı…" *ngIf="ek.ilceler.length === 0">
+          </div>
+          <div class="form-field">
+            <label>Mahalle</label>
+            <select [(ngModel)]="ek.mahalle" [ngModelOptions]="{standalone: true}"
+                    *ngIf="ek.mahalleler.length > 0">
+              <option value="">— Seçiniz —</option>
+              <option *ngFor="let mah of ek.mahalleler" [value]="mah.name">{{ mah.name }}</option>
+            </select>
+            <input type="text" [(ngModel)]="ek.mahalle" [ngModelOptions]="{standalone: true}"
+                   placeholder="Mahalle adı…" *ngIf="ek.mahalleler.length === 0">
+          </div>
+          <div class="form-field">
+            <label>Konum <small style="font-weight:400;color:#888;">(enlem, boylam)</small></label>
+            <input type="text" [(ngModel)]="ek.konum" [ngModelOptions]="{standalone: true}"
+                   placeholder="Otomatik veya: 39.925533, 32.866287" inputmode="decimal" autocomplete="off">
+          </div>
+          <div class="form-field">
+            <label>Mekan</label>
+            <input type="text" [(ngModel)]="ek.mekan" [ngModelOptions]="{standalone: true}"
+                   placeholder="Etkinlik mekanı…">
+          </div>
+          <div class="form-field">
+            <label>{{ activeForm === 'completed' ? 'Katılımcı Sayısı' : 'Tahmini Katılımcı Sayısı' }}</label>
+            <input type="number" [(ngModel)]="ek.katilimciSayisi" [ngModelOptions]="{standalone: true}"
+                   min="0" placeholder="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Hata / Başarı -->
     <div class="form-alert form-alert-error" *ngIf="formError">
       {{ formError }}
@@ -214,8 +294,6 @@
     <div class="form-alert form-alert-success" *ngIf="formSuccess">
       {{ formSuccess }}
     </div>
-
-    <!-- Alt buton -->
     <div class="form-actions">
       <button type="button" class="btn btn-danger" *ngIf="selectedPlanId" (click)="iptalEt()" [disabled]="isSaving">İptal Edildi</button>
       <button type="button" class="btn btn-primary" (click)="kaydet()" [disabled]="isSaving">Kaydet</button>

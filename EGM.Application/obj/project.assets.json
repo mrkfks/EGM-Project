@@ -164,6 +164,19 @@
           }
         }
       },
+      "NetTopologySuite/2.6.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/NetTopologySuite.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/NetTopologySuite.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "System.IdentityModel.Tokens.Jwt/8.16.0": {
         "type": "package",
         "dependencies": {
@@ -184,6 +197,9 @@
       "EGM.Domain/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
+        "dependencies": {
+          "NetTopologySuite": "2.6.0"
+        },
         "compile": {
           "bin/placeholder/EGM.Domain.dll": {}
         },
@@ -492,6 +508,22 @@
         "microsoft.identitymodel.tokens.nuspec"
       ]
     },
+    "NetTopologySuite/2.6.0": {
+      "sha512": "1B1OTacTd4QtFyBeuIOcThwSSLUdRZU3bSFIwM8vk36XiZlBMi3K36u74e4OqwwHRHUuJC1PhbDx4hyI266X1Q==",
+      "type": "package",
+      "path": "nettopologysuite/2.6.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "icon.png",
+        "lib/netstandard2.0/NetTopologySuite.dll",
+        "lib/netstandard2.0/NetTopologySuite.xml",
+        "lib/netstandard2.1/NetTopologySuite.dll",
+        "lib/netstandard2.1/NetTopologySuite.xml",
+        "nettopologysuite.2.6.0.nupkg.sha512",
+        "nettopologysuite.nuspec"
+      ]
+    },
     "System.IdentityModel.Tokens.Jwt/8.16.0": {
       "sha512": "rrs2u7DRMXQG2yh0oVyF/vLwosfRv20Ld2iEpYcKwQWXHjfV+gFXNQsQ9p008kR9Ou4pxBs68Q6/9zC8Gi1wjg==",
       "type": "package",
@@ -534,19 +566,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mrkfk\\.nuget\\packages\\": {}
+    "/home/mrkfks/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "c:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
+      "projectUniqueName": "/home/mrkfks/Projeler/EGM-Project/EGM.Application/EGM.Application.csproj",
       "projectName": "EGM.Application",
-      "projectPath": "c:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj",
-      "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
-      "outputPath": "c:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\obj\\",
+      "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Application/EGM.Application.csproj",
+      "packagesPath": "/home/mrkfks/.nuget/packages/",
+      "outputPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Application/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\mrkfk\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/mrkfks/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -558,8 +590,8 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {
-              "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj"
+            "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj": {
+              "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj"
             }
           }
         }
@@ -613,7 +645,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/home/mrkfks/.dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

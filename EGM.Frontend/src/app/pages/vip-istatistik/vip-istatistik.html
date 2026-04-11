@@ -23,7 +23,10 @@
     </div>
     <div class="filtre-group">
       <label>İl</label>
-      <input type="text" [(ngModel)]="filtreIl" placeholder="İl adı..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIl" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of ilSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Başlangıç Tarihi</label>

@@ -2,7 +2,10 @@
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { catchError, of } from 'rxjs';
 import { KonuService, Konu } from '../../services/konu.service';
+
+const API = 'http://localhost:5117/api';
 
 interface SosyalMedyaForm {
   kullaniciAdi: string;
@@ -11,6 +14,8 @@ interface SosyalMedyaForm {
   konu: string;
   il: string;
   ilce: string;
+  mahalle: string;
+  konum: string;
   paylasimTarihi: string;
   icerikOzeti: string;
   hassasiyet: number;
@@ -27,7 +32,7 @@ interface SosyalMedyaForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Socialmedia implements OnInit {
-  private apiBase = 'http://localhost:5117/api';
+  private apiBase = API;
 
   kaydediliyor = false;
   basariMesaji = '';
@@ -44,12 +49,18 @@ export class Socialmedia implements OnInit {
     konu: '',
     il: '',
     ilce: '',
+    mahalle: '',
+    konum: '',
     paylasimTarihi: new Date().toISOString().slice(0, 16),
     icerikOzeti: '',
     hassasiyet: 0,
     ekranGoruntusuBase64: '',
     ekranGoruntusuAd: '',
   };
+
+  tumIller: { name: string; osmId: number }[] = [];
+  filtreliIlceler: { name: string; osmId: number }[] = [];
+  filtreliMahalleler: { name: string; osmId: number }[] = [];
 
   platformlar: string[] = [
     'Twitter / X',
@@ -103,6 +114,47 @@ export class Socialmedia implements OnInit {
       next: res => { this.konular = res; this.konularYukleniyor = false; this.cdr.markForCheck(); },
       error: () => { this.konularYukleniyor = false; this.cdr.markForCheck(); }
     });
+    this.http.get<any[]>(`${API}/geo/provinces-geopackage`).subscribe({
+      next: res => { this.tumIller = res; this.cdr.markForCheck(); },
+      error: () => {}
+    });
+  }
+
+  ilDegisti(): void {
+    this.filtreliIlceler = [];
+    this.filtreliMahalleler = [];
+    this.form.ilce = '';
+    this.form.mahalle = '';
+    this.form.konum = '';
+    if (!this.form.il) { this.cdr.markForCheck(); return; }
+    this.http.get<any[]>(`${API}/geo/districts-geopackage?province=${encodeURIComponent(this.form.il)}`)
+      .pipe(catchError(() => of([])))
+      .subscribe(districts => { this.filtreliIlceler = districts; this.cdr.markForCheck(); });
+  }
+
+  ilceDegisti(): void {
+    this.filtreliMahalleler = [];
+    this.form.mahalle = '';
+    this.form.konum = '';
+    if (!this.form.ilce) { this.cdr.markForCheck(); return; }
+    this.http.get<any[]>(`${API}/geo/neighborhoods-geopackage?district=${encodeURIComponent(this.form.ilce)}`)
+      .pipe(catchError(() => of([])))
+      .subscribe(neighborhoods => { this.filtreliMahalleler = neighborhoods; this.cdr.markForCheck(); });
+  }
+
+  mahalleDegisti(): void {
+    this.form.konum = '';
+    if (!this.form.il || !this.form.ilce || !this.form.mahalle) { this.cdr.markForCheck(); return; }
+    this.http.get<any>(`${API}/geo/get-coordinates?provinceName=${encodeURIComponent(this.form.il)}&districtName=${encodeURIComponent(this.form.ilce)}&neighborhoodName=${encodeURIComponent(this.form.mahalle)}`)
+      .pipe(catchError(() => of(null)))
+      .subscribe(coords => {
+        if (coords?.latitude && coords?.longitude) {
+          this.form.konum = `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+        } else {
+          this.form.konum = `${this.form.mahalle}, ${this.form.ilce}, ${this.form.il}`;
+        }
+        this.cdr.markForCheck();
+      });
   }
 
   gorselSec(event: Event): void {
@@ -199,6 +251,8 @@ export class Socialmedia implements OnInit {
       konu: '',
       il: '',
       ilce: '',
+      mahalle: '',
+      konum: '',
       paylasimTarihi: new Date().toISOString().slice(0, 16),
       icerikOzeti: '',
       hassasiyet: 0,

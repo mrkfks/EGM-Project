@@ -4,15 +4,24 @@
   <div class="filtre-bar">
     <div class="filtre-group">
       <label>Platform</label>
-      <input type="text" [(ngModel)]="filtrePlatform" placeholder="Twitter, Facebook..." (input)="filtrele()" />
+      <select [(ngModel)]="filtrePlatform" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let p of tumPlatformlar" [value]="p">{{ p }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Konu</label>
-      <input type="text" [(ngModel)]="filtreKonu" placeholder="Konu ara..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreKonu" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let k of tumKonular" [value]="k">{{ k }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>İlgili Kişi / Kurum</label>
-      <input type="text" [(ngModel)]="filtreIlgiliKisi" placeholder="Kişi veya kurum..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIlgiliKisi" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let o of tumKisilerKurumlar" [value]="o">{{ o }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Hassasiyet</label>
@@ -26,11 +35,17 @@
     </div>
     <div class="filtre-group">
       <label>İl</label>
-      <input type="text" [(ngModel)]="filtreIl" placeholder="İl adı..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIl" (change)="filtreIlce = ''; filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of ilSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>İlçe</label>
-      <input type="text" [(ngModel)]="filtreIlce" placeholder="İlçe adı..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIlce" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of ilceSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Başlangıç Tarihi</label>

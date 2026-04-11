@@ -107,8 +107,8 @@ export class SokakIstatistik implements OnInit {
       s = s.filter(o => o.il === this.filtreIl);
     if (this.filtreIlce)
       s = s.filter(o => o.ilce === this.filtreIlce);
-    if (this.filtreMekan.trim())
-      s = s.filter(o => o.mekan?.toLowerCase().includes(this.filtreMekan.trim().toLowerCase()));
+    if (this.filtreMekan !== '')
+      s = s.filter(o => o.mekan === this.filtreMekan);
     if (this.filtreHassasiyet !== '')
       s = s.filter(o => o.hassasiyet === +this.filtreHassasiyet);
     if (this.filtreDurum !== '')
@@ -121,8 +121,8 @@ export class SokakIstatistik implements OnInit {
     }
     if (this.filtreEvrakNo.trim())
       s = s.filter(o => o.evrakNumarasi?.toLowerCase().includes(this.filtreEvrakNo.trim().toLowerCase()));
-    if (this.filtreTakipNo.trim())
-      s = s.filter(o => o.takipNo?.toLowerCase().includes(this.filtreTakipNo.trim().toLowerCase()));
+    if (this.filtreTakipNo !== '')
+      s = s.filter(o => o.takipNo === this.filtreTakipNo);
 
     this.filtreli = s;
   }
@@ -151,6 +151,12 @@ export class SokakIstatistik implements OnInit {
   get ilceSecenekler(): string[] {
     const base = this.filtreIl ? this.tumKayitlar.filter(o => o.il === this.filtreIl) : this.tumKayitlar;
     return [...new Set(base.map(o => o.ilce ?? '').filter(v => v))].sort();
+  }
+  get mekanSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.mekan ?? '').filter(v => v))].sort();
+  }
+  get takipNoSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.takipNo ?? '').filter(v => v))].sort();
   }
 
   get toplamSayfa(): number {

@@ -39,7 +39,23 @@ export class VIP implements OnInit {
   baslangicTarihi = new Date().toISOString().substring(0, 16);
   bitisTarihi = new Date(Date.now() + 60 * 60 * 1000).toISOString().substring(0, 16);
   il = '';
+  ilce = '';
+  mahalle = '';
+  konum = '';
   hassasiyet = 0;
+
+  // Filtreleme arrays
+  filtreliIlceler: { name: string; osmId: number }[] = [];
+  filtreliMahalleler: { name: string; osmId: number }[] = [];
+
+  // Ek mekanlar
+  ekMekanlar: { il: string; ilce: string; mahalle: string; mekan: string; ilceler: any[]; mahalleler: any[] }[] = [];
+  ekMekanIl = '';
+  ekMekanIlce = '';
+  ekMekanMahalle = '';
+  ekMekanMekan = '';
+  ekMekanFiltreleIlceler: { name: string; osmId: number }[] = [];
+  ekMekanFiltreleMahalleler: { name: string; osmId: number }[] = [];
 
   // UI durumu
   kayitlar: VIPZiyaretRecord[] = [];
@@ -149,6 +165,64 @@ export class VIP implements OnInit {
     this.baslangicTarihi = kayit.baslangicTarihi ? kayit.baslangicTarihi.substring(0, 16) : this.baslangicTarihi;
     this.bitisTarihi = kayit.bitisTarihi ? kayit.bitisTarihi.substring(0, 16) : this.bitisTarihi;
     this.ziyaretDurumu = 1;
+  }
+
+  ilDegisti(il: string): void {
+    this.il = il;
+    this.ilce = '';
+    this.mahalle = '';
+    this.filtreliIlceler = [];
+    this.filtreliMahalleler = [];
+  }
+
+  ilceDegisti(ilce: string): void {
+    this.ilce = ilce;
+    this.mahalle = '';
+    this.filtreliMahalleler = [];
+  }
+
+  mahalleDegisti(mahalle: string): void {
+    this.mahalle = mahalle;
+  }
+
+  ekMekanIlDegisti(): void {
+    this.ekMekanIlce = '';
+    this.ekMekanMahalle = '';
+    this.ekMekanFiltreleIlceler = [];
+    this.ekMekanFiltreleMahalleler = [];
+  }
+
+  ekMekanIlceDegisti(): void {
+    this.ekMekanMahalle = '';
+    this.ekMekanFiltreleMahalleler = [];
+  }
+
+  ekMekanEkle(): void {
+    if (this.ekMekanIl && this.ekMekanIlce && this.ekMekanMahalle && this.ekMekanMekan.trim()) {
+      this.ekMekanlar = [
+        ...this.ekMekanlar,
+        {
+          il: this.ekMekanIl,
+          ilce: this.ekMekanIlce,
+          mahalle: this.ekMekanMahalle,
+          mekan: this.ekMekanMekan.trim(),
+          ilceler: [],
+          mahalleler: []
+        }
+      ];
+      this.ekMekanIl = '';
+      this.ekMekanIlce = '';
+      this.ekMekanMahalle = '';
+      this.ekMekanMekan = '';
+      this.ekMekanFiltreleIlceler = [];
+      this.ekMekanFiltreleMahalleler = [];
+      this.cdr.markForCheck();
+    }
+  }
+
+  ekMekanSil(index: number): void {
+    this.ekMekanlar = this.ekMekanlar.filter((_, i) => i !== index);
+    this.cdr.markForCheck();
   }
 
   iptalEt(): void {
@@ -277,12 +351,24 @@ export class VIP implements OnInit {
     this.unvan = '';
     this.mekan = '';
     this.il = '';
+    this.ilce = '';
+    this.mahalle = '';
+    this.konum = '';
     this.ziyaretDurumu = 0;
     this.hassasiyet = 0;
     this.guvenlikSeviyesi = 'Normal';
     this.gozlemNoktalari = '';
     this.baslangicTarihi = new Date().toISOString().substring(0, 16);
     this.bitisTarihi = new Date(Date.now() + 60 * 60 * 1000).toISOString().substring(0, 16);
+    this.ekMekanlar = [];
+    this.ekMekanIl = '';
+    this.ekMekanIlce = '';
+    this.ekMekanMahalle = '';
+    this.ekMekanMekan = '';
+    this.ekMekanFiltreleIlceler = [];
+    this.ekMekanFiltreleMahalleler = [];
+    this.filtreliIlceler = [];
+    this.filtreliMahalleler = [];
   }
 
   trackById(_index: number, item: { id: string }): string { return item.id; }

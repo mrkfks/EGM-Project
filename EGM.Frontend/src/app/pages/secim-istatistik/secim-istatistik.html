@@ -4,35 +4,59 @@
   <div class="filtre-bar">
     <div class="filtre-group">
       <label>Müşahit</label>
-      <input type="text" [(ngModel)]="filtreMusahit" placeholder="Müşahit adı..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreMusahit" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let m of tumMusahitler" [value]="m">{{ m }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>İl</label>
-      <input type="text" [(ngModel)]="filtreIl" placeholder="İl adı..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIl" (change)="filtreIlce = ''; filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of ilSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>İlçe</label>
-      <input type="text" [(ngModel)]="filtreIlce" placeholder="İlçe adı..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreIlce" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of ilceSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Mahalle</label>
-      <input type="text" [(ngModel)]="filtreMahalle" placeholder="Mahalle..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreMahalle" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let ma of tumMahalleler" [value]="ma">{{ ma }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Okul</label>
-      <input type="text" [(ngModel)]="filtreOkul" placeholder="Okul adı..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreOkul" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let o of tumOkullar" [value]="o">{{ o }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Sandık No</label>
-      <input type="text" [(ngModel)]="filtreSandikNo" placeholder="Sandık no..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreSandikNo" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let s of tumSandikNolari" [value]="s">{{ s }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Konu</label>
-      <input type="text" [(ngModel)]="filtreKonu" placeholder="Konu ara..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreKonu" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let k of tumKonular" [value]="k">{{ k }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Olay Kategorisi</label>
-      <input type="text" [(ngModel)]="filtreKategori" placeholder="Kategori..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreKategori" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let ka of tumKategoriler" [value]="ka">{{ ka }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Başlangıç Tarihi</label>

@@ -18,6 +18,13 @@
       </select>
     </div>
     <div class="flt-group">
+      <label>Olay Türü</label>
+      <select [(ngModel)]="filterOlayTuru" class="flt-input">
+        <option value="">Tümü</option>
+        <option *ngFor="let t of olayTurleri" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+    <div class="flt-group">
       <label>Konu</label>
       <select [(ngModel)]="filterKonuId" class="flt-input">
         <option value="">Tümü</option>

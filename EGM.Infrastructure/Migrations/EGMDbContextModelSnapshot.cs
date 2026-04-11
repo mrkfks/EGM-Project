@@ -651,8 +651,14 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Mekan")
                         .HasColumnType("TEXT");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("REAL");
 
                     b.Property<string>("TakipNo")
                         .HasColumnType("TEXT");

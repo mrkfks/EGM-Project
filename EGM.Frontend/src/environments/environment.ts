@@ -2,5 +2,6 @@ const _host = typeof window !== 'undefined' ? window.location.hostname : 'localh
 
 export const environment = {
   production: false,
-  apiUrl: `http://${_host}:5117`
+  apiUrl: `http://${_host}:5117`,
+  apiBaseUrl: `http://${_host}:5117`
 };

@@ -58,9 +58,9 @@
         </div>
         <div class="form-group">
           <label>Ilce <span class="zorunlu">*</span></label>
-          <select [(ngModel)]="ilce" [disabled]="!il">
+          <select [(ngModel)]="ilce" (ngModelChange)="ilceDegisti($event)" [disabled]="!il">
             <option value="">Ilce seciniz</option>
-            <option *ngFor="let d of filtreliIlceler" [value]="d">{{ d }}</option>
+            <option *ngFor="let d of filtreliIlceler" [value]="d.name">{{ d.name }}</option>
           </select>
         </div>
       </div>
@@ -69,7 +69,10 @@
       <div class="form-row">
         <div class="form-group">
           <label>Mahalle</label>
-          <input type="text" [(ngModel)]="mahalle" placeholder="Mahalle adi (opsiyonel)" />
+          <select [(ngModel)]="mahalle" [disabled]="!ilce">
+            <option value="">Mahalle seciniz</option>
+            <option *ngFor="let m of filtreliMahalleler" [value]="m.name">{{ m.name }}</option>
+          </select>
         </div>
         <div class="form-group">
           <label>Okul</label>

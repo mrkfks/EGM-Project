@@ -58,11 +58,17 @@
     </div>
     <div class="filtre-group">
       <label>Mekan</label>
-      <input type="text" [(ngModel)]="filtreMekan" placeholder="Mekan..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreMekan" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of mekanSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Takip No</label>
-      <input type="text" [(ngModel)]="filtreTakipNo" placeholder="Takip no..." (input)="filtrele()" />
+      <select [(ngModel)]="filtreTakipNo" (change)="filtrele()">
+        <option value="">Tümü</option>
+        <option *ngFor="let v of takipNoSecenekler" [value]="v">{{ v }}</option>
+      </select>
     </div>
     <div class="filtre-group">
       <label>Başlangıç Tarihi</label>

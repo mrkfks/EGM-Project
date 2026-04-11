@@ -1,0 +1,81 @@
+<div class="harita-container">
+  <!-- Kontrol Paneli -->
+  <div class="control-panel">
+    <div class="control-group">
+      <label for="province-select">İl Seç:</label>
+      <select
+        id="province-select"
+        [(ngModel)]="selectedProvince"
+        (change)="onProvinceChange()"
+        class="form-control"
+      >
+        <option value="">Tüm İller</option>
+        <option *ngFor="let province of provinces" [value]="province.name">
+          {{ province.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="year-select">Yıl Seç:</label>
+      <select
+        id="year-select"
+        [(ngModel)]="selectedYear"
+        (change)="onYearChange()"
+        class="form-control"
+      >
+        <option [value]="2024">2024</option>
+        <option [value]="2025">2025</option>
+        <option [value]="2026">2026</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="showOlaylar" (change)="toggleOlaylar()" />
+        Olayları Göster
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="showVIPZiyaretler" (change)="toggleVIPZiyaretler()" />
+        VIP Ziyaretlerini Göster
+      </label>
+    </div>
+
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input type="checkbox" [(ngModel)]="showProvinceBoundaries" (change)="toggleProvinceBoundaries()" />
+        İl Sınırlarını Göster
+      </label>
+    </div>
+
+    <button class="btn btn-primary" (click)="resetMap()" title="Haritayı sıfırla">
+      Sıfırla
+    </button>
+
+    <div *ngIf="isLoading" class="loading">Veriler yükleniyor...</div>
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  </div>
+
+  <!-- Harita -->
+  <div #mapContainer class="map-wrapper"></div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-title">Gösterge</div>
+    <div class="legend-item">
+      <span class="legend-marker olay-marker"></span>
+      <span>Olaylar</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-marker vip-marker"></span>
+      <span>VIP Ziyaretleri</span>
+    </div>
+    <div class="legend-item">
+      <span class="legend-marker boundary-marker"></span>
+      <span>İl Sınırları</span>
+    </div>
+  </div>
+</div>

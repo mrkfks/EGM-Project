@@ -147,6 +147,7 @@ builder.Services.AddScoped<RaporlarService>();
 
 // ── Coğrafi Veri Servisi (TurkiyeRehber.sqlite) ──────────────────────────
 builder.Services.AddSingleton<IGeoService, GeoDbService>();
+builder.Services.AddScoped<IGeoAreaService, GeoAreaService>();
 
 // ── Bildirim Servisi ─────────────────────────────────────────────────────
 builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();

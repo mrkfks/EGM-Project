@@ -49,6 +49,11 @@ export class SosyalMedyaIstatistik implements OnInit {
   filtreTarih1        = '';
   filtreTarih2        = '';
 
+  // Seçenek listeleri
+  tumPlatformlar: string[] = [];
+  tumKonular: string[] = [];
+  tumKisilerKurumlar: string[] = [];
+
   // Sayfalama
   readonly sayfaBoyutu = 20;
   mevcutSayfa = 1;
@@ -65,6 +70,7 @@ export class SosyalMedyaIstatistik implements OnInit {
     this.http.get<SosyalMedyaItem[]>(`${API}/sosyalmedyaolay`).subscribe({
       next: res => {
         this.tumKayitlar = res;
+        this.secenekleriCekil();
         this.filtrele();
         this.yukleniyor = false;
         this.cdr.markForCheck();
@@ -77,22 +83,28 @@ export class SosyalMedyaIstatistik implements OnInit {
     });
   }
 
+  secenekleriCekil(): void {
+    this.tumPlatformlar = [...new Set(this.tumKayitlar.map(o => o.platform ?? '').filter(v => v))].sort();
+    this.tumKonular = [...new Set(this.tumKayitlar.map(o => o.konu ?? '').filter(v => v))].sort();
+    this.tumKisilerKurumlar = [...new Set(this.tumKayitlar.map(o => o.ilgiliKisiKurum ?? '').filter(v => v))].sort();
+  }
+
   filtrele(): void {
     this.mevcutSayfa = 1;
     let sonuc = [...this.tumKayitlar];
 
     if (this.filtreHassasiyet !== '')
       sonuc = sonuc.filter(s => s.hassasiyet === +this.filtreHassasiyet);
-    if (this.filtrePlatform.trim())
-      sonuc = sonuc.filter(s => s.platform?.toLowerCase().includes(this.filtrePlatform.trim().toLowerCase()));
-    if (this.filtreKonu.trim())
-      sonuc = sonuc.filter(s => s.konu?.toLowerCase().includes(this.filtreKonu.trim().toLowerCase()));
-    if (this.filtreIlgiliKisi.trim())
-      sonuc = sonuc.filter(s => s.ilgiliKisiKurum?.toLowerCase().includes(this.filtreIlgiliKisi.trim().toLowerCase()));
-    if (this.filtreIl.trim())
-      sonuc = sonuc.filter(s => s.il?.toLowerCase().includes(this.filtreIl.trim().toLowerCase()));
-    if (this.filtreIlce.trim())
-      sonuc = sonuc.filter(s => s.ilce?.toLowerCase().includes(this.filtreIlce.trim().toLowerCase()));
+    if (this.filtrePlatform)
+      sonuc = sonuc.filter(s => s.platform === this.filtrePlatform);
+    if (this.filtreKonu)
+      sonuc = sonuc.filter(s => s.konu === this.filtreKonu);
+    if (this.filtreIlgiliKisi)
+      sonuc = sonuc.filter(s => s.ilgiliKisiKurum === this.filtreIlgiliKisi);
+    if (this.filtreIl)
+      sonuc = sonuc.filter(s => s.il === this.filtreIl);
+    if (this.filtreIlce)
+      sonuc = sonuc.filter(s => s.ilce === this.filtreIlce);
     if (this.filtreTarih1) {
       const t1 = new Date(this.filtreTarih1);
       sonuc = sonuc.filter(s => s.paylasimTarihi && new Date(s.paylasimTarihi) >= t1);
@@ -126,6 +138,15 @@ export class SosyalMedyaIstatistik implements OnInit {
 
   sayfayaGit(p: number): void {
     if (p >= 1 && p <= this.toplamSayfa) this.mevcutSayfa = p;
+  }
+
+  get ilSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(o => o.il ?? '').filter(v => v))].sort();
+  }
+
+  get ilceSecenekler(): string[] {
+    const base = this.filtreIl ? this.tumKayitlar.filter(o => o.il === this.filtreIl) : this.tumKayitlar;
+    return [...new Set(base.map(o => o.ilce ?? '').filter(v => v))].sort();
   }
 
   get sayfaNumaralari(): number[] {

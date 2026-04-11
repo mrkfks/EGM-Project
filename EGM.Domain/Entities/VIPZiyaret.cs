@@ -11,6 +11,8 @@ namespace EGM.Domain.Entities
         public DateTime BitisTarihi { get; set; }
         public string? Il { get; set; }
         public string? Mekan { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
         public Hassasiyet Hassasiyet { get; set; }
         public string? GuvenlikSeviyesi { get; set; }
         public string? GozlemNoktalari { get; set; }

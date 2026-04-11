@@ -27,10 +27,12 @@
     "@microsoft/signalr": "^8.0.7",
     "@ng-bootstrap/ng-bootstrap": "^20.0.0",
     "@popperjs/core": "^2.11.8",
+    "@types/leaflet": "^1.9.21",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
     "exceljs": "^4.4.0",
     "express": "^5.1.0",
+    "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

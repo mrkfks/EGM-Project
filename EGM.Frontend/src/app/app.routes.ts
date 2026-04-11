@@ -20,6 +20,7 @@ export const routes: Routes = [
 
     { path: 'ajanda',            loadComponent: () => import('./pages/ajanda/ajanda').then(m => m.Ajanda),                     canActivate: [authGuard] },
     { path: 'olay',              loadComponent: () => import('./pages/olay/olay').then(m => m.Olay),                         canActivate: [authGuard] },
+    { path: 'harita',            loadComponent: () => import('./pages/harita/harita.component').then(m => m.HaritaComponent),  canActivate: [authGuard] },
     { path: 'istatistikler',     loadComponent: () => import('./pages/istatistikler/istatistikler').then(m => m.Istatistikler), canActivate: [authGuard] },
     { path: 'raporlar',          loadComponent: () => import('./pages/bultenler/bultenler').then(m => m.Bultenler),          canActivate: [authGuard] },
     { path: 'bulten-paneli',     loadComponent: () => import('./pages/bulten-paneli/bulten-paneli').then(m => m.BultenPaneli), canActivate: [authGuard] },

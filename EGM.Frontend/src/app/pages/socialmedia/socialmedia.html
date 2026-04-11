@@ -102,18 +102,36 @@
         <span *ngIf="konularYukleniyor" class="field-hint">Yukleniyor...</span>
       </div>
 
-      <!-- Il / Ilce -->
+      <!-- Il / Ilce / Mahalle / Konum -->
       <div class="field-row">
         <div class="field-group flex-1">
           <label class="field-label">Il</label>
-          <select class="form-input" [(ngModel)]="form.il">
+          <select class="form-input" [(ngModel)]="form.il" (ngModelChange)="ilDegisti()">
             <option value="">— Seciniz —</option>
-            <option *ngFor="let i of iller" [value]="i">{{ i }}</option>
+            <option *ngFor="let i of tumIller" [value]="i.name">{{ i.name }}</option>
           </select>
         </div>
         <div class="field-group flex-1">
           <label class="field-label">Ilce</label>
-          <input type="text" class="form-input" [(ngModel)]="form.ilce" placeholder="Ilce adi (opsiyonel)" maxlength="100" />
+          <select class="form-input" [(ngModel)]="form.ilce" (ngModelChange)="ilceDegisti()" [disabled]="!form.il">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let d of filtreliIlceler" [value]="d.name">{{ d.name }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Mahalle / Konum -->
+      <div class="field-row">
+        <div class="field-group flex-1">
+          <label class="field-label">Mahalle</label>
+          <select class="form-input" [(ngModel)]="form.mahalle" (ngModelChange)="mahalleDegisti()" [disabled]="!form.ilce">
+            <option value="">— Seciniz —</option>
+            <option *ngFor="let m of filtreliMahalleler" [value]="m.name">{{ m.name }}</option>
+          </select>
+        </div>
+        <div class="field-group flex-1">
+          <label class="field-label">Konum Bilgisi (Otomatik)</label>
+          <input type="text" class="form-input" [(ngModel)]="form.konum" placeholder="Il/Ilce/Mahalle secimine gore otomatik doldurulacak" readonly maxlength="250" />
         </div>
       </div>
 

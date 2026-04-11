@@ -19,7 +19,7 @@
           "options": {
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "allowedCommonJsDependencies": [],
+            "allowedCommonJsDependencies": ["exceljs"],
             "assets": [
               {
                 "glob": "**/*",
@@ -31,18 +31,17 @@
           },
           "configurations": {
             "production": {              "optimization": true,
-              "buildOptimizer": true,
               "sourceMap": false,
               "namedChunks": false,              "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "2MB",
+                  "maximumError": "4MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "4kB",
-                  "maximumError": "8kB"
+                  "maximumWarning": "32kB",
+                  "maximumError": "64kB"
                 }
               ],
               "outputHashing": "all"

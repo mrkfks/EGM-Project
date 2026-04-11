@@ -93,9 +93,8 @@ export class VipIstatistik implements OnInit {
     if (this.filtreHassasiyet !== '') {
       sonuc = sonuc.filter(v => v.hassasiyet === +this.filtreHassasiyet);
     }
-    if (this.filtreIl.trim()) {
-      const il = this.filtreIl.trim().toLowerCase();
-      sonuc = sonuc.filter(v => v.il?.toLowerCase().includes(il));
+    if (this.filtreIl !== '') {
+      sonuc = sonuc.filter(v => v.il === this.filtreIl);
     }
     if (this.filtreTarih1) {
       const t1 = new Date(this.filtreTarih1);
@@ -131,6 +130,10 @@ export class VipIstatistik implements OnInit {
     const end   = Math.min(this.toplamSayfa, this.mevcutSayfa + 2);
     for (let i = start; i <= end; i++) pages.push(i);
     return pages;
+  }
+
+  get ilSecenekler(): string[] {
+    return [...new Set(this.tumKayitlar.map(k => k.il ?? '').filter(v => v))].sort();
   }
 
   hassasiyetClass(h: number): string {

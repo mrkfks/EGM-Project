@@ -1,12 +1,12 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, PLATFORM_ID } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { OlayTuruService, OlayTuru as OlayTuruDto } from '../../services/olay-turu.service';
 import { GerceklesmeSekliService, GerceklesmeSekli as GerceklesmeSekliDto } from '../../services/gerceklesme-sekli.service';
-import { getIlceler } from '../../data/ilceler';
 
 const API = environment.apiUrl + '/api';
 
@@ -15,32 +15,6 @@ const HASSASIYET = [
   { value: 1, label: 'Orta',   color: '#f39c12', shadow: '0 0 12px rgba(243,156,18,0.45)' },
   { value: 2, label: 'Yüksek', color: '#e74c3c', shadow: '0 0 12px rgba(231,76,60,0.45)'  },
   { value: 3, label: 'Kritik', color: '#8e44ad', shadow: '0 0 12px rgba(142,68,173,0.45)' },
-];
-
-
-
-const IL_LISTESI: { id: number; ad: string }[] = [
-  {id:1,ad:'Adana'},{id:2,ad:'Adıyaman'},{id:3,ad:'Afyonkarahisar'},{id:4,ad:'Ağrı'},
-  {id:5,ad:'Amasya'},{id:6,ad:'Ankara'},{id:7,ad:'Antalya'},{id:8,ad:'Artvin'},
-  {id:9,ad:'Aydın'},{id:10,ad:'Balıkesir'},{id:11,ad:'Bilecik'},{id:12,ad:'Bingöl'},
-  {id:13,ad:'Bitlis'},{id:14,ad:'Bolu'},{id:15,ad:'Burdur'},{id:16,ad:'Bursa'},
-  {id:17,ad:'Çanakkale'},{id:18,ad:'Çankırı'},{id:19,ad:'Çorum'},{id:20,ad:'Denizli'},
-  {id:21,ad:'Diyarbakır'},{id:22,ad:'Edirne'},{id:23,ad:'Elazığ'},{id:24,ad:'Erzincan'},
-  {id:25,ad:'Erzurum'},{id:26,ad:'Eskişehir'},{id:27,ad:'Gaziantep'},{id:28,ad:'Giresun'},
-  {id:29,ad:'Gümüşhane'},{id:30,ad:'Hakkari'},{id:31,ad:'Hatay'},{id:32,ad:'Isparta'},
-  {id:33,ad:'Mersin'},{id:34,ad:'İstanbul'},{id:35,ad:'İzmir'},{id:36,ad:'Kars'},
-  {id:37,ad:'Kastamonu'},{id:38,ad:'Kayseri'},{id:39,ad:'Kırklareli'},{id:40,ad:'Kırşehir'},
-  {id:41,ad:'Kocaeli'},{id:42,ad:'Konya'},{id:43,ad:'Kütahya'},{id:44,ad:'Malatya'},
-  {id:45,ad:'Manisa'},{id:46,ad:'Kahramanmaraş'},{id:47,ad:'Mardin'},{id:48,ad:'Muğla'},
-  {id:49,ad:'Muş'},{id:50,ad:'Nevşehir'},{id:51,ad:'Niğde'},{id:52,ad:'Ordu'},
-  {id:53,ad:'Rize'},{id:54,ad:'Sakarya'},{id:55,ad:'Samsun'},{id:56,ad:'Siirt'},
-  {id:57,ad:'Sinop'},{id:58,ad:'Sivas'},{id:59,ad:'Tekirdağ'},{id:60,ad:'Tokat'},
-  {id:61,ad:'Trabzon'},{id:62,ad:'Tunceli'},{id:63,ad:'Şanlıurfa'},{id:64,ad:'Uşak'},
-  {id:65,ad:'Van'},{id:66,ad:'Yozgat'},{id:67,ad:'Zonguldak'},{id:68,ad:'Aksaray'},
-  {id:69,ad:'Bayburt'},{id:70,ad:'Karaman'},{id:71,ad:'Kırıkkale'},{id:72,ad:'Batman'},
-  {id:73,ad:'Şırnak'},{id:74,ad:'Bartın'},{id:75,ad:'Ardahan'},{id:76,ad:'Iğdır'},
-  {id:77,ad:'Yalova'},{id:78,ad:'Karabük'},{id:79,ad:'Kilis'},{id:80,ad:'Osmaniye'},
-  {id:81,ad:'Düzce'},
 ];
 
 
@@ -63,7 +37,7 @@ interface OlayListItem {
 @Component({
   selector: 'app-sokak-olay-ekle',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './sokak-olay-ekle.html',
   styleUrl: './sokak-olay-ekle.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -100,13 +74,23 @@ export class SokakOlayEkle implements OnInit {
   readonly isBrowser: boolean;
 
   readonly HASSASIYET = HASSASIYET;
-  readonly IL_LISTESI = IL_LISTESI;
-  filtreliIlceler: string[] = [];
+  
+  // API'den yüklenen veriler
+  tumIller: { name: string; osmId: number }[] = [];
+  filtreliIlceler: { name: string; osmId: number }[] = [];
+  filtreliMahalleler: { name: string; osmId: number }[] = [];
 
   userPlans: OlayListItem[] = [];
   completedEvents: OlayListItem[] = [];
   isLoadingPlanned  = false;
   isLoadingCompleted = false;
+
+  ekKonumlar: {
+    il: string; ilce: string; mahalle: string;
+    konum: string; mekan: string; katilimciSayisi: number | null;
+    ilceler: { name: string; osmId: number }[];
+    mahalleler: { name: string; osmId: number }[];
+  }[] = [];
 
   /** Gerçekleşenler formuna yüklenen planlanan olayın id'si (null = yeni kayıt) */
   selectedPlanId: string | null = null;
@@ -175,9 +159,7 @@ export class SokakOlayEkle implements OnInit {
       konuId:           ['', Validators.required],
       tarih:            ['', Validators.required],
       il:               ['', Validators.required],
-      ilce:             ['', Validators.maxLength(100)],
-      baslangicKonum:   ['', [Validators.pattern(/^-?\d{1,3}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/)]],
-      bitisKonum:       ['', [Validators.pattern(/^-?\d{1,3}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/)]],
+      ilce:             ['', Validators.maxLength(100)],      mahalle:          ['', Validators.maxLength(100)],      baslangicKonum:   ['', [Validators.pattern(/^-?\d{1,3}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/)]],
       mekan:            ['', Validators.maxLength(250)],
       latitude:         [null, [Validators.min(-90),   Validators.max(90)]],
       longitude:        [null, [Validators.min(-180),  Validators.max(180)]],
@@ -193,8 +175,10 @@ export class SokakOlayEkle implements OnInit {
       evrakNumarasi:    [''],
     });
 
+
     if (this.isCityScoped && this.tokenCityId) {
-      const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+      // Seçili şehri adıyla bul
+      const ilAdi = this.tumIller.find(i => i.osmId === this.tokenCityId)?.name ?? '';
       this.form.get('il')!.setValue(ilAdi);
       this.form.get('il')!.disable();
       this.form.get('cityId')!.setValue(this.tokenCityId);
@@ -203,17 +187,49 @@ export class SokakOlayEkle implements OnInit {
 
     this.form.get('hassasiyet')!.valueChanges.subscribe(v => this.onHassasiyetChange(+v));
 
-    // İl değişince ilçeleri güncelle
+    // İl değişince ilçeleri API'den yükle
     this.form.get('il')!.valueChanges.subscribe((ilAdi: string) => {
-      this.filtreliIlceler = getIlceler(ilAdi);
-      this.form.get('ilce')!.setValue('');
-      this.cdr.markForCheck();
+      if (!ilAdi || ilAdi.trim() === '') {
+        this.filtreliIlceler = [];
+        this.filtreliMahalleler = [];
+      } else {
+        this.http.get<any[]>(`${API}/geo/districts-geopackage?province=${encodeURIComponent(ilAdi)}`)
+          .pipe(
+            catchError(err => {
+              console.error('İlçe yükleme hatası:', err);
+              return of([]);
+            })
+          )
+          .subscribe(districts => {
+            this.filtreliIlceler = districts;
+            this.form.get('ilce')!.setValue('');
+            this.filtreliMahalleler = [];
+            this.cdr.markForCheck();
+          });
+      }
     });
-    // Başlangıçta mevcut il değeri için ilçeleri yükle
-    const baslangicIl = this.form.get('il')!.value;
-    if (baslangicIl) {
-      this.filtreliIlceler = getIlceler(baslangicIl);
-    }
+
+    // İlçe değişince mahalleri API'den yükle
+    this.form.get('ilce')?.valueChanges.subscribe((ilceName: string) => {
+      this.form.get('mahalle')!.setValue('');
+      if (!ilceName || ilceName.trim() === '') {
+        this.filtreliMahalleler = [];
+      } else {
+        this.http.get<any[]>(`${API}/geo/neighborhoods-geopackage?district=${encodeURIComponent(ilceName)}`)
+          .pipe(
+            catchError(err => {
+              console.error('Mahalle yükleme hatası:', err);
+              return of([]);
+            })
+          )
+          .subscribe(neighborhoods => {
+            this.filtreliMahalleler = neighborhoods;
+            this.cdr.markForCheck();
+          });
+      }
+    });
+
+    this.setupLocationAutoFill();
   }
 
   get f(): { [key: string]: AbstractControl } { return this.form.controls; }
@@ -233,6 +249,146 @@ export class SokakOlayEkle implements OnInit {
     return { lat, lng };
   }
 
+  // ── İl/İlçleden Koordinat Otomatik Doldurma ──────────────────────────
+  private setupLocationAutoFill(): void {
+    // İL seçimi değiştiğinde
+    this.form.get('il')?.valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        switchMap(provinceName => {
+          if (!provinceName) return of(null);
+          
+          return this.http.get<any>(
+            `${API}/geo/get-coordinates?provinceName=${encodeURIComponent(provinceName)}`
+          ).pipe(
+            catchError(err => {
+              console.error('İl için koordinat hatası:', err);
+              return of(null);
+            })
+          );
+        })
+      )
+      .subscribe(coords => {
+        if (coords?.latitude && coords?.longitude) {
+          this.form.patchValue({
+            baslangicKonum: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`
+          }, { emitEvent: false });
+          
+          this.cdr.markForCheck();
+        }
+      });
+
+    // İLÇE seçimi değiştiğinde
+    this.form.get('ilce')?.valueChanges
+      .pipe(
+        distinctUntilChanged(),
+        switchMap(districtName => {
+          if (!districtName) return of(null);
+          
+          const provinceName = this.form.get('il')?.value;
+          if (!provinceName) return of(null);
+          
+          return this.http.get<any>(
+            `${API}/geo/get-coordinates?` +
+            `provinceName=${encodeURIComponent(provinceName)}&` +
+            `districtName=${encodeURIComponent(districtName)}`
+          ).pipe(
+            catchError(err => {
+              console.error('İlçe için koordinat hatası:', err);
+              return of(null);
+            })
+          );
+        })
+      )
+      .subscribe(coords => {
+        if (coords?.latitude && coords?.longitude) {
+          this.form.patchValue({
+            baslangicKonum: `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`
+          }, { emitEvent: false });
+          
+          this.cdr.markForCheck();
+        }
+      });
+
+    // REVERSE LOOKUP: KOORDİNAT GİRİŞİ → İL/İLÇE DOLDURMA
+    // Başlangıç Konum alanı koordinat değiştiğinde il/ilçe'yi otomatik bulur
+    this.form.get('baslangicKonum')?.valueChanges
+      .pipe(
+        debounceTime(500), // 500ms bekleme (kullanıcı yazması bitsin)
+        distinctUntilChanged(),
+        switchMap(konum => {
+          if (!konum || konum.trim() === '') return of(null);
+          
+          // Koordinat parse etme: "39.925533, 32.866287" veya "39.925533,32.866287"
+          const parts = konum.split(',').map((p: string) => parseFloat(p.trim()));
+          
+          if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) {
+            // Geçerli koordinat değil
+            return of(null);
+          }
+          
+          const latitude = parts[0];
+          const longitude = parts[1];
+          
+          // Koordinat aralığını kontrol et
+          if (latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+            return of(null);
+          }
+          
+          // API'ye gönder: koordinat → il/ilçe bulma
+          return this.http.get<any>(
+            `${API}/geo/resolve-location?latitude=${latitude}&longitude=${longitude}`
+          ).pipe(
+            catchError(err => {
+              console.warn('Koordinat çözümleme başarısız:', err);
+              return of(null);
+            })
+          );
+        })
+      )
+      .subscribe(location => {
+        if (location?.province || location?.district || location?.neighborhood) {
+          const updateObj: any = {};
+          
+          // İl doldur (sadece boşsa)
+          if (location.province && !this.form.get('il')?.value) {
+            updateObj['il'] = location.province;
+          }
+          
+          // İlçe doldur (sadece boşsa ve il seçildiyse)
+          if (location.district && !this.form.get('ilce')?.value) {
+            updateObj['ilce'] = location.district;
+          }
+          
+          // Mahalle doldur (sadece boşsa)
+          if (location.neighborhood && !this.form.get('mahalle')?.value) {
+            updateObj['mahalle'] = location.neighborhood;
+          }
+          
+          if (Object.keys(updateObj).length > 0) {
+            this.form.patchValue(updateObj, { emitEvent: false });
+            this.cdr.markForCheck();
+            
+            // İl değişti, ilçe listesini API'den güncelle
+            if (updateObj['il']) {
+              const ilAdi = updateObj['il'];
+              this.http.get<any[]>(`${API}/geo/districts-geopackage?province=${encodeURIComponent(ilAdi)}`)
+                .pipe(
+                  catchError(err => {
+                    console.error('İlçe yükleme hatası:', err);
+                    return of([]);
+                  })
+                )
+                .subscribe(districts => {
+                  this.filtreliIlceler = districts;
+                  this.cdr.markForCheck();
+                });
+            }
+          }
+        }
+      });
+  }
+
   private onHassasiyetChange(val: number): void {
     const h = HASSASIYET.find(x => x.value === val) ?? HASSASIYET[0];
     this.hassasiyetColor  = h.color;
@@ -241,6 +397,17 @@ export class SokakOlayEkle implements OnInit {
 
   // ── Lookup yükleme ──────────────────────────────────────────────────
   private loadLookups(): void {
+    // İlleri TurkeyRehber'dan yükle
+    this.http.get<any[]>(`${API}/geo/provinces-geopackage`).subscribe({
+      next: res => { 
+        this.tumIller = res;
+        this.cdr.markForCheck();
+      },
+      error: (err) => {
+        console.error('İlleri yükleme hatası:', err);
+      },
+    });
+
     this.http.get<any[]>(`${API}/organizator`).subscribe({
       next: res => { this.organizatorler = res.map(o => ({ id: o.id, ad: o.ad })); this.cdr.markForCheck(); },
       error: () => {},
@@ -341,9 +508,10 @@ export class SokakOlayEkle implements OnInit {
     this.selectedPlanId = null;
     this.formError = null;
     this.formSuccess = null;
+    this.ekKonumlar = [];
     this.form.reset();
     if (this.isCityScoped && this.tokenCityId) {
-      const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+      const ilAdi = this.tumIller.find((i: any) => i.osmId === this.tokenCityId)?.name ?? '';
       this.form.get('il')!.setValue(ilAdi);
     }
   }
@@ -353,9 +521,10 @@ export class SokakOlayEkle implements OnInit {
     this.selectedPlanId = null;
     this.formError = null;
     this.formSuccess = null;
+    this.ekKonumlar = [];
     this.form.reset();
     if (this.isCityScoped && this.tokenCityId) {
-      const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+      const ilAdi = this.tumIller.find((i: any) => i.osmId === this.tokenCityId)?.name ?? '';
       this.form.get('il')!.setValue(ilAdi);
     }
   }
@@ -379,8 +548,6 @@ export class SokakOlayEkle implements OnInit {
           ilce:             detail.ilce ?? '',
           baslangicKonum: detail.baslangicLat != null && detail.baslangicLng != null
             ? `${detail.baslangicLat},${detail.baslangicLng}` : '',
-          bitisKonum:     detail.bitisLat != null && detail.bitisLng != null
-            ? `${detail.bitisLat},${detail.bitisLng}` : '',
           mekan:            detail.mekan ?? '',
           katilimciSayisi:  detail.katilimciSayisi ?? null,
           hassasiyet:       detail.hassasiyet ?? 0,
@@ -424,8 +591,6 @@ export class SokakOlayEkle implements OnInit {
       ilce:            v.ilce || null,
       baslangicLat:     this.parseKonum(v.baslangicKonum)?.lat ?? null,
       baslangicLng:     this.parseKonum(v.baslangicKonum)?.lng ?? null,
-      bitisLat:         this.parseKonum(v.bitisKonum)?.lat ?? null,
-      bitisLng:         this.parseKonum(v.bitisKonum)?.lng ?? null,
       mekan:           v.mekan || null,
       latitude:        v.latitude ?? null,
       longitude:       v.longitude ?? null,
@@ -454,7 +619,7 @@ export class SokakOlayEkle implements OnInit {
         this.selectedPlanId = null;
         this.form.reset();
         if (this.isCityScoped && this.tokenCityId) {
-          const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+          const ilAdi = this.tumIller.find((i: any) => i.osmId === this.tokenCityId)?.name ?? '';
           this.form.get('il')!.setValue(ilAdi);
         }
         this.cdr.markForCheck();
@@ -500,8 +665,6 @@ export class SokakOlayEkle implements OnInit {
       ilce:            v.ilce || null,
       baslangicLat:     this.parseKonum(v.baslangicKonum)?.lat ?? null,
       baslangicLng:     this.parseKonum(v.baslangicKonum)?.lng ?? null,
-      bitisLat:         this.parseKonum(v.bitisKonum)?.lat ?? null,
-      bitisLng:         this.parseKonum(v.bitisKonum)?.lng ?? null,
       mekan:           v.mekan || null,
       latitude:        v.latitude ?? null,
       longitude:       v.longitude ?? null,
@@ -535,7 +698,7 @@ export class SokakOlayEkle implements OnInit {
           this.selectedPlanId = null;
           this.form.reset();
           if (this.isCityScoped && this.tokenCityId) {
-            const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+            const ilAdi = this.tumIller.find((i: any) => i.osmId === this.tokenCityId)?.name ?? '';
             this.form.get('il')!.setValue(ilAdi);
           }
           this.cdr.markForCheck();
@@ -558,9 +721,13 @@ export class SokakOlayEkle implements OnInit {
         this.formSuccess = this.activeForm === 'planned'
           ? 'Olay planlananlara kaydedildi.'
           : 'Olay gerçekleşenlere kaydedildi.';
+        // Ek konumlar varsa kaydet
+        if (this.ekKonumlar.length > 0) {
+          this.saveEkKonumlar((created as any).id);
+        }
         this.form.reset();
         if (this.isCityScoped && this.tokenCityId) {
-          const ilAdi = IL_LISTESI.find(i => i.id === this.tokenCityId)?.ad ?? '';
+          const ilAdi = this.tumIller.find((i: any) => i.osmId === this.tokenCityId)?.name ?? '';
           this.form.get('il')!.setValue(ilAdi);
         }
         if (this.activeForm === 'planned') {
@@ -589,4 +756,74 @@ export class SokakOlayEkle implements OnInit {
 
   trackById(_index: number, item: { id: string }): string { return item.id; }
   trackByValue(_index: number, item: string | number): string | number { return item; }
+
+  ekKonumEkle(): void {
+    this.ekKonumlar = [...this.ekKonumlar, {
+      il: '', ilce: '', mahalle: '',
+      konum: '', mekan: '', katilimciSayisi: null,
+      ilceler: [], mahalleler: []
+    }];
+    this.cdr.markForCheck();
+  }
+
+  ekKonumIlDegisti(i: number): void {
+    const ek = this.ekKonumlar[i];
+    ek.ilce = '';
+    ek.mahalle = '';
+    ek.ilceler = [];
+    ek.mahalleler = [];
+    ek.konum = '';
+    if (!ek.il) { this.cdr.markForCheck(); return; }
+    // İl koordinatını otomatik doldur
+    this.http.get<any>(`${API}/geo/get-coordinates?provinceName=${encodeURIComponent(ek.il)}`)
+      .pipe(catchError(() => of(null)))
+      .subscribe(coords => {
+        if (coords?.latitude && coords?.longitude) {
+          ek.konum = `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+        }
+        this.cdr.markForCheck();
+      });
+    this.http.get<any[]>(`${API}/geo/districts-geopackage?province=${encodeURIComponent(ek.il)}`)
+      .pipe(catchError(() => of([])))
+      .subscribe(districts => { ek.ilceler = districts; this.cdr.markForCheck(); });
+  }
+
+  ekKonumIlceDegisti(i: number): void {
+    const ek = this.ekKonumlar[i];
+    ek.mahalle = '';
+    ek.mahalleler = [];
+    if (!ek.ilce) { this.cdr.markForCheck(); return; }
+    // İlçe koordinatını otomatik doldur
+    this.http.get<any>(
+      `${API}/geo/get-coordinates?provinceName=${encodeURIComponent(ek.il)}&districtName=${encodeURIComponent(ek.ilce)}`
+    ).pipe(catchError(() => of(null)))
+      .subscribe(coords => {
+        if (coords?.latitude && coords?.longitude) {
+          ek.konum = `${coords.latitude.toFixed(6)}, ${coords.longitude.toFixed(6)}`;
+        }
+        this.cdr.markForCheck();
+      });
+    this.http.get<any[]>(`${API}/geo/neighborhoods-geopackage?district=${encodeURIComponent(ek.ilce)}`)
+      .pipe(catchError(() => of([])))
+      .subscribe(neighborhoods => { ek.mahalleler = neighborhoods; this.cdr.markForCheck(); });
+  }
+
+  ekKonumSil(index: number): void {
+    this.ekKonumlar = this.ekKonumlar.filter((_, i) => i !== index);
+    this.cdr.markForCheck();
+  }
+
+  private saveEkKonumlar(olayId: string): void {
+    this.ekKonumlar.forEach((ek, index) => {
+      const coords = this.parseKonum(ek.konum);
+      if (!coords) return;
+      this.http.post(`${API}/olay/${olayId}/rota`, {
+        noktaAdi: ek.mekan || null,
+        latitude: coords.lat,
+        longitude: coords.lng,
+        siraNo: index + 1
+      }).subscribe();
+    });
+    this.ekKonumlar = [];
+  }
 }

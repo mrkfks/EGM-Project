@@ -11,10 +11,11 @@
           "BCrypt.Net-Next": "4.1.0",
           "EGM.Application": "1.0.0",
           "EGM.Infrastructure": "1.0.0",
-          "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.3",
-          "Microsoft.AspNetCore.OpenApi": "10.0.3",
-          "Microsoft.EntityFrameworkCore.Design": "10.0.3",
-          "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "10.0.3",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.5",
+          "Microsoft.AspNetCore.OpenApi": "10.0.5",
+          "Microsoft.EntityFrameworkCore": "10.0.5",
+          "Microsoft.EntityFrameworkCore.Design": "10.0.5",
+          "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": "10.0.5",
           "Microsoft.IdentityModel.Tokens": "8.16.0",
           "Swashbuckle.AspNetCore": "10.1.4",
           "System.IdentityModel.Tokens.Jwt": "8.16.0"
@@ -39,25 +40,25 @@
           }
         }
       },
-      "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.3": {
+      "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.5": {
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
         },
         "runtime": {
           "lib/net10.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.AspNetCore.OpenApi/10.0.3": {
+      "Microsoft.AspNetCore.OpenApi/10.0.5": {
         "dependencies": {
           "Microsoft.OpenApi": "2.4.1"
         },
         "runtime": {
           "lib/net10.0/Microsoft.AspNetCore.OpenApi.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
@@ -341,104 +342,120 @@
           }
         }
       },
-      "Microsoft.Data.Sqlite.Core/10.0.3": {
+      "Microsoft.Data.Sqlite.Core/10.0.5": {
         "dependencies": {
           "SQLitePCLRaw.core": "2.1.11"
         },
         "runtime": {
           "lib/net8.0/Microsoft.Data.Sqlite.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.EntityFrameworkCore/10.0.3": {
+      "Microsoft.EntityFrameworkCore/10.0.5": {
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.3"
+          "Microsoft.EntityFrameworkCore.Abstractions": "10.0.5"
         },
         "runtime": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.EntityFrameworkCore.Abstractions/10.0.3": {
+      "Microsoft.EntityFrameworkCore.Abstractions/10.0.5": {
         "runtime": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Abstractions.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.EntityFrameworkCore.Design/10.0.3": {
+      "Microsoft.EntityFrameworkCore.Design/10.0.5": {
         "dependencies": {
           "Humanizer.Core": "2.14.1",
           "Microsoft.Build.Framework": "18.0.2",
           "Microsoft.CodeAnalysis.CSharp": "5.0.0",
           "Microsoft.CodeAnalysis.CSharp.Workspaces": "5.0.0",
           "Microsoft.CodeAnalysis.Workspaces.MSBuild": "5.0.0",
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.3",
-          "Microsoft.Extensions.DependencyModel": "10.0.3",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.5",
+          "Microsoft.Extensions.DependencyModel": "10.0.5",
           "Mono.TextTemplating": "3.0.0",
           "Newtonsoft.Json": "13.0.3"
         },
         "runtime": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Design.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.EntityFrameworkCore.Relational/10.0.3": {
+      "Microsoft.EntityFrameworkCore.Relational/10.0.5": {
         "dependencies": {
-          "Microsoft.EntityFrameworkCore": "10.0.3"
+          "Microsoft.EntityFrameworkCore": "10.0.5"
         },
         "runtime": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Relational.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.EntityFrameworkCore.Sqlite/10.0.3": {
+      "Microsoft.EntityFrameworkCore.Sqlite/10.0.5": {
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.3",
-          "Microsoft.Extensions.DependencyModel": "10.0.3",
+          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.5",
+          "Microsoft.Extensions.DependencyModel": "10.0.5",
           "SQLitePCLRaw.bundle_e_sqlite3": "2.1.11",
           "SQLitePCLRaw.core": "2.1.11"
         }
       },
-      "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.3": {
+      "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.5": {
         "dependencies": {
-          "Microsoft.Data.Sqlite.Core": "10.0.3",
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.3",
-          "Microsoft.Extensions.DependencyModel": "10.0.3",
+          "Microsoft.Data.Sqlite.Core": "10.0.5",
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.5",
+          "Microsoft.Extensions.DependencyModel": "10.0.5",
           "SQLitePCLRaw.core": "2.1.11"
         },
         "runtime": {
           "lib/net10.0/Microsoft.EntityFrameworkCore.Sqlite.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.Extensions.DependencyModel/10.0.3": {
+      "Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite/10.0.5": {
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore.Sqlite.Core": "10.0.5",
+          "Microsoft.Extensions.DependencyModel": "10.0.5",
+          "NetTopologySuite": "2.6.0",
+          "NetTopologySuite.IO.SpatiaLite": "2.0.0",
+          "SQLitePCLRaw.core": "2.1.11",
+          "mod_spatialite": "4.3.0.1"
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite.dll": {
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
+          }
+        }
+      },
+      "Microsoft.Extensions.DependencyModel/10.0.5": {
         "runtime": {
           "lib/net10.0/Microsoft.Extensions.DependencyModel.dll": {
-            "assemblyVersion": "10.0.0.3",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.0.5",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
-      "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore/10.0.3": {
+      "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore/10.0.5": {
         "dependencies": {
-          "Microsoft.EntityFrameworkCore.Relational": "10.0.3"
+          "Microsoft.EntityFrameworkCore.Relational": "10.0.5"
         },
         "runtime": {
           "lib/net10.0/Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore.dll": {
-            "assemblyVersion": "10.0.3.0",
-            "fileVersion": "10.0.326.7603"
+            "assemblyVersion": "10.0.5.0",
+            "fileVersion": "10.0.526.15411"
           }
         }
       },
@@ -522,6 +539,130 @@
           }
         }
       },
+      "mod_spatialite/4.3.0.1": {
+        "runtimeTargets": {
+          "runtimes/win-x64/native/libfreexl-1.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libgcc_s_seh-1.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libgeos.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libgeos_c.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libiconv-2.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/liblzma-5.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libproj-13.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libstdc++-6.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libwinpthread-1.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/libxml2-2.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/mod_spatialite.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x64/native/zlib1.dll": {
+            "rid": "win-x64",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libfreexl-1.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libgcc_s_dw2-1.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libgeos.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libgeos_c.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libiconv-2.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/liblzma-5.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libproj-13.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libstdc++-6.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libwinpthread-1.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/libxml2-2.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/mod_spatialite.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          },
+          "runtimes/win-x86/native/zlib1.dll": {
+            "rid": "win-x86",
+            "assetType": "native",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "Mono.TextTemplating/3.0.0": {
         "dependencies": {
           "System.CodeDom": "6.0.0"
@@ -530,6 +671,36 @@
           "lib/net6.0/Mono.TextTemplating.dll": {
             "assemblyVersion": "3.0.0.0",
             "fileVersion": "3.0.0.1"
+          }
+        }
+      },
+      "NetTopologySuite/2.6.0": {
+        "runtime": {
+          "lib/netstandard2.1/NetTopologySuite.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "NetTopologySuite.IO.GeoPackage/2.0.0": {
+        "dependencies": {
+          "NetTopologySuite": "2.6.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/NetTopologySuite.IO.GeoPackage.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "NetTopologySuite.IO.SpatiaLite/2.0.0": {
+        "dependencies": {
+          "NetTopologySuite": "2.6.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/NetTopologySuite.IO.SpatiaLite.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
           }
         }
       },
@@ -812,7 +983,7 @@
         "dependencies": {
           "BCrypt.Net-Next": "4.1.0",
           "EGM.Domain": "1.0.0",
-          "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.3",
+          "Microsoft.AspNetCore.Authentication.JwtBearer": "10.0.5",
           "Microsoft.IdentityModel.Tokens": "8.16.0",
           "System.IdentityModel.Tokens.Jwt": "8.16.0"
         },
@@ -824,6 +995,9 @@
         }
       },
       "EGM.Domain/1.0.0": {
+        "dependencies": {
+          "NetTopologySuite": "2.6.0"
+        },
         "runtime": {
           "EGM.Domain.dll": {
             "assemblyVersion": "1.0.0.0",
@@ -834,9 +1008,12 @@
       "EGM.Infrastructure/1.0.0": {
         "dependencies": {
           "EGM.Domain": "1.0.0",
-          "Microsoft.EntityFrameworkCore": "10.0.3",
-          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.3",
+          "Microsoft.EntityFrameworkCore": "10.0.5",
+          "Microsoft.EntityFrameworkCore.Sqlite": "10.0.5",
+          "Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite": "10.0.5",
           "Microsoft.IdentityModel.Tokens": "8.16.0",
+          "NetTopologySuite": "2.6.0",
+          "NetTopologySuite.IO.GeoPackage": "2.0.0",
           "System.IdentityModel.Tokens.Jwt": "8.16.0"
         },
         "runtime": {
@@ -868,19 +1045,19 @@
       "path": "humanizer.core/2.14.1",
       "hashPath": "humanizer.core.2.14.1.nupkg.sha512"
     },
-    "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.3": {
+    "Microsoft.AspNetCore.Authentication.JwtBearer/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-TBDs8e9y2vJHp14EwNfnIZUNrm6siw8PAAU5laOrYFuGgRxx8oCdxZyfTgp1Oy/icUk9h/XtpYBHPnXIG0f2/g==",
-      "path": "microsoft.aspnetcore.authentication.jwtbearer/10.0.3",
-      "hashPath": "microsoft.aspnetcore.authentication.jwtbearer.10.0.3.nupkg.sha512"
+      "sha512": "sha512-fZzXogChrwQ/SfifQJgeW7AtR8hUv5+LH9oLWjm5OqfnVt3N8MwcMHHMdawvqqdjP79lIZgetnSpj77BLsSI1g==",
+      "path": "microsoft.aspnetcore.authentication.jwtbearer/10.0.5",
+      "hashPath": "microsoft.aspnetcore.authentication.jwtbearer.10.0.5.nupkg.sha512"
     },
-    "Microsoft.AspNetCore.OpenApi/10.0.3": {
+    "Microsoft.AspNetCore.OpenApi/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-SAvSrKDgnY5GDjDAngOXxPhUvEKlTU/0zIq8zidqHvh/xnZBPs0Vc4LqwyvnmnafNnyUaivtRABz4K4wodXfSg==",
-      "path": "microsoft.aspnetcore.openapi/10.0.3",
-      "hashPath": "microsoft.aspnetcore.openapi.10.0.3.nupkg.sha512"
+      "sha512": "sha512-vTcxIfOPyfFbYk1g8YcXJfkMnlEWVkSnnjxcZLy60zgwiHMRf2SnZR+9E4HlpwKxgE3yfKMOti8J6WfKuKsw6w==",
+      "path": "microsoft.aspnetcore.openapi/10.0.5",
+      "hashPath": "microsoft.aspnetcore.openapi.10.0.5.nupkg.sha512"
     },
     "Microsoft.Build.Framework/18.0.2": {
       "type": "package",
@@ -924,68 +1101,75 @@
       "path": "microsoft.codeanalysis.workspaces.msbuild/5.0.0",
       "hashPath": "microsoft.codeanalysis.workspaces.msbuild.5.0.0.nupkg.sha512"
     },
-    "Microsoft.Data.Sqlite.Core/10.0.3": {
+    "Microsoft.Data.Sqlite.Core/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-onD94qHlvteS2S9eg1T7Huehm3x92no4nU1AyDWjSmT6jDBhY8QF0UapwNhFA+1dArzxM10fV7s6uI1EIK2+dw==",
-      "path": "microsoft.data.sqlite.core/10.0.3",
-      "hashPath": "microsoft.data.sqlite.core.10.0.3.nupkg.sha512"
+      "sha512": "sha512-jFYXnh7s0RShCw6Vkf+ReGCw+mVi7ISg1YaEzYCJcXnUifmbW+aqvCsRJuSRj2ZuQ+oqetpjxlZtbpMmk5FKqQ==",
+      "path": "microsoft.data.sqlite.core/10.0.5",
+      "hashPath": "microsoft.data.sqlite.core.10.0.5.nupkg.sha512"
     },
-    "Microsoft.EntityFrameworkCore/10.0.3": {
+    "Microsoft.EntityFrameworkCore/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-CDEImwD4A7BseABJMCpLZnhfFjmPY/bHwhhS70elc6gLI/bYUEOhxWt7PmaNGYGhIEzOnStlCy5QcVb+8dod5Q==",
-      "path": "microsoft.entityframeworkcore/10.0.3",
-      "hashPath": "microsoft.entityframeworkcore.10.0.3.nupkg.sha512"
+      "sha512": "sha512-9tNBmK3EpYVGRQLiqP+bqK2m+TD0Gv//4vCzR7ZOgl4FWzCFyOpYdIVka13M4kcBdPdSJcs3wbHr3rmzOqbIMA==",
+      "path": "microsoft.entityframeworkcore/10.0.5",
+      "hashPath": "microsoft.entityframeworkcore.10.0.5.nupkg.sha512"
     },
-    "Microsoft.EntityFrameworkCore.Abstractions/10.0.3": {
+    "Microsoft.EntityFrameworkCore.Abstractions/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-c7Uoz381xnMHNBRB8eHRhGgzUtXbgddlbODhwZRrTSzZWDharp3RkJsFwhxyESbeXhCqmML7VdvjMQ7uu+HreA==",
-      "path": "microsoft.entityframeworkcore.abstractions/10.0.3",
-      "hashPath": "microsoft.entityframeworkcore.abstractions.10.0.3.nupkg.sha512"
+      "sha512": "sha512-32c58Rnm47Qvhimawf67KO9PytgPz3QoWye7Abapt0Yocw/JnzMiSNj/pRoIKyn8Jxypkv86zxKD4Q/zNTc0Ag==",
+      "path": "microsoft.entityframeworkcore.abstractions/10.0.5",
+      "hashPath": "microsoft.entityframeworkcore.abstractions.10.0.5.nupkg.sha512"
     },
-    "Microsoft.EntityFrameworkCore.Design/10.0.3": {
+    "Microsoft.EntityFrameworkCore.Design/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-OPZ/u7fONQFmnyUIDB8SeJtKnyFkj1zJsZ0Ke2Cp17q8hYs6jGmYEFd6Ne4Hdcd6auUdFdV7di+uFo2w+L34NA==",
-      "path": "microsoft.entityframeworkcore.design/10.0.3",
-      "hashPath": "microsoft.entityframeworkcore.design.10.0.3.nupkg.sha512"
+      "sha512": "sha512-gm6f0cC2w/2tcd4GeZJqEMruTercpIJfO5sSAFLtqTqblDBHgAFk70xwshUIUVX4I6sZwdEUSd1YxoKFk1AL0w==",
+      "path": "microsoft.entityframeworkcore.design/10.0.5",
+      "hashPath": "microsoft.entityframeworkcore.design.10.0.5.nupkg.sha512"
     },
-    "Microsoft.EntityFrameworkCore.Relational/10.0.3": {
+    "Microsoft.EntityFrameworkCore.Relational/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Pmh60OK9neVr/M0FJwm9hlzm2bD4Kd65SID8E6SP5c90tExNgXwORrlEWl0oGU/ig9ifpNN4PSpIrnHNozlT5w==",
-      "path": "microsoft.entityframeworkcore.relational/10.0.3",
-      "hashPath": "microsoft.entityframeworkcore.relational.10.0.3.nupkg.sha512"
+      "sha512": "sha512-uxmFjZEAB/KbsgWFSS4lLqkEHCfXxB2x0UcbiO4e5fCRpFFeTMSx/me6009nYJLu5IKlDwO1POh++P6RilFTDw==",
+      "path": "microsoft.entityframeworkcore.relational/10.0.5",
+      "hashPath": "microsoft.entityframeworkcore.relational.10.0.5.nupkg.sha512"
     },
-    "Microsoft.EntityFrameworkCore.Sqlite/10.0.3": {
+    "Microsoft.EntityFrameworkCore.Sqlite/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-pXP9l00ZzsZuS6ajUJFLHi5vt3vVxHaxQXCwRs73tyqNbjPX/4ac114wyfAepMSmUKq0roFFoTZ7h+1K1+iQjQ==",
-      "path": "microsoft.entityframeworkcore.sqlite/10.0.3",
-      "hashPath": "microsoft.entityframeworkcore.sqlite.10.0.3.nupkg.sha512"
+      "sha512": "sha512-lxeRviglTkkmzYJVJ600yb6gJjnf5za9v7uH+0byuSXTGv7U8cT6hz7qRTmiGSOfLcl86QFdy2BBKaUFd6NQug==",
+      "path": "microsoft.entityframeworkcore.sqlite/10.0.5",
+      "hashPath": "microsoft.entityframeworkcore.sqlite.10.0.5.nupkg.sha512"
     },
-    "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.3": {
+    "Microsoft.EntityFrameworkCore.Sqlite.Core/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-bUkOkSwPqvhNlsMMg5dA/PR9S4cVehiHEIZklakRH6JZCFsEBNvUz8kBRGK8Hi6mcaPKUAmVZQkN3moZsBYZLA==",
-      "path": "microsoft.entityframeworkcore.sqlite.core/10.0.3",
-      "hashPath": "microsoft.entityframeworkcore.sqlite.core.10.0.3.nupkg.sha512"
+      "sha512": "sha512-rVH43bcUyZiMn0SnCpVnvFpl4PFxT4GwmuVVLcT4JL0NtzuHY9ymKV+Llb5cjuJ+6+gEl4eixy2rE8nxOPcBSA==",
+      "path": "microsoft.entityframeworkcore.sqlite.core/10.0.5",
+      "hashPath": "microsoft.entityframeworkcore.sqlite.core.10.0.5.nupkg.sha512"
     },
-    "Microsoft.Extensions.DependencyModel/10.0.3": {
+    "Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-31kRjr1fgdJO1UZ/AsjL2noqwht+juHMQ8c/oh8CEsDhlM2+0zwVZVsZjxSfOFiPtn5+6kRGuvSbLAufAPT0kA==",
-      "path": "microsoft.extensions.dependencymodel/10.0.3",
-      "hashPath": "microsoft.extensions.dependencymodel.10.0.3.nupkg.sha512"
+      "sha512": "sha512-vqWE8LulALOhRuOEclaB5ahY5ZcQDwWmWNdWjT9pvP9nXwEkx7zMlvhEt/Mpkh2pc8KTkjkzU97c6HDf7i8gRg==",
+      "path": "microsoft.entityframeworkcore.sqlite.nettopologysuite/10.0.5",
+      "hashPath": "microsoft.entityframeworkcore.sqlite.nettopologysuite.10.0.5.nupkg.sha512"
     },
-    "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore/10.0.3": {
+    "Microsoft.Extensions.DependencyModel/10.0.5": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-iS+BIH8VkzR9ox57Jm6YLlYW9VfcaDL5b05f8acl2lK9goVDJJq6qbfuLarW9PDf3Vrxv05SEk8bYQkhZDfVow==",
-      "path": "microsoft.extensions.diagnostics.healthchecks.entityframeworkcore/10.0.3",
-      "hashPath": "microsoft.extensions.diagnostics.healthchecks.entityframeworkcore.10.0.3.nupkg.sha512"
+      "sha512": "sha512-xA4kkL+QS6KCAOKz/O0oquHs44Ob8J7zpBCNt3wjkBWDg5aCqfwG8rWWLsg5V86AM0sB849g9JjPjIdksTCIKg==",
+      "path": "microsoft.extensions.dependencymodel/10.0.5",
+      "hashPath": "microsoft.extensions.dependencymodel.10.0.5.nupkg.sha512"
+    },
+    "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore/10.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-RtNhAwrnZcUZgi3SUMvaDVF405ZtKVR7l/6OHcqFj6JY5nT7QOdBxxULnby9dUQ6Jhnfl7cdDlMjsexfASNyjg==",
+      "path": "microsoft.extensions.diagnostics.healthchecks.entityframeworkcore/10.0.5",
+      "hashPath": "microsoft.extensions.diagnostics.healthchecks.entityframeworkcore.10.0.5.nupkg.sha512"
     },
     "Microsoft.IdentityModel.Abstractions/8.16.0": {
       "type": "package",
@@ -1043,12 +1227,40 @@
       "path": "microsoft.visualstudio.solutionpersistence/1.0.52",
       "hashPath": "microsoft.visualstudio.solutionpersistence.1.0.52.nupkg.sha512"
     },
+    "mod_spatialite/4.3.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-jdRRlDd05vvxmJntsFJ1QKjQallH5sW76HB9iyKDFUAkeipe13pi8wWR1lGEJvwTPsEeWgMpRrCj5VTzjQhsYg==",
+      "path": "mod_spatialite/4.3.0.1",
+      "hashPath": "mod_spatialite.4.3.0.1.nupkg.sha512"
+    },
     "Mono.TextTemplating/3.0.0": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-YqueG52R/Xej4VVbKuRIodjiAhV0HR/XVbLbNrJhCZnzjnSjgMJ/dCdV0akQQxavX6hp/LC6rqLGLcXeQYU7XA==",
       "path": "mono.texttemplating/3.0.0",
       "hashPath": "mono.texttemplating.3.0.0.nupkg.sha512"
+    },
+    "NetTopologySuite/2.6.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1B1OTacTd4QtFyBeuIOcThwSSLUdRZU3bSFIwM8vk36XiZlBMi3K36u74e4OqwwHRHUuJC1PhbDx4hyI266X1Q==",
+      "path": "nettopologysuite/2.6.0",
+      "hashPath": "nettopologysuite.2.6.0.nupkg.sha512"
+    },
+    "NetTopologySuite.IO.GeoPackage/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-Ozy3Yv3kLe8hQ3L2a/6kKJYqlxUPQDeN3vs9/o9Sw8M36TImWrVtpfAJ+bYIdCoufmO0hWPi0cfSYrlJCdPiDw==",
+      "path": "nettopologysuite.io.geopackage/2.0.0",
+      "hashPath": "nettopologysuite.io.geopackage.2.0.0.nupkg.sha512"
+    },
+    "NetTopologySuite.IO.SpatiaLite/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-nT8ep51zgrTPEtRG+Cxeoi585uFlzmCmJz+xl35ima1xWCk4KuRuLtCEswy8RQkApmeaawAAfsTsa83sgmT4xw==",
+      "path": "nettopologysuite.io.spatialite/2.0.0",
+      "hashPath": "nettopologysuite.io.spatialite.2.0.0.nupkg.sha512"
     },
     "Newtonsoft.Json/13.0.3": {
       "type": "package",
