@@ -1,0 +1,78 @@
+<div class="filter-toolbar">
+  <div class="filter-section filter-section--date">
+    <span class="filter-label">Tarih Aralığı</span>
+    <div class="date-range">
+      <input
+        id="tarih-baslangic"
+        type="date"
+        [(ngModel)]="tarihBaslangic"
+        class="form-control"
+        title="Başlangıç Tarihi"
+      />
+      <span class="date-separator">—</span>
+      <input
+        id="tarih-bitis"
+        type="date"
+        [(ngModel)]="tarihBitis"
+        class="form-control"
+        title="Bitiş Tarihi"
+      />
+    </div>
+  </div>
+
+  <div class="filter-divider"></div>
+
+  <div class="filter-section">
+    <span class="filter-label">Konu</span>
+    <select id="konu-select" [(ngModel)]="selectedKonu" class="form-control">
+      <option [value]="''">Tümü</option>
+      <option *ngFor="let konu of konular" [value]="konu.id">{{ konu.ad }}</option>
+    </select>
+  </div>
+
+  <div class="filter-section">
+    <span class="filter-label">Kuruluş</span>
+    <select id="organizator-select" [(ngModel)]="selectedOrganizator" class="form-control">
+      <option [value]="''">Tümü</option>
+      <option *ngFor="let org of organizatorlar" [value]="org.id">{{ org.ad }}</option>
+    </select>
+  </div>
+
+  <div class="filter-section">
+    <span class="filter-label">Olay Türü</span>
+    <select id="olay-turu-select" [(ngModel)]="selectedOlayTuru" class="form-control">
+      <option [value]="''">Tümü</option>
+      <option *ngFor="let tur of olayTurleri" [value]="tur.name">{{ tur.name }}</option>
+    </select>
+  </div>
+
+  <div class="filter-section">
+    <span class="filter-label">Gerçekleşme</span>
+    <select id="gerceklesme-sekli-select" [(ngModel)]="selectedGerceklesmeSekli" class="form-control">
+      <option [value]="''">Tümü</option>
+      <option *ngFor="let sekil of gerceklesmeSekilleri" [value]="sekil.id">{{ sekil.name }}</option>
+    </select>
+  </div>
+
+  <div class="filter-section">
+    <span class="filter-label">Durum</span>
+    <select id="durum-select" [(ngModel)]="selectedDurum" class="form-control">
+      <option [value]="''">Tümü</option>
+      <option *ngFor="let durum of durumlar" [value]="durum.value">{{ durum.label }}</option>
+    </select>
+  </div>
+
+  <div class="filter-divider"></div>
+
+  <div class="filter-actions">
+    <button (click)="onFilterApply()" [disabled]="isLoading" class="btn btn-primary">
+      <span *ngIf="!isLoading">🔍 Uygula</span>
+      <span *ngIf="isLoading" class="spinner"></span>
+    </button>
+    <button (click)="onReset()" [disabled]="isLoading" class="btn btn-ghost" title="Filtreleri temizle">
+      ✕
+    </button>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-badge">{{ errorMessage }}</div>
+</div>

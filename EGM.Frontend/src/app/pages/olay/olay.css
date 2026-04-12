@@ -74,7 +74,8 @@
 }
 
 .filter-input-dt {
-  min-width: 180px;
+  min-width: 200px;
+  height: 38px;
 }
 
 .filter-btn-group {

@@ -2919,25 +2919,25 @@
       "Microsoft.EntityFrameworkCore.Sqlite >= 10.0.5",
       "Microsoft.EntityFrameworkCore.Sqlite.NetTopologySuite >= 10.0.5",
       "Microsoft.IdentityModel.Tokens >= 8.16.0",
-      "NetTopologySuite >= 2.5.1",
+      "NetTopologySuite >= 2.6.0",
       "NetTopologySuite.IO.GeoPackage >= 2.0.0",
       "System.IdentityModel.Tokens.Jwt >= 8.16.0"
     ]
   },
   "packageFolders": {
-    "/home/mrkfks/.nuget/packages/": {}
+    "C:\\Users\\mrkfk\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj",
       "projectName": "EGM.Infrastructure",
-      "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj",
-      "packagesPath": "/home/mrkfks/.nuget/packages/",
-      "outputPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/obj/",
+      "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/mrkfks/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\mrkfk\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -2949,8 +2949,8 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj": {
-              "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj"
+            "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {
+              "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj"
             }
           }
         }
@@ -2999,7 +2999,7 @@
           },
           "NetTopologySuite": {
             "target": "Package",
-            "version": "[2.5.1, )"
+            "version": "[2.6.0, )"
           },
           "NetTopologySuite.IO.GeoPackage": {
             "target": "Package",
@@ -3029,7 +3029,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/home/mrkfks/.dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
@@ -3446,17 +3446,5 @@
         }
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1603",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "EGM.Infrastructure, NetTopologySuite (>= 2.5.1) öğesine bağlı ancak NetTopologySuite 2.5.1 bulunamadı. Bunun yerine NetTopologySuite 2.6.0 çözümlendi.",
-      "libraryId": "NetTopologySuite",
-      "targetGraphs": [
-        "net10.0"
-      ]
-    }
-  ]
+  }
 }

@@ -54,6 +54,12 @@ namespace EGM.Domain.Entities
 
         /// <summary>Otomatik üretilen benzersiz takip numarası. Format: SO-YYYYMMDDPP-SSS</summary>
         public string? TakipNo { get; set; }
+
+        /// <summary>
+        /// Olay başlangıç saati geldiğinde "Olay Başladı" bildirimi gönderildi mi?
+        /// true ise arka plan servisi tekrar bildirim göndermez.
+        /// </summary>
+        public bool BaslangicBildirimiGonderildi { get; set; } = false;
     }
 }
 

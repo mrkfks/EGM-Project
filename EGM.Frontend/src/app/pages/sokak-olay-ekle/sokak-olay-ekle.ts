@@ -159,7 +159,7 @@ export class SokakOlayEkle implements OnInit {
       konuId:           ['', Validators.required],
       tarih:            ['', Validators.required],
       il:               ['', Validators.required],
-      ilce:             ['', Validators.maxLength(100)],      mahalle:          ['', Validators.maxLength(100)],      baslangicKonum:   ['', [Validators.pattern(/^-?\d{1,3}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/)]],
+      ilce:             ['', Validators.maxLength(100)],      mahalle:          [{ value: '', disabled: true }, Validators.maxLength(100)],      baslangicKonum:   ['', [Validators.pattern(/^-?\d{1,3}(\.\d+)?,\s*-?\d{1,3}(\.\d+)?$/)]],
       mekan:            ['', Validators.maxLength(250)],
       latitude:         [null, [Validators.min(-90),   Validators.max(90)]],
       longitude:        [null, [Validators.min(-180),  Validators.max(180)]],
@@ -214,7 +214,9 @@ export class SokakOlayEkle implements OnInit {
       this.form.get('mahalle')!.setValue('');
       if (!ilceName || ilceName.trim() === '') {
         this.filtreliMahalleler = [];
+        this.form.get('mahalle')!.disable();
       } else {
+        this.form.get('mahalle')!.enable();
         this.http.get<any[]>(`${API}/geo/neighborhoods-geopackage?district=${encodeURIComponent(ilceName)}`)
           .pipe(
             catchError(err => {

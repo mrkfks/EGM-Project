@@ -130,6 +130,63 @@ namespace EGM.Infrastructure.Services
                     .SendAsync("ReceiveNotification", payload);
         }
 
+        // ─── Olay Başladı Bildirimi ──────────────────────────────────────
+        public async Task NotifyOlayBasladiAsync(Olay olay)
+        {
+            var saatStr = olay.BaslangicSaati.HasValue
+                ? olay.Tarih.Date.Add(olay.BaslangicSaati.Value).ToString("HH:mm")
+                : olay.Tarih.ToString("HH:mm");
+
+            var title   = $"[Başladı] {olay.TakipNo ?? olay.OlayTuru ?? "Olay"} — {olay.Il}";
+            var message = $"Olay başlangıç saatine ulaşıldı. " +
+                          $"Tarih: {olay.Tarih:dd.MM.yyyy} | Saat: {saatStr} | " +
+                          $"Tür: {olay.OlayTuru ?? "-"} | Hassasiyet: {olay.Hassasiyet}";
+            var type    = NotificationType.Operasyonel;
+
+            // ── Hedef kullanıcılar: ilgili il personeli ───────────────
+            var ilKullanicilari = await _context.Users
+                .Where(u => (u.Role == Roles.IlPersoneli || u.Role == Roles.IlYoneticisi) && !u.IsDeleted)
+                .Where(u => !olay.CityId.HasValue || u.CityId == olay.CityId)
+                .ToListAsync();
+
+            // ── Hedef kullanıcılar: her zaman tüm başkanlık ──────────
+            var hqKullanicilari = await _context.Users
+                .Where(u => (u.Role == Roles.BaskanlikPersoneli || u.Role == Roles.BaskanlikYoneticisi) && !u.IsDeleted)
+                .ToListAsync();
+
+            var notifications = ilKullanicilari
+                .Concat(hqKullanicilari)
+                .Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)olay.Hassasiyet * 10, type))
+                .ToList();
+
+            if (notifications.Count == 0) return;
+
+            await _context.Bildirimler.AddRangeAsync(notifications);
+            await _context.SaveChangesAsync();
+
+            // ── SignalR ───────────────────────────────────────────────
+            var payload = new
+            {
+                title,
+                message,
+                hassasiyet = (int)olay.Hassasiyet,
+                type       = type.ToString(),
+                olayId     = olay.Id,
+                latitude   = olay.Latitude,
+                longitude  = olay.Longitude,
+                cityId     = olay.CityId
+            };
+
+            if (olay.CityId.HasValue)
+                await _hub.Clients
+                    .Group(NotificationGroupNames.City(olay.CityId.Value))
+                    .SendAsync("ReceiveNotification", payload);
+
+            await _hub.Clients
+                .Group(NotificationGroupNames.HQ)
+                .SendAsync("ReceiveNotification", payload);
+        }
+
         // ─── Okundu İşaretle ─────────────────────────────────────────────
         public async Task MarkAsReadAsync(Guid notificationId, string userId)
         {

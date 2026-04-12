@@ -139,6 +139,17 @@ export class Olay implements OnInit {
   }
 
   ngOnInit(): void {
+    // Tarih aralığı filtrelerini bugünün başlangıcı ve sonuyla başlat
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const yyyy = now.getFullYear();
+    const mm = pad(now.getMonth() + 1);
+    const dd = pad(now.getDate());
+    
+    // Bugünün başlangıcı (00:00) ve sonu (23:59)
+    this.filterDatetimeBaslangic = `${yyyy}-${mm}-${dd}T00:00`;
+    this.filterDatetimeBitis = `${yyyy}-${mm}-${dd}T23:59`;
+
     this.decodeToken();
     this.loadLookups();
     this.loadRows();

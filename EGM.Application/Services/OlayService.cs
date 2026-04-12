@@ -75,6 +75,41 @@ namespace EGM.Application.Services
             return olay;
         }
 
+        /// <summary>
+        /// Harita sayfası için gelişmiş filtreleme destekli olay listesi.
+        /// OlayFilterDto ile birden fazla kritere göre filtreleme yapar.
+        /// İl Personeli → yalnızca kendi illerinin olaylarını görür.
+        /// </summary>
+        public async Task<PagedResult<Olay>> GetFilteredMapOlaylarAsync(OlayFilterDto filter)
+        {
+            if (filter.Page < 1) filter.Page = 1;
+            if (filter.PageSize < 1 || filter.PageSize > 500) filter.PageSize = 100;
+
+            int? cityId = null;
+            if (Roles.IsCityScoped(_currentUser.Role) && _currentUser.CityId.HasValue)
+                cityId = _currentUser.CityId.Value;
+
+            var (items, total) = await _olayRepository.GetFilteredMapOlaylarAsync(
+                filter.TarihBaslangic,
+                filter.TarihBitis,
+                filter.KonuId,
+                filter.OrganizatorId,
+                filter.OlayTuru,
+                filter.GerceklesmeSekliId,
+                filter.Durum,
+                cityId,
+                filter.Page,
+                filter.PageSize);
+
+            return new PagedResult<Olay>
+            {
+                Items      = items,
+                TotalCount = total,
+                Page       = filter.Page,
+                PageSize   = filter.PageSize
+            };
+        }
+
         // ── Organizatöre göre getir ──────────────────────────────────────
         public async Task<IReadOnlyList<Olay>> GetByOrganizatorAsync(
             Guid organizatorId,

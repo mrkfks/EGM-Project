@@ -1,0 +1,205 @@
+/* ── Filter Toolbar ─────────────────────────────────── */
+.filter-toolbar {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Tarih aralığı 2 input içerdiğinden biraz daha geniş */
+.filter-section--date {
+  flex: 2;
+}
+
+.filter-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-left: 2px;
+  white-space: nowrap;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.date-separator {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.form-control {
+  padding: 6px 8px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 12px;
+  background-color: #f9fafb;
+  color: #111827;
+  cursor: pointer;
+  font-family: inherit;
+  height: 32px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.date-range .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+input.form-control[type="date"] {
+  width: 100%;
+  min-width: 0;
+}
+
+select.form-control {
+  width: 100%;
+  min-width: 0;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+}
+
+.form-control:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.filter-divider {
+  width: 1px;
+  height: 32px;
+  background-color: #e5e7eb;
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+/* ── Aksiyon Butonları ─────────────────────────────── */
+.filter-actions {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+  padding-bottom: 0;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 0 16px;
+  height: 34px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #1d4ed8;
+}
+
+.btn-ghost {
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border: 1px solid #e5e7eb;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: #fee2e2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Spinner ─────────────────────────────────────────── */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Hata Rozeti ─────────────────────────────────────── */
+.error-badge {
+  font-size: 11px;
+  color: #dc2626;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: 4px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  .filter-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;    overflow: visible;
+  }
+
+  .filter-section {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 140px;  }
+
+  .filter-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .filter-divider {
+    display: none;
+  }
+}

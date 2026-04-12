@@ -68,6 +68,28 @@ namespace EGM.API.Controllers
             return Ok(olaylar.Select(o => MapToResponse(o)));
         }
 
+        /// <summary>
+        /// Harita sayfası için gelişmiş filtreleme endpoint'i.
+        /// POST body'de OlayFilterDto gönderilir.
+        /// </summary>
+        [HttpPost("filtre")]
+        public async Task<IActionResult> GetFiltered([FromBody] OlayFilterDto filter)
+        {
+            if (filter == null) return BadRequest("Filter parametreleri gereklidir.");
+
+            var paged = await _olayService.GetFilteredMapOlaylarAsync(filter);
+            return Ok(new
+            {
+                paged.TotalCount,
+                paged.Page,
+                paged.PageSize,
+                paged.TotalPages,
+                paged.HasNextPage,
+                paged.HasPreviousPage,
+                Items = paged.Items.Select(o => MapToResponse(o))
+            });
+        }
+
         [HttpGet("{id}/rota")]
         public async Task<IActionResult> GetRota(Guid id)
         {

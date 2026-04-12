@@ -28,5 +28,21 @@ namespace EGM.Domain.Interfaces
 
         /// <summary>Belirli bir konuya ait olayları getirir.</summary>
         Task<IReadOnlyList<Olay>> GetByKonuAsync(Guid konuId);
+
+        /// <summary>
+        /// Harita sayfası için gelişmiş filtreleme destekli olayları sayfalanmış şekilde döner.
+        /// Tüm parametreler optional; null olan parametreler filtre uygulanmaz.
+        /// </summary>
+        Task<(IReadOnlyList<Olay> Items, int TotalCount)> GetFilteredMapOlaylarAsync(
+            DateTime? tarihBaslangic,
+            DateTime? tarihBitis,
+            Guid? konuId,
+            Guid? organizatorId,
+            string? olayTuru,
+            Guid? gerceklesmeSekliId,
+            OlayDurum? durum,
+            int? cityId,
+            int page,
+            int pageSize);
     }
 }

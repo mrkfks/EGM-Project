@@ -22,6 +22,7 @@ export class Navbar implements OnInit, OnDestroy {
   private sub?: Subscription;
 
   private readonly PAGE_MAP: Record<string, { title: string; icon: string }> = {
+    '/harita':               { title: 'Harita',                          icon: 'map' },
     '/ajanda':               { title: 'Ajanda',                         icon: 'calendar' },
     '/olay':                 { title: 'Olay Listesi',                   icon: 'alert' },
     '/sokak-olay-ekle':      { title: 'Sokak Olayı Ekle',               icon: 'alert' },

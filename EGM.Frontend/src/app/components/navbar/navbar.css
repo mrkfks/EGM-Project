@@ -75,11 +75,22 @@
   color: #6b7d8f;
 }
 
+/* ── Orta bölüm (Dinamik içerik) ────────── */
+.nb-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 58px;
+  padding: 0 10px;
+}
+
 /* ── Sağ bölüm ────────────────────────────── */
 .nb-right {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 /* ── Kullanıcı butonu ────────────────────── */

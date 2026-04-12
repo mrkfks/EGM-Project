@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "w8KNALEhh9M=",
+  "dgSpecHash": "g0NQekpBnpU=",
   "success": true,
-  "projectFilePath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj",
+  "projectFilePath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
   "expectedPackageFiles": [
-    "/home/mrkfks/.nuget/packages/nettopologysuite/2.6.0/nettopologysuite.2.6.0.nupkg.sha512"
+    "C:\\Users\\mrkfk\\.nuget\\packages\\nettopologysuite\\2.6.0\\nettopologysuite.2.6.0.nupkg.sha512"
   ],
   "logs": []
 }

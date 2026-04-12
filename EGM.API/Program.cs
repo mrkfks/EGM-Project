@@ -121,8 +121,7 @@ builder.Services.AddDbContext<EGMDbContext>((serviceProvider, options) =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
     options.AddInterceptors(serviceProvider.GetRequiredService<AuditInterceptor>());
     if (builder.Environment.IsDevelopment())
-        options.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Warning)
-               .EnableSensitiveDataLogging();
+        options.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Warning);
 });
 
 // ── Generic Repository ───────────────────────────────────────────────────
@@ -151,6 +150,9 @@ builder.Services.AddScoped<IGeoAreaService, GeoAreaService>();
 
 // ── Bildirim Servisi ─────────────────────────────────────────────────────
 builder.Services.AddScoped<IInAppNotificationService, InAppNotificationService>();
+
+// ── Arka Plan Servisleri ─────────────────────────────────────────────────
+builder.Services.AddHostedService<EGM.API.BackgroundServices.OlayStartNotifierService>();
 
 // ── Rate Limiting ────────────────────────────────────────────────────────
 builder.Services.AddRateLimiter(options =>

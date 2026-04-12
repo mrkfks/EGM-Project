@@ -163,13 +163,11 @@
         <div class="form-field">
           <label>Mahalle</label>
           <select formControlName="mahalle" 
-                  [disabled]="!form.get('ilce')?.value"
                   *ngIf="filtreliMahalleler.length > 0">
             <option value="">— Seçiniz —</option>
             <option *ngFor="let mahalle of filtreliMahalleler" [value]="mahalle.name">{{ mahalle.name }}</option>
           </select>
           <input type="text" formControlName="mahalle" 
-                 [disabled]="!form.get('ilce')?.value"
                  [placeholder]="form.get('ilce')?.value ? 'Mahalle adı…' : 'İlçe seçiniz'"
                  title="Mahalle alanı ilçe seçildikten sonra aktif olur"
                  *ngIf="filtreliMahalleler.length === 0">

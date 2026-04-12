@@ -13,13 +13,19 @@
       <!-- Başlangıç tarih+saat -->
       <div class="filter-group">
         <label>Başlangıç Tarih / Saat</label>
-        <input type="datetime-local" [(ngModel)]="filterDatetimeBaslangic" class="filter-input filter-input-dt">
+        <input type="datetime-local" 
+               [(ngModel)]="filterDatetimeBaslangic" 
+               [ngModelOptions]="{standalone: true}" 
+               class="filter-input filter-input-dt">
       </div>
 
       <!-- Bitiş tarih+saat -->
       <div class="filter-group">
         <label>Bitiş Tarih / Saat</label>
-        <input type="datetime-local" [(ngModel)]="filterDatetimeBitis" class="filter-input filter-input-dt">
+        <input type="datetime-local" 
+               [(ngModel)]="filterDatetimeBitis" 
+               [ngModelOptions]="{standalone: true}" 
+               class="filter-input filter-input-dt">
       </div>
 
       <!-- İl -->

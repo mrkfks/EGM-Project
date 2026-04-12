@@ -167,6 +167,37 @@ namespace EGM.Application.DTOs
         public string? TakipNo { get; set; }
     }
 
+    /// <summary>Harita sayfasında olayları filtrelemek için kullanılan DTO.</summary>
+    public class OlayFilterDto
+    {
+        /// <summary>Tarih aralığı başlangıcı (sadece tarih, saat kısımlı dikkate alınmaz).</summary>
+        public DateTime? TarihBaslangic { get; set; }
+
+        /// <summary>Tarih aralığı sonu (sadece tarih, saat kısımlı dikkate alınmaz).</summary>
+        public DateTime? TarihBitis { get; set; }
+
+        /// <summary>Olay konusu ID'si (null ise filtre uygulanmaz).</summary>
+        public Guid? KonuId { get; set; }
+
+        /// <summary>Organizatör (Kuruluş) ID'si (null ise filtre uygulanmaz).</summary>
+        public Guid? OrganizatorId { get; set; }
+
+        /// <summary>Olay türü adı (string, null ise filtre uygulanmaz).</summary>
+        public string? OlayTuru { get; set; }
+
+        /// <summary>Gerçekleşme şekli ID'si (null ise filtre uygulanmaz).</summary>
+        public Guid? GerceklesmeSekliId { get; set; }
+
+        /// <summary>Olay durumu (null ise filtre uygulanmaz).</summary>
+        public OlayDurum? Durum { get; set; }
+
+        /// <summary>Sayfa numarası (varsayılan: 1).</summary>
+        public int Page { get; set; } = 1;
+
+        /// <summary>Sayfa boyutu (varsayılan: 100, max: 500).</summary>
+        public int PageSize { get; set; } = 100;
+    }
+
     // ── Sosyal Medya Olayi ───────────────────────────────────────────────
     public class SosyalMedyaOlayCreateDto
     {

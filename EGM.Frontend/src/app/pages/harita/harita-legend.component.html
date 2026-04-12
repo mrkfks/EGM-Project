@@ -1,0 +1,18 @@
+<div class="legend">
+  <div class="legend-title">Gösterge</div>
+  
+  <div *ngIf="showOlaylar" class="legend-item">
+    <span class="legend-marker olay-marker"></span>
+    <span>Olaylar</span>
+  </div>
+  
+  <div *ngIf="showVIPZiyaretler" class="legend-item">
+    <span class="legend-marker vip-marker"></span>
+    <span>VIP Ziyaretleri</span>
+  </div>
+  
+  <div *ngIf="showProvinceBoundaries" class="legend-item">
+    <span class="legend-marker boundary-marker"></span>
+    <span>İl Sınırları</span>
+  </div>
+</div>
