@@ -72,11 +72,13 @@ export class GeoService {
   getCoordinates(
     provinceName?: string,
     districtName?: string,
+    neighborhoodName?: string,
     adminLevel?: number
   ): Observable<Coordinates> {
     const params: any = {};
     if (provinceName) params['provinceName'] = provinceName;
     if (districtName) params['districtName'] = districtName;
+    if (neighborhoodName) params['neighborhoodName'] = neighborhoodName;
     if (adminLevel) params['adminLevel'] = adminLevel;
 
     return this.http.get<Coordinates>(`${this.apiUrl}/get-coordinates`, { params });

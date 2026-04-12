@@ -58,6 +58,7 @@ export interface OlayData {
   bitisSaati?: string;
   il?: string;
   ilce?: string;
+  mahalle?: string;
   mekan?: string;
   latitude?: number;
   longitude?: number;

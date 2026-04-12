@@ -4,6 +4,7 @@ namespace EGM.Domain.Enums
     {
         Planlandi = 0,
         Gerceklesti = 1,
-        Iptal = 2
+        Iptal = 2,
+        DevamEdiyor = 3
     }
 }

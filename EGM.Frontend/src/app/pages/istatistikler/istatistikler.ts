@@ -1,4 +1,4 @@
-﻿import { CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   Component,
@@ -81,6 +81,7 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
   gerceklesti = 0;
   planlandiSayisi = 0;
   iptal = 0;
+  devamEdiyorSayisi = 0;
   ortalamaRisk = 0;
 
   olayTurleri: string[] = [];
@@ -229,6 +230,7 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
     this.gerceklesti = v.filter(o => o.durum === 1).length;
     this.planlandiSayisi = v.filter(o => o.durum === 0).length;
     this.iptal = v.filter(o => o.durum === 2).length;
+    this.devamEdiyorSayisi = v.filter(o => o.durum === 3).length;
   }
 
   private grafikleriOlustur(): void {
@@ -242,19 +244,20 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private olusturDurumChart(): Chart {
-    const sayac = [0, 0, 0];
+    const sayac = [0, 0, 0, 0];
     this.filtreliVeri.forEach(o => {
       if (o.durum === 0) sayac[0]++;
       else if (o.durum === 1) sayac[1]++;
       else if (o.durum === 2) sayac[2]++;
+      else if (o.durum === 3) sayac[3]++;
     });
     return new Chart(this.durumChartRef.nativeElement, {
       type: 'doughnut',
       data: {
-        labels: ['Planlanmis', 'Gerceklesti', 'Iptal'],
+        labels: ['Planlanmis', 'Gerceklesti', 'Iptal', 'Devam Ediyor'],
         datasets: [{
           data: sayac,
-          backgroundColor: ['#3b82f6', '#10b981', '#ef4444'],
+          backgroundColor: ['#3b82f6', '#10b981', '#ef4444', '#f59e0b'],
           borderWidth: 2,
           borderColor: '#fff',
         }],
@@ -388,7 +391,7 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
   }
 
   durumEtiket(durum: number): string {
-    return ['Planlanmis', 'Gerceklesti', 'Iptal'][durum] ?? 'Bilinmiyor';
+    return ['Planlanmis', 'Gerceklesti', 'Iptal', 'Devam Ediyor'][durum] ?? 'Bilinmiyor';
   }
 
   hassasiyetEtiket(h: number): string {
@@ -439,6 +442,7 @@ export class Istatistikler implements OnInit, AfterViewInit, OnDestroy {
       { 'Metrik': 'Gerceklesti', 'Deger': this.gerceklesti },
       { 'Metrik': 'Planlanmis', 'Deger': this.planlandiSayisi },
       { 'Metrik': 'Iptal', 'Deger': this.iptal },
+      { 'Metrik': 'Devam Ediyor', 'Deger': this.devamEdiyorSayisi },
     ]);
 
     const tarih = new Date().toISOString().slice(0, 10);

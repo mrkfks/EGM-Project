@@ -1,4 +1,4 @@
-﻿<section class="ist-page">
+<section class="ist-page">
 
   <!-- Filtre Bar -->
   <div class="ist-filter-bar">
@@ -45,6 +45,7 @@
         <option value="0">Planlandı</option>
         <option value="1">Gerçekleşti</option>
         <option value="2">İptal</option>
+        <option value="3">Devam Ediyor</option>
       </select>
     </div>
     <div class="flt-group">
@@ -113,6 +114,11 @@
         <span class="kart-icon">&#10060;</span>
         <div class="kart-deger">{{ iptal }}</div>
         <div class="kart-etiket">Iptal</div>
+      </div>
+      <div class="ist-kart ist-kart-orange">
+        <span class="kart-icon">&#9888;</span>
+        <div class="kart-deger">{{ devamEdiyorSayisi }}</div>
+        <div class="kart-etiket">Devam Ediyor</div>
       </div>
     </div>
 

@@ -18,7 +18,8 @@ export const HASSASIYET = [
 export const DURUM = [
   { value: 0, label: 'Planlandı'   },
   { value: 1, label: 'Gerçekleşti' },
-  { value: 2, label: 'İptal'       }
+  { value: 2, label: 'İptal'       },
+  { value: 3, label: 'Devam Ediyor' }
 ];
 
 export const OLAY_TURLERI = [
@@ -304,7 +305,7 @@ export class Olay implements OnInit {
   durumLabel(v: number): string      { return DURUM.find(d => d.value === v)?.label ?? '-'; }
 
   durumBadgeClass(v: number): string {
-    return ['badge-planned', 'badge-done', 'badge-cancelled'][v] ?? 'badge-planned';
+    return ['badge-planned', 'badge-done', 'badge-cancelled', 'badge-in-progress'][v] ?? 'badge-planned';
   }
 
   formatTarih(t: string): string {

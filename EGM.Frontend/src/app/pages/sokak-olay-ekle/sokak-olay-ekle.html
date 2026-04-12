@@ -2,7 +2,7 @@
   <!-- ── Sol Panel: Planlanan Olaylar ───────────────────────── -->
   <div class="side-panel">
     <h3 class="side-panel-title">
-      <span class="side-dot planned"></span> Planlanan Olaylar
+      <span class="side-dot planned"></span> Planlanan ve Devam Edenler
       <span class="side-count">{{ userPlans.length }}</span>
     </h3>
     <div *ngIf="isLoadingPlanned" class="side-loading">Yükleniyor…</div>
@@ -12,6 +12,7 @@
     <div *ngFor="let plan of userPlans; trackBy: trackById"
          class="side-card"
          [class.side-card-selected]="selectedPlanId === plan.id"
+         [class.side-card-active]="plan.durum === 3 && selectedPlanId !== plan.id"
          (click)="selectPlanForCompletion(plan)"
          title="Gerçekleşenler formuna yükle">
       <div class="side-card-header">
@@ -27,6 +28,7 @@
         <span class="takipno-label">Takip No:</span>
         <span class="takipno-value">{{ plan.takipNo || '—' }}</span>
       </div>
+      <span class="side-card-status in-progress" *ngIf="plan.durum === 3">Devam Ediyor</span>
       <div class="side-card-hint">Gerçekleşti olarak işaretle →</div>
     </div>
   </div>

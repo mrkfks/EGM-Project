@@ -20,6 +20,7 @@ namespace EGM.Domain.Entities
 
         public string? Il { get; set; }
         public string? Ilce { get; set; }
+        public string? Mahalle { get; set; }
         public string? Mekan { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }

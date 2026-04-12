@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using EGM.Domain.Enums;
@@ -87,6 +87,9 @@ namespace EGM.Application.DTOs
         [StringLength(100)]
         public string? Ilce { get; set; }
 
+        [StringLength(100)]
+        public string? Mahalle { get; set; }
+
         [StringLength(250)]
         public string? Mekan { get; set; }
 
@@ -144,6 +147,7 @@ namespace EGM.Application.DTOs
         public TimeSpan? BitisSaati { get; set; }
         public string? Il { get; set; }
         public string? Ilce { get; set; }
+        public string? Mahalle { get; set; }
         public string? Mekan { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }

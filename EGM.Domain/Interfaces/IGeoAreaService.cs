@@ -65,6 +65,7 @@ public interface IGeoAreaService
     Task<(double latitude, double longitude)?> GetCoordinatesByAdminAreaAsync(
         string? provinceName = null,
         string? districtName = null,
+        string? neighborhoodName = null,
         int? adminLevel = null,
         CancellationToken cancellationToken = default);
 }

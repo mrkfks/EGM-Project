@@ -129,6 +129,7 @@ export class HaritaComponent implements OnInit, OnDestroy {
         }
       });
     }, 100);
+    this.listenForDurumUpdates(); // Durum güncellemelerini dinle
   }
 
   ngAfterViewInit(): void {
@@ -192,7 +193,7 @@ export class HaritaComponent implements OnInit, OnDestroy {
 
     // Sayfa bilgisi ekle
     filter.page = 1;
-    filter.pageSize = 100;
+    filter.pageSize = 1000;
 
     this.olayService.getFilteredForMap(filter).subscribe(
       (response) => {
@@ -212,9 +213,15 @@ export class HaritaComponent implements OnInit, OnDestroy {
    * Varsayılan filteri uygula (tüm alanlar boş)
    */
   private applyDefaultFilter(): void {
+    const today = new Date();
+    const afterTwoDays = new Date();
+    afterTwoDays.setDate(today.getDate() + 2);
+
     const defaultFilter: OlayFilterRequest = {
+      tarihBaslangic: today,
+      tarihBitis: afterTwoDays,
       page: 1,
-      pageSize: 100
+      pageSize: 1000
     };
 
     this.onFilterApplied(defaultFilter);
@@ -222,49 +229,77 @@ export class HaritaComponent implements OnInit, OnDestroy {
 
   /**
    * Olayları haritaya göster.
-   * Koordinat eksikse il merkezi koordinatını fallback olarak kullanır.
+   * Koordinat eksikse sırasıyla mahalle, ilçe veya il merkezi koordinatını fallback olarak kullanır.
    */
   private displayOlaylar(olaylar: OlayData[]): void {
     this.olayMarkersGroup.clearLayers();
 
-    // Koordinatsız olaylar için il merkezi yükle
+    // Koordinatsız olaylar için fallback koordinatları hazırla
     const olaylarKoordinatsiz = olaylar.filter(o => o.latitude == null || o.longitude == null);
-    const benzersizIller = [...new Set(olaylarKoordinatsiz.map(o => o.il).filter((il): il is string => !!il))];
+    
+    // Benzersiz İl-İlçe-Mahalle kombinasyonları
+    const benzersizAlanlar: { il: string; ilce?: string; mahalle?: string }[] = [];
+    olaylarKoordinatsiz.forEach(o => {
+      if (!o.il) return;
+      
+      // Mahalle varsa
+      if (o.ilce && o.mahalle) {
+        if (!benzersizAlanlar.find(a => a.il === o.il && a.ilce === o.ilce && a.mahalle === o.mahalle)) {
+          benzersizAlanlar.push({ il: o.il, ilce: o.ilce, mahalle: o.mahalle });
+        }
+      }
 
-    // İlmerkez map'ini hazırla (fallback koordinatlarla başla)
-    const ilKoordinatMap = new Map<string, Coordinates>();
-    benzersizIller.forEach(il => {
-      if (this.ilMerkezleri[il]) {
-        ilKoordinatMap.set(il, this.ilMerkezleri[il]);
+      // İlçe varsa
+      if (o.ilce) {
+        if (!benzersizAlanlar.find(a => a.il === o.il && a.ilce === o.ilce && !a.mahalle)) {
+          benzersizAlanlar.push({ il: o.il, ilce: o.ilce });
+        }
+      }
+
+      // Sadece ili de ekle
+      if (!benzersizAlanlar.find(a => a.il === o.il && !a.ilce)) {
+        benzersizAlanlar.push({ il: o.il });
       }
     });
 
-    if (benzersizIller.length > 0) {
-      const requests = benzersizIller.map(il =>
-        this.geoService.getCoordinates(il).pipe(
-          map(coords => ({ il, coords })),
-          catchError(() => of({ il, coords: null as Coordinates | null }))
+    const koordinatMap = new Map<string, Coordinates>();
+    
+    if (benzersizAlanlar.length > 0) {
+      const requests = benzersizAlanlar.map(alan =>
+        this.geoService.getCoordinates(alan.il, alan.ilce, alan.mahalle).pipe(
+          map(coords => ({ alan, coords })),
+          catchError(() => of({ alan, coords: null as Coordinates | null }))
         )
       );
 
       forkJoin(requests).subscribe(sonuclar => {
-        // API'den dönen koordinatlarla fallback'i güncelle
-        sonuclar.forEach(({ il, coords }) => { 
+        sonuclar.forEach(({ alan, coords }) => { 
           if (coords) {
-            ilKoordinatMap.set(il, coords);
+            let key = alan.il;
+            if (alan.ilce) key += `-${alan.ilce}`;
+            if (alan.mahalle) key += `-${alan.mahalle}`;
+            koordinatMap.set(key, coords);
           }
         });
-        this.renderMarkers(olaylar, ilKoordinatMap);
+        
+        // Eğer ilçe merkezi bulunamadıysa il merkezini fallback olarak kullanmak için il merkezlerini de ekleyelim
+        this.provinces.forEach(p => {
+          if (this.ilMerkezleri[p.name] && !koordinatMap.has(p.name)) {
+            koordinatMap.set(p.name, this.ilMerkezleri[p.name]);
+          }
+        });
+
+        this.renderMarkers(olaylar, koordinatMap);
       });
     } else {
-      this.renderMarkers(olaylar, ilKoordinatMap);
+      this.renderMarkers(olaylar, koordinatMap);
     }
   }
 
   /**
    * Olayları marker olarak haritaya çizer.
    */
-  private renderMarkers(olaylar: OlayData[], ilKoordinatMap: Map<string, Coordinates>): void {
+  private renderMarkers(olaylar: OlayData[], koordinatMap: Map<string, Coordinates>): void {
     this.olayMarkersGroup.clearLayers();
     let gosterilenSayi = 0;
 
@@ -272,45 +307,75 @@ export class HaritaComponent implements OnInit, OnDestroy {
       let lat = olay.latitude ?? null;
       let lng = olay.longitude ?? null;
       let kesinKonum = lat != null && lng != null;
+      let fallbackSeviyesi: 'mahalle' | 'ilce' | 'il' | 'yok' | null = null;
 
-      // Koordinat yoksa il merkezini kullan
-      if ((lat == null || lng == null) && olay.il) {
-        const ilCoords = ilKoordinatMap.get(olay.il);
-        if (ilCoords) {
-          lat = ilCoords.latitude;
-          lng = ilCoords.longitude;
-          kesinKonum = false;
+      // Koordinat yoksa fallback kullan
+      if (!kesinKonum && olay.il) {
+        // 1. Öncelik: Mahalle Merkezi
+        if (olay.ilce && olay.mahalle) {
+          const mahCoords = koordinatMap.get(`${olay.il}-${olay.ilce}-${olay.mahalle}`);
+          if (mahCoords) {
+            lat = mahCoords.latitude;
+            lng = mahCoords.longitude;
+            fallbackSeviyesi = 'mahalle';
+          }
+        }
+
+        // 2. Öncelik: İlçe Merkezi
+        if ((lat == null || lng == null) && olay.ilce) {
+          const ilceCoords = koordinatMap.get(`${olay.il}-${olay.ilce}`);
+          if (ilceCoords) {
+            lat = ilceCoords.latitude;
+            lng = ilceCoords.longitude;
+            fallbackSeviyesi = 'ilce';
+          }
+        }
+        
+        // 3. Öncelik: İl Merkezi (ilçe bulunamadıysa veya yoksa)
+        if (lat == null || lng == null) {
+          const ilCoords = koordinatMap.get(olay.il);
+          if (ilCoords) {
+            lat = ilCoords.latitude;
+            lng = ilCoords.longitude;
+            fallbackSeviyesi = 'il';
+          }
         }
       }
 
       if (lat == null || lng == null) return;
 
-      // Gerçek durumu belirle (tarih bilgilerine göre)
+      // Gerçek durumu belirle
       const gercekDurum = this.getGercekDurum(olay);
-
-      // Duruma göre renk belirle
       const color = this.getColorByDurum(gercekDurum);
 
-      // Kesin konumda dolu daire, il merkezinde bordo kenarlı + küçük
       const marker = L.circleMarker([lat, lng], {
-        radius: kesinKonum ? 7 : 5,
+        radius: kesinKonum ? 10 : 7,
         fillColor: color.fill,
         color: kesinKonum ? color.border : '#374151',
-        weight: kesinKonum ? 2 : 1,
+        weight: kesinKonum ? 3 : 2,
         opacity: 0.9,
-        fillOpacity: kesinKonum ? 0.8 : 0.5
+        fillOpacity: kesinKonum ? 0.85 : 0.6
       });
 
-      // Popup
+      // Popup içeriği
       const durumAdı = this.getDurumAdi(gercekDurum);
-      const konumNotu = kesinKonum ? '' : '<small style="color:#9ca3af"><i>📍 Kesin konum girilmemiş, il merkezi gösteriliyor</i></small><br/>';
+      if (kesinKonum) {
+        konumNotu = '<small style="color:#2563eb"><i>📍 Kesin Konum</i></small><br/>';
+      } else if (fallbackSeviyesi === 'mahalle') {
+        konumNotu = '<small style="color:#10b981"><i>📍 Kesin konum yok, mahalle merkezi gösteriliyor</i></small><br/>';
+      } else if (fallbackSeviyesi === 'ilce') {
+        konumNotu = '<small style="color:#f59e0b"><i>📍 Kesin konum yok, ilçe merkezi gösteriliyor</i></small><br/>';
+      } else if (fallbackSeviyesi === 'il') {
+        konumNotu = '<small style="color:#ef4444"><i>📍 Kesin konum yok, il merkezi gösteriliyor</i></small><br/>';
+      }
+
       const popupContent = `
         <div class="popup-content">
           <strong>${olay.takipNo || 'Takip No'}</strong><br/>
           <small><strong>Konu:</strong> ${olay.konuAd || '-'}</small><br/>
           <small><strong>Kuruluş:</strong> ${olay.organizatorAd || '-'}</small><br/>
           <small><strong>Türü:</strong> ${olay.olayTuru || '-'}</small><br/>
-          <small><strong>Yer:</strong> ${olay.il || ''} / ${olay.ilce || ''} - ${olay.mekan || ''}</small><br/>
+          <small><strong>Yer:</strong> ${olay.il || ''} / ${olay.ilce || ''}${olay.mahalle ? ' / ' + olay.mahalle : ''} - ${olay.mekan || ''}</small><br/>
           <small><strong>Tarih:</strong> ${new Date(olay.tarih).toLocaleDateString('tr-TR')}</small><br/>
           <small><strong>Durumu:</strong> ${durumAdı}</small><br/>
           <small><strong>Katılımcı:</strong> ${olay.katilimciSayisi || '0'}</small><br/>
@@ -323,7 +388,8 @@ export class HaritaComponent implements OnInit, OnDestroy {
       gosterilenSayi++;
     });
 
-    console.log(`${gosterilenSayi}/${olaylar.length} olay haritada gösteriliyor (kesin konum olmayan il merkezine yerleştirildi)`);
+    const kesinSayi = olaylar.filter(o => o.latitude != null && o.longitude != null).length;
+    console.log(`${gosterilenSayi}/${olaylar.length} olay haritada gösteriliyor (${kesinSayi} kesin konum, ${gosterilenSayi - kesinSayi} yaklaşık konum)`);
 
     // Harita zoom'u otomatik ayarla (tüm marker'lara sığsın)
     if (gosterilenSayi > 0) {
@@ -336,39 +402,12 @@ export class HaritaComponent implements OnInit, OnDestroy {
    * Durum enum'u ile tarih bilgileri birleştirilerek hesaplanır
    */
   private getGercekDurum(olay: OlayData): number {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Iptal ise direkt dön
-    if (olay.durum === OlayDurumEnum.Iptal) {
-      return OlayDurumEnum.Iptal;
-    }
-
-    // Gerçek başlangıç tarihi varsa ve bugüne eşit/geçti
-    if (olay.gercekBaslangicTarihi) {
-      const baslangicTarihi = new Date(olay.gercekBaslangicTarihi);
-      baslangicTarihi.setHours(0, 0, 0, 0);
-
-      if (baslangicTarihi <= today) {
-        // Bitış tarihi yok veya bugün/gelecekte → hâlâ devam ediyor
-        if (!olay.gercekBitisTarihi) {
-          return OlayDurumEnum.DevamEdiyor;
-        }
-
-        const bitisTarihi = new Date(olay.gercekBitisTarihi);
-        bitisTarihi.setHours(0, 0, 0, 0);
-
-        // Bitış tarihi geçti = tamamlandı
-        if (bitisTarihi < today) {
-          return OlayDurumEnum.Gerceklesti;
-        }
-
-        // Bitış tarihi bugün veya gelecekte = devam ediyor
-        return OlayDurumEnum.DevamEdiyor;
-      }
-    }
-
-    // Başlangıç tarihi gelmemişse = planlandi
+    // Sadece backend'den gelen kesin duruma güven.
+    // Kullanıcının kuralı: "İlgili düzenlemeler yapılıp kaydedilmeden asla gerçekleşen olay olarak kaydedilemez"
+    if (olay.durum === OlayDurumEnum.Iptal) return OlayDurumEnum.Iptal;
+    if (olay.durum === OlayDurumEnum.DevamEdiyor) return OlayDurumEnum.DevamEdiyor;
+    if (olay.durum === OlayDurumEnum.Gerceklesti) return OlayDurumEnum.Gerceklesti;
+    
     return OlayDurumEnum.Planlandi;
   }
 
@@ -587,5 +626,72 @@ export class HaritaComponent implements OnInit, OnDestroy {
   private loadProvinceBoundaries(): void {
     // İl sınır verilerini yükle
     console.log('İl sınırları yükleniyor');
+  }
+
+  /**
+   * Olay durum güncellemesi sonrası haritayı yenile
+   */
+  refreshMap(): void {
+    this.geoService.getOlaylarForMap().subscribe(
+      (geoJson) => {
+        const olaylar: OlayData[] = geoJson.features.map(f => {
+          const props = f.properties;
+          const geom = f.geometry as any;
+          
+          // Koordinatları geometry'den veya properties'den çek
+          let lat = props['latitude'];
+          let lng = props['longitude'];
+          
+          if (lat == null && geom?.coordinates?.length >= 2) {
+            lng = geom.coordinates[0];
+            lat = geom.coordinates[1];
+          }
+
+          return {
+            id: props['id'] || f.id,
+            olayTuru: props['olayTuru'],
+            organizatorId: props['organizatorId'],
+            organizatorAd: props['organizatorAd'],
+            konuId: props['konuId'],
+            konuAd: props['konuAd'],
+            tarih: props['tarih'],
+            baslangicSaati: props['baslangicSaati'],
+            bitisSaati: props['bitisSaati'],
+            il: props['il'],
+            ilce: props['ilce'],
+            mekan: props['mekan'],
+            latitude: lat,
+            longitude: lng,
+            katilimciSayisi: props['katilimciSayisi'],
+            gozaltiSayisi: props['gozaltiSayisi'],
+            sehitOluSayisi: props['sehitOluSayisi'],
+            aciklama: props['aciklama'],
+            evrakNumarasi: props['evrakNumarasi'],
+            durum: props['durum'] != null ? parseInt(props['durum'].toString(), 10) : 0,
+            gercekBaslangicTarihi: props['gercekBaslangicTarihi'],
+            gercekBitisTarihi: props['gercekBitisTarihi'],
+            createdByUserId: props['createdByUserId'],
+            cityId: props['cityId'],
+            olayBitisTarihi: props['olayBitisTarihi'],
+            gerceklesenKatilimciSayisi: props['gerceklesenKatilimciSayisi'],
+            gerceklesmeSekliId: props['gerceklesmeSekliId'],
+            takipNo: props['takipNo']
+          };
+        });
+        this.displayOlaylar(olaylar);
+      },
+      (error) => {
+        console.error('Harita verileri güncellenemedi:', error);
+      }
+    );
+  }
+
+  /**
+   * Durum güncellemesi dinleyicisi
+   */
+  listenForDurumUpdates(): void {
+    setInterval(() => {
+      this.refreshMap();
+    }, 60000); // Her dakika haritayı güncelle
   }
 }

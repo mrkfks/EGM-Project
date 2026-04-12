@@ -167,20 +167,22 @@ public class GeoController : ControllerBase
     public async Task<IActionResult> GetCoordinates(
         [FromQuery] string? provinceName = null,
         [FromQuery] string? districtName = null,
+        [FromQuery] string? neighborhoodName = null,
         [FromQuery] int? adminLevel = null,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(provinceName) && 
             string.IsNullOrWhiteSpace(districtName) && 
+            string.IsNullOrWhiteSpace(neighborhoodName) &&
             !adminLevel.HasValue)
         {
-            return BadRequest(new { error = "provinceName, districtName veya adminLevel gereklidir." });
+            return BadRequest(new { error = "provinceName, districtName, neighborhoodName veya adminLevel gereklidir." });
         }
 
         try
         {
             var coordinates = await _geoAreaService.GetCoordinatesByAdminAreaAsync(
-                provinceName, districtName, adminLevel, cancellationToken);
+                provinceName, districtName, neighborhoodName, adminLevel, cancellationToken);
 
             if (coordinates == null)
                 return NotFound(new { error = "Belirtilen alan bulunamadı." });
@@ -302,15 +304,19 @@ public class GeoController : ControllerBase
                     id = olay.Id,
                     properties = new
                     {
+                        id = olay.Id,
                         takipNo = olay.TakipNo,
                         il = olay.Il,
                         ilce = olay.Ilce,
+                        mahalle = olay.Mahalle,
                         mekan = olay.Mekan,
                         tarih = olay.Tarih,
-                        durum = olay.Durum.ToString(),
-                        hassasiyet = olay.Hassasiyet.ToString(),
+                        durum = (int)olay.Durum,
+                        hassasiyet = (int)olay.Hassasiyet,
                         olayTuru = olay.OlayTuru,
-                        aciklama = olay.Aciklama
+                        aciklama = olay.Aciklama,
+                        latitude = olay.Latitude,
+                        longitude = olay.Longitude
                     },
                     geometry = new
                     {
@@ -372,6 +378,7 @@ public class GeoController : ControllerBase
                     id = vip.Id,
                     properties = new
                     {
+                        id = vip.Id,
                         takipNo = vip.TakipNo,
                         ziyaretEdenAdSoyad = vip.ZiyaretEdenAdSoyad,
                         unvan = vip.Unvan,
@@ -379,9 +386,11 @@ public class GeoController : ControllerBase
                         mekan = vip.Mekan,
                         baslangicTarihi = vip.BaslangicTarihi,
                         bitisTarihi = vip.BitisTarihi,
-                        durum = vip.ZiyaretDurumu.ToString(),
-                        hassasiyet = vip.Hassasiyet.ToString(),
-                        guvenlikSeviyesi = vip.GuvenlikSeviyesi
+                        durum = (int)vip.ZiyaretDurumu,
+                        hassasiyet = (int)vip.Hassasiyet,
+                        guvenlikSeviyesi = vip.GuvenlikSeviyesi,
+                        latitude = vip.Latitude,
+                        longitude = vip.Longitude
                     },
                     geometry = new
                     {

@@ -188,6 +188,7 @@ namespace EGM.Application.Services
             existing.BitisSaati     = updated.BitisSaati;
             existing.Il             = updated.Il;
             existing.Ilce           = updated.Ilce;
+            existing.Mahalle        = updated.Mahalle;
             existing.Mekan          = updated.Mekan;
             existing.Latitude       = updated.Latitude;
             existing.Longitude      = updated.Longitude;

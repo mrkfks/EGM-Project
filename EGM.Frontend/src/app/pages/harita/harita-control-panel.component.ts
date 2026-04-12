@@ -38,9 +38,10 @@ export class HaritaControlPanelComponent implements OnInit {
   olayTurleri: OlayTuru[] = [];
   gerceklesmeSekilleri: GerceklesmeSekli[] = [];
   durumlar = [
-    { value: '0', label: 'Planlandu' },
-    { value: '1', label: 'Gerceklesti' },
-    { value: '2', label: 'Iptal' }
+    { value: '0', label: 'Planlandı' },
+    { value: '1', label: 'Gerçekleşti' },
+    { value: '2', label: 'İptal' },
+    { value: '3', label: 'Devam Ediyor' }
   ];
 
   constructor(
@@ -51,6 +52,14 @@ export class HaritaControlPanelComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Varsayılan 48 saatlik aralık
+    const today = new Date();
+    const afterTwoDays = new Date();
+    afterTwoDays.setDate(today.getDate() + 2);
+    
+    this.tarihBaslangic = today.toISOString().split('T')[0];
+    this.tarihBitis = afterTwoDays.toISOString().split('T')[0];
+
     this.loadFilterOptions();
   }
 
@@ -81,6 +90,25 @@ export class HaritaControlPanelComponent implements OnInit {
   }
 
   onFilterApply(): void {
+    if (this.tarihBaslangic && this.tarihBitis) {
+      const start = new Date(this.tarihBaslangic);
+      const end = new Date(this.tarihBitis);
+      
+      if (end < start) {
+        this.errorMessage = 'Bitiş tarihi başlangıç tarihinden önce olamaz.';
+        return;
+      }
+
+      const diffTime = Math.abs(end.getTime() - start.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays > 7) {
+        this.errorMessage = 'Maksimum 1 haftalık tarih aralığı seçebilirsiniz.';
+        return;
+      }
+    }
+
+    this.errorMessage = '';
     const filter: OlayFilterRequest = {
       tarihBaslangic: this.tarihBaslangic ? new Date(this.tarihBaslangic) : null,
       tarihBitis: this.tarihBitis ? new Date(this.tarihBitis) : null,
@@ -90,15 +118,19 @@ export class HaritaControlPanelComponent implements OnInit {
       gerceklesmeSekliId: this.selectedGerceklesmeSekli || null,
       durum: this.selectedDurum ? parseInt(this.selectedDurum, 10) : null,
       page: 1,
-      pageSize: 100
+      pageSize: 1000
     };
 
     this.filterApplied.emit(filter);
   }
 
   onReset(): void {
-    this.tarihBaslangic = '';
-    this.tarihBitis = '';
+    const today = new Date();
+    const afterTwoDays = new Date();
+    afterTwoDays.setDate(today.getDate() + 2);
+    
+    this.tarihBaslangic = today.toISOString().split('T')[0];
+    this.tarihBitis = afterTwoDays.toISOString().split('T')[0];
     this.selectedKonu = '';
     this.selectedOrganizator = '';
     this.selectedOlayTuru = '';

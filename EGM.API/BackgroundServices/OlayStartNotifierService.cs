@@ -77,12 +77,13 @@ namespace EGM.API.BackgroundServices
                 {
                     await notifier.NotifyOlayBasladiAsync(olay);
                     olay.BaslangicBildirimiGonderildi = true;
-                    // Durumu otomatik olarak "Gerceklesti" yap
+                    // Durumu otomatik olarak "Devam Ediyor" yap
                     if (olay.Durum == EGM.Domain.Enums.OlayDurum.Planlandi)
                     {
-                        olay.Durum = EGM.Domain.Enums.OlayDurum.Gerceklesti;
+                        olay.Durum = EGM.Domain.Enums.OlayDurum.DevamEdiyor;
+                        olay.GercekBaslangicTarihi = now;
                         _logger.LogInformation(
-                            "Olay {TakipNo} durumu otomatik olarak Gerceklesti olarak güncellendi.",
+                            "Olay {TakipNo} durumu otomatik olarak Devam Ediyor olarak güncellendi.",
                             olay.TakipNo ?? olay.Id.ToString());
                     }
                     _logger.LogInformation(

@@ -274,6 +274,7 @@ public class GeoAreaService : IGeoAreaService
     public async Task<(double latitude, double longitude)?> GetCoordinatesByAdminAreaAsync(
         string? provinceName = null,
         string? districtName = null,
+        string? neighborhoodName = null,
         int? adminLevel = null,
         CancellationToken cancellationToken = default)
     {
@@ -281,6 +282,7 @@ public class GeoAreaService : IGeoAreaService
         {
             if (string.IsNullOrWhiteSpace(provinceName) &&
                 string.IsNullOrWhiteSpace(districtName) &&
+                string.IsNullOrWhiteSpace(neighborhoodName) &&
                 !adminLevel.HasValue)
                 return null;
 
@@ -289,7 +291,19 @@ public class GeoAreaService : IGeoAreaService
 
             await using var cmd = conn.CreateCommand();
 
-            if (!string.IsNullOrWhiteSpace(districtName))
+            if (!string.IsNullOrWhiteSpace(neighborhoodName))
+            {
+                cmd.CommandText = $"""
+                    SELECT rt.minx, rt.maxx, rt.miny, rt.maxy
+                    FROM   {Table} a
+                    JOIN   {Rtree} rt ON rt.id = a.fid
+                    WHERE  a.code >= {NeighborhoodMin}
+                      AND  lower(a.name) = lower($name)
+                    LIMIT  1
+                    """;
+                cmd.Parameters.AddWithValue("$name", neighborhoodName);
+            }
+            else if (!string.IsNullOrWhiteSpace(districtName))
             {
                 cmd.CommandText = $"""
                     SELECT rt.minx, rt.maxx, rt.miny, rt.maxy
@@ -337,16 +351,16 @@ public class GeoAreaService : IGeoAreaService
             double centerLat = (miny + maxy) / 2.0;
 
             _logger.LogInformation(
-                "Koordinat bulundu: Province={Province}, District={District} -> ({Lat:F6}, {Lon:F6})",
-                provinceName, districtName, centerLat, centerLon);
+                "Koordinat bulundu: Province={Province}, District={District}, Neighborhood={Neighborhood} -> ({Lat:F6}, {Lon:F6})",
+                provinceName, districtName, neighborhoodName, centerLat, centerLon);
 
             return (centerLat, centerLon);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "GetCoordinatesByAdminAreaAsync sırasında hata: Province={Province}, District={District}",
-                provinceName, districtName);
+                "GetCoordinatesByAdminAreaAsync sırasında hata: Province={Province}, District={District}, Neighborhood={Neighborhood}",
+                provinceName, districtName, neighborhoodName);
             throw;
         }
     }

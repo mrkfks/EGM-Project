@@ -1,4 +1,4 @@
-﻿/* ═══════════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════════
    EGM – Olay Listesi  |  Açık Tema (Sokak Olayları ile uyumlu)
    ═══════════════════════════════════════════════════════════════════ */
 
@@ -271,6 +271,7 @@
 .badge-planned   { background: #e8f4fd; color: #2980b9; border: 1px solid #aed6f1; }
 .badge-done      { background: #eafaf1; color: #1e8449; border: 1px solid #a9dfbf; }
 .badge-cancelled { background: #fdecea; color: #c0392b; border: 1px solid #f1948a; }
+.badge-in-progress { background: #fff8ec; color: #d35400; border: 1px solid #f39c12; }
 
 /* Risk mini bar */
 .risk-mini-bar {
