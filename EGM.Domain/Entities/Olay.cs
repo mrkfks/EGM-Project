@@ -1,19 +1,25 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using EGM.Domain.Enums;
 
 namespace EGM.Domain.Entities
 {
     public class Olay : BaseEntity
     {
+        [Required(ErrorMessage = "Olay türü zorunludur.")]
+        [StringLength(100)]
         public string? OlayTuru { get; set; }
 
+        [Required]
         public Guid OrganizatorId { get; set; }
         public Organizator? Organizator { get; set; }
 
+        [Required]
         public Guid KonuId { get; set; }
         public Konu? Konu { get; set; }
 
+        [Required(ErrorMessage = "Tarih zorunludur.")]
         public DateTime Tarih { get; set; }
         public TimeSpan? BaslangicSaati { get; set; }
         public TimeSpan? BitisSaati { get; set; }
@@ -25,8 +31,11 @@ namespace EGM.Domain.Entities
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "Katılımcı sayısı negatif olamaz.")]
         public int? KatilimciSayisi { get; set; }
+        [Range(0, int.MaxValue)]
         public int? GozaltiSayisi { get; set; }
+        [Range(0, int.MaxValue)]
         public int? SehitOluSayisi { get; set; }
         public string? Aciklama { get; set; }
         public string? EvrakNumarasi { get; set; }

@@ -67,6 +67,9 @@ body.login-page .main-content > *:not(router-outlet) {
 /* ── Responsive ──────────────────────────────────── */
 @media (max-width: 900px) {
   .main-content { left: 0 !important; }
+  .harita-controls-bottom {
+    display: none !important;
+  }
 }
 
 /* Scroll kapatma */

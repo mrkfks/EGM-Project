@@ -7,6 +7,7 @@ import { debounceTime, distinctUntilChanged, switchMap, catchError, of, forkJoin
 import { environment } from '../../../environments/environment';
 import { OlayTuruService, OlayTuru as OlayTuruDto } from '../../services/olay-turu.service';
 import { GerceklesmeSekliService, GerceklesmeSekli as GerceklesmeSekliDto } from '../../services/gerceklesme-sekli.service';
+import { GeoService, District } from '../../services/geo.service';
 
 const API = environment.apiUrl + '/api';
 
@@ -20,7 +21,7 @@ const HASSASIYET = [
 interface OrganizatorOption { id: string; ad: string; }
 interface KonuOption        { id: string; ad: string; }
 interface OlayListItem {
-  id: string;
+  id: string; // Guid string format
   olayTuru?: string;
   il?: string;
   ilce?: string;
@@ -29,7 +30,7 @@ interface OlayListItem {
   katilimciSayisi?: number;
   organizatorAd?: string;
   durum: number;
-  takipNo?: string;
+  takipNo?: string | null;
 }
 
 @Component({
@@ -75,7 +76,7 @@ export class SokakOlayEkle implements OnInit {
   
   // API'den yüklenen veriler
   tumIller: { name: string; osmId: number }[] = [];
-  filtreliIlceler: { name: string; osmId: number }[] = [];
+  filtreliIlceler: District[] = [];
   filtreliMahalleler: { name: string; osmId: number }[] = [];
 
   userPlans: OlayListItem[] = [];
@@ -90,7 +91,7 @@ export class SokakOlayEkle implements OnInit {
     mahalleler: { name: string; osmId: number }[];
   }[] = [];
 
-  /** Gerçekleşenler formuna yüklenen planlanan olayın id'si (null = yeni kayıt) */
+  /** Gerceğleşenler formuna yüklenen planlanan olayın takipNo'su (null = yeni kayıt) */
   selectedPlanId: string | null = null;
 
   activeForm: 'planned' | 'completed' = 'planned';
@@ -108,7 +109,6 @@ export class SokakOlayEkle implements OnInit {
   }
 
   ngOnInit(): void {
-    this.decodeToken();
     this.buildForm();
     this.loadLookups();
     this.loadPlannedEvents();
@@ -121,22 +121,20 @@ export class SokakOlayEkle implements OnInit {
   }
 
   private decodeToken(): void {
-    if (!this.isBrowser) return;
-    const token = localStorage.getItem('token');
-    if (!token) return;
-    try {
-      const b64  = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-      const json = decodeURIComponent(
-        Array.prototype.map.call(atob(b64), (c: string) =>
-          '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-        ).join('')
-      );
-      const p = JSON.parse(json);
-      this.tokenUserId = p['sub'] ?? p['nameid'] ?? null;
-      this.tokenRole   = p['role'] ?? null;
-      const cid = p['cityId'];
-      this.tokenCityId = cid && cid !== '' ? parseInt(cid, 10) : null;
-    } catch { /* ignore */ }
+    this.http.get<any>(`${API}/me`).subscribe({
+      next: user => {
+        this.tokenUserId = user.id;
+        this.tokenRole = user.role;
+        this.tokenCityId = user.cityId;
+        this.cdr.markForCheck();
+      },
+      error: () => {
+        this.tokenUserId = null;
+        this.tokenRole = null;
+        this.tokenCityId = null;
+        this.cdr.markForCheck();
+      }
+    });
   }
 
   get isCityScoped(): boolean {
@@ -150,28 +148,17 @@ export class SokakOlayEkle implements OnInit {
 
   private buildForm(): void {
     this.form = this.fb.group({
-      olayTuru:         ['', Validators.required],
-      olayinGerceklesmeSekli: ['', Validators.required],
-      organizatorId:    ['', Validators.required],
-      konuId:           ['', Validators.required],
-      tarih:            ['', Validators.required],
-      il:               ['', Validators.required],
-      ilce:             ['', Validators.maxLength(100)],
-      mahalle:          ['', Validators.maxLength(100)],
-      baslangicKonum:   [''],
-      mekan:            ['', Validators.maxLength(250)],
-      latitude:         [null, [Validators.min(-90),   Validators.max(90)]],
-      longitude:        [null, [Validators.min(-180),  Validators.max(180)]],
-      katilimciSayisi:  [null, Validators.min(0)],
-      hassasiyet:       [0,    Validators.required],
-      aciklama:         ['', Validators.maxLength(1000)],
-      cityId:           [this.tokenCityId],
-      bitisTarihi:      [''],
-      gerceklesenKatilimciSayisi: [null, Validators.min(0)],
-      sehitSayisi:      [null, Validators.min(0)],
-      oluSayisi:        [null, Validators.min(0)],
-      gozaltiSayisi:    [null, Validators.min(0)],
-      evrakNumarasi:    [''],
+      olayTuru: ['', Validators.required],
+      organizatorId: ['', Validators.required],
+      konuId: ['', Validators.required],
+      tarih: ['', Validators.required],
+      latitude: [null, [Validators.min(-90), Validators.max(90)]],
+      longitude: [null, [Validators.min(-180), Validators.max(180)]],
+      katilimciSayisi: [null, Validators.min(0)],
+      gozaltiSayisi: [null, Validators.min(0)],
+      sehitOluSayisi: [null, Validators.min(0)],
+      aciklama: ['', Validators.maxLength(1000)],
+      evrakNumarasi: ['', Validators.maxLength(100)],
     });
 
     if (this.isCityScoped && this.tokenCityId) {
@@ -342,56 +329,28 @@ export class SokakOlayEkle implements OnInit {
     this.isLoadingCompleted = true;
     this.http.get<any>(`${API}/olay?durum=1&sayfaBoyutu=100`).subscribe({
       next: res => {
-        const today = new Date().toLocaleDateString('tr-TR');
-        this.completedEvents = (res?.items ?? res ?? []).filter((event: any) => {
-          const eventDate = new Date(event.tarih).toLocaleDateString('tr-TR');
-          return eventDate === today;
-        });
+        this.completedEvents = res?.items ?? [];
         this.isLoadingCompleted = false;
         this.cdr.markForCheck();
       },
-      error: () => { this.isLoadingCompleted = false; this.cdr.markForCheck(); }
+      error: () => {
+        this.isLoadingCompleted = false;
+        this.cdr.markForCheck();
+      }
     });
   }
 
   loadPlannedEvents(): void {
     this.isLoadingPlanned = true;
-    
-    const planned$ = this.http.get<any>(`${API}/olay?durum=0&sayfaBoyutu=100`).pipe(
-      catchError(err => {
-        console.error('Planlanan olaylar yüklenemedi:', err);
-        return of({ items: [] });
-      })
-    );
-    const inProgress$ = this.http.get<any>(`${API}/olay?durum=3&sayfaBoyutu=100`).pipe(
-      catchError(err => {
-        console.warn('Devam eden olaylar sayısal filtreyle alınamadı, isimle deneniyor...', err);
-        return this.http.get<any>(`${API}/olay?durum=DevamEdiyor&sayfaBoyutu=100`).pipe(
-          catchError(err2 => {
-            console.error('Devam eden olaylar hiçbir formatta alınamadı:', err2);
-            return of({ items: [] });
-          })
-        );
-      })
-    );
-
-    forkJoin([planned$, inProgress$]).subscribe({
-      next: ([res0, res3]) => {
-        const items0 = res0?.items ?? res0 ?? [];
-        const items3 = res3?.items ?? res3 ?? [];
-        
-        this.userPlans = [...items0, ...items3].sort((a: any, b: any) => {
-          if (a.durum === 3 && b.durum !== 3) return -1;
-          if (a.durum !== 3 && b.durum === 3) return 1;
-          return new Date(b.tarih).getTime() - new Date(a.tarih).getTime();
-        });
-        
+    this.http.get<any>(`${API}/olay?durum=0&sayfaBoyutu=100`).subscribe({
+      next: res => {
+        this.userPlans = res?.items ?? [];
         this.isLoadingPlanned = false;
         this.cdr.markForCheck();
       },
-      error: () => { 
-        this.isLoadingPlanned = false; 
-        this.cdr.markForCheck(); 
+      error: () => {
+        this.isLoadingPlanned = false;
+        this.cdr.markForCheck();
       }
     });
   }
@@ -427,12 +386,12 @@ export class SokakOlayEkle implements OnInit {
   }
 
   selectPlanForCompletion(plan: OlayListItem): void {
-    this.selectedPlanId = plan.id;
+    this.selectedPlanId = plan.takipNo ?? null; // undefined durumunda null atanıyor
     this.activeForm = 'completed';
     this.formError = null;
     this.formSuccess = null;
 
-    this.http.get<any>(`${API}/olay/${plan.id}`).subscribe({
+    this.http.get<any>(`${API}/olay/${plan.takipNo}`).subscribe({
       next: detail => {
         this.form.patchValue({
           olayTuru:         this.olayTurleri.find(t => t.name === detail.olayTuru)?.id ?? '',
@@ -493,15 +452,22 @@ export class SokakOlayEkle implements OnInit {
       next: () => {
         this.isSaving = false;
         this.formSuccess = 'Etkinlik iptal edildi.';
-        const plan = this.userPlans.find(p => p.id === planId);
-        this.userPlans = this.userPlans.filter(p => p.id !== planId);
-        if (plan) {
-          const cancelled: OlayListItem = { ...plan, durum: 2 };
-          this.completedEvents = [cancelled, ...this.completedEvents];
+        const plan = this.userPlans.find(p => p.takipNo === planId);
+        if (!plan) {
+            console.error('Plan bulunamadı.');
+            return;
         }
-        this.selectedPlanId = null;
-        this.form.reset();
-        this.cdr.markForCheck();
+        this.userPlans = this.userPlans.filter(p => p.takipNo !== planId);
+
+        this.http.put<void>(`${API}/olay/${plan.takipNo}`, { ...plan, durum: 3 }).subscribe({
+          next: () => {
+              plan.durum = 3;
+              this.cdr.markForCheck();
+          },
+          error: (err) => {
+              console.error('Hata:', err);
+          }
+        });
       },
       error: () => {
         this.isSaving = false;
@@ -518,43 +484,9 @@ export class SokakOlayEkle implements OnInit {
       return;
     }
 
-    const v = this.form.getRawValue();
-
-    if (this.activeForm === 'planned' && v.tarih) {
-      const secilenTarih = new Date(v.tarih);
-      if (secilenTarih < new Date()) {
-        this.formError = 'Planlanan olay geçmiş bir tarihe girilemez.';
-        return;
-      }
-    }
-
     this.isSaving = true;
     this.formError = null;
-    const durum = this.activeForm === 'planned' ? 0 : 1;
-    const payload = {
-      olayTuru:        this.olayTurleri.find(t => t.id === v.olayTuru)?.name ?? v.olayTuru,
-      organizatorId:   v.organizatorId,
-      konuId:          v.konuId,
-      tarih:           this.normalizeDt(v.tarih)!,
-      baslangicSaati:  v.tarih ? (this.normalizeDt(v.tarih)!.split('T')[1] ?? null) : null,
-      il:              v.il,
-      ilce:            v.ilce || null,
-      mahalle:         v.mahalle || null,
-      mekan:           v.mekan || null,
-      latitude:        this.parseKonum(v.baslangicKonum)?.lat ?? v.latitude ?? null,
-      longitude:       this.parseKonum(v.baslangicKonum)?.lng ?? v.longitude ?? null,
-      katilimciSayisi: v.katilimciSayisi ?? null,
-      gozaltiSayisi:   v.gozaltiSayisi ?? null,
-      evrakNumarasi:   v.evrakNumarasi || null,
-      sehitOluSayisi:  (Number(v.sehitSayisi) || 0) + (Number(v.oluSayisi) || 0) || null,
-      aciklama:        v.aciklama || null,
-      hassasiyet:      +v.hassasiyet,
-      cityId:          v.cityId ?? null,
-      durum,
-      gerceklesmeSekliId:           v.olayinGerceklesmeSekli || null,
-      gerceklesenKatilimciSayisi:   v.gerceklesenKatilimciSayisi ?? null,
-      olayBitisTarihi:              this.normalizeDt(v.bitisTarihi)
-    };
+    const payload = this.form.getRawValue();
 
     if (this.selectedPlanId && this.activeForm === 'completed') {
       this.http.put<void>(`${API}/olay/${this.selectedPlanId}`, payload).subscribe({
@@ -601,7 +533,7 @@ export class SokakOlayEkle implements OnInit {
     this.userPlans.forEach(plan => {
       const baslangicTarihi = new Date(plan.tarih);
       if (baslangicTarihi <= simdi && plan.durum === 0) {
-        this.http.put<void>(`${API}/olay/${plan.id}`, { ...plan, durum: 3 }).subscribe({
+        this.http.put<void>(`${API}/olay/${plan.takipNo}`, { ...plan, durum: 3 }).subscribe({
           next: () => { plan.durum = 3; this.cdr.markForCheck(); }
         });
       }
@@ -612,5 +544,30 @@ export class SokakOlayEkle implements OnInit {
   
   saveEkKonumlar(olayId: string): void {
      // Implement ek konum saving logic if needed
+  }
+
+  ekKonumEkle(): void {
+    this.ekKonumlar.push({
+      il: '',
+      ilce: '',
+      mahalle: '',
+      konum: '',
+      mekan: '',
+      katilimciSayisi: null,
+      ilceler: [],
+      mahalleler: []
+    });
+  }
+
+  ekKonumSil(index: number): void {
+    this.ekKonumlar.splice(index, 1);
+  }
+
+  ekKonumIlDegisti(index: number): void {
+    console.log(`İl değişti: ${this.ekKonumlar[index].il}`);
+  }
+
+  ekKonumIlceDegisti(index: number): void {
+    console.log(`İlçe değişti: ${this.ekKonumlar[index].ilce}`);
   }
 }

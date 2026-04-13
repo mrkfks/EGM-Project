@@ -1,7 +1,8 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
+import { SidebarService } from '../../services/sidebar.service';
 
 export interface NavItem {
   label: string;
@@ -40,7 +41,10 @@ const HQ_Y_VE_UZERI = [R.BaskanlikYoneticisi, R.Yetkili];
 export class Sidebar implements OnInit, OnDestroy {
   show = true;
   userRole = '';
+  isMobile = false;
+  isOpen = false;
   private sub?: Subscription;
+  private sidebarSub?: Subscription;
 
   readonly groups: NavGroup[] = [
     {
@@ -72,20 +76,54 @@ export class Sidebar implements OnInit, OnDestroy {
     }
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private sidebarService: SidebarService) {
+    this.checkMobileView();
+  }
 
   ngOnInit(): void {
+    this.checkMobileView();
     this.readRole();
     this.checkRoute(this.router.url);
     this.sub = this.router.events
       .pipe(filter(e => e instanceof NavigationEnd))
       .subscribe((e: any) => this.checkRoute(e.url));
+    
+    // Subscribe to sidebar service
+    this.sidebarSub = this.sidebarService.isOpen$.subscribe((isOpen: boolean) => {
+      this.isOpen = isOpen;
+    });
   }
 
-  ngOnDestroy(): void { this.sub?.unsubscribe(); }
+  ngOnDestroy(): void { 
+    this.sub?.unsubscribe();
+    this.sidebarSub?.unsubscribe();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.checkMobileView();
+  }
+
+  private checkMobileView(): void {
+    this.isMobile = window.innerWidth < 900;
+    if (!this.isMobile) {
+      this.sidebarService.closeSidebar(); // Desktop-da drawer'ı kapat
+    }
+  }
+
+  toggleSidebar(): void {
+    this.sidebarService.toggleSidebar();
+  }
+
+  closeSidebar(): void {
+    this.sidebarService.closeSidebar();
+  }
 
   private checkRoute(url: string): void {
     this.show = !url.includes('/login');
+    if (this.isMobile) {
+      this.sidebarService.closeSidebar(); // Rota değiştiğinde mobile drawer'ı kapat
+    }
   }
 
   private readRole(): void {

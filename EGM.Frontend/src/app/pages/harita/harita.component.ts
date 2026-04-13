@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
@@ -31,6 +31,7 @@ export class HaritaComponent implements OnInit, OnDestroy {
   selectedProvince: string = '';
   showVIPZiyaretler: boolean = false;
   showProvinceBoundaries: boolean = false;
+  isMobile: boolean = false;
 
   // Türkiye merkez koordinatları
   turkeyCenter: L.LatLngExpression = [38.9637, 35.2433];
@@ -113,8 +114,21 @@ export class HaritaComponent implements OnInit, OnDestroy {
 
   constructor(
     private geoService: GeoService,
-    private olayService: OlayService
-  ) {}
+    private olayService: OlayService,
+    private cdr: ChangeDetectorRef
+  ) {
+    this.checkMobileView();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize(): void {
+    this.checkMobileView();
+  }
+
+  private checkMobileView(): void {
+    this.isMobile = window.innerWidth < 900;
+    this.cdr.markForCheck();
+  }
 
   ngOnInit(): void {
     setTimeout(() => {
@@ -173,13 +187,16 @@ export class HaritaComponent implements OnInit, OnDestroy {
    * İlleri yükle (dropdown için)
    */
   private loadProvinces(): void {
+    this.isLoading = true;
     this.geoService.getProvinces().subscribe(
-      (data) => {
-        this.provinces = data.sort((a, b) => a.name.localeCompare(b.name));
+      (provinces: Province[]) => {
+        this.provinces = provinces;
+        this.isLoading = false;
       },
       (error) => {
-        console.error('İlleri yükleme hatası:', error);
-        this.errorMessage = 'İller yüklenemedi';
+        console.error('Error fetching provinces:', error);
+        this.errorMessage = 'İller yüklenirken bir hata oluştu.';
+        this.isLoading = false;
       }
     );
   }
@@ -308,6 +325,7 @@ export class HaritaComponent implements OnInit, OnDestroy {
       let lng = olay.longitude ?? null;
       let kesinKonum = lat != null && lng != null;
       let fallbackSeviyesi: 'mahalle' | 'ilce' | 'il' | 'yok' | null = null;
+      let konumNotu = '';
 
       // Koordinat yoksa fallback kullan
       if (!kesinKonum && olay.il) {
@@ -648,7 +666,7 @@ export class HaritaComponent implements OnInit, OnDestroy {
           }
 
           return {
-            id: props['id'] || f.id,
+            id: props['takipNo'] || props['id'],
             olayTuru: props['olayTuru'],
             organizatorId: props['organizatorId'],
             organizatorAd: props['organizatorAd'],

@@ -1,0 +1,5 @@
+### Test Olaylar API
+GET http://localhost:5117/api/olaylar
+
+### Test Tekil Olay API
+GET http://localhost:5117/api/olay/SO-2026041369-001

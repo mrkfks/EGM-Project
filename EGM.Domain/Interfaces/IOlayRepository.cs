@@ -44,5 +44,8 @@ namespace EGM.Domain.Interfaces
             int? cityId,
             int page,
             int pageSize);
+
+        /// <summary>TakipNo ile olay getirir.</summary>
+        Task<Olay?> GetByTakipNoAsync(string takipNo);
     }
 }

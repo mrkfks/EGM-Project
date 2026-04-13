@@ -137,7 +137,7 @@ builder.Services.AddScoped<JwtTokenService>();builder.Services.AddScoped<ICurren
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<RoleAssignmentService>();
-builder.Services.AddScoped<OlayService>();
+builder.Services.AddScoped<IOlayService, OlayService>();
 builder.Services.AddScoped<OrganizatorService>();
 builder.Services.AddScoped<SecimService>();
 builder.Services.AddScoped<SosyalMedyaOlayService>();

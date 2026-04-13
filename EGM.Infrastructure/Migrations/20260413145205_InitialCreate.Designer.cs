@@ -11,44 +11,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EGM.Infrastructure.Migrations
 {
     [DbContext(typeof(EGMDbContext))]
-    [Migration("20260325194841_AddPerformanceIndexes2")]
-    partial class AddPerformanceIndexes2
+    [Migration("20260413145205_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.3");
-
-            modelBuilder.Entity("EGM.Domain.Entities.Aday", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AdSoyad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("PartiAdi")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Adaylar");
-                });
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.5");
 
             modelBuilder.Entity("EGM.Domain.Entities.AuditLog", b =>
                 {
@@ -102,13 +72,10 @@ namespace EGM.Infrastructure.Migrations
                     b.ToTable("AuditLoglar");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.Ekip", b =>
+            modelBuilder.Entity("EGM.Domain.Entities.GerceklesmeSekli", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Ad")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
@@ -121,52 +88,21 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("VIPZiyaretId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VIPZiyaretId");
-
-                    b.ToTable("Ekipler");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.GuvenlikPlani", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Aciklama")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Ad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
+                    b.Property<Guid>("OlayTuruId")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("VIPZiyaretId")
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("VIPZiyaretId");
+                    b.HasIndex("OlayTuruId");
 
-                    b.ToTable("GuvenlikPlanlari");
+                    b.ToTable("GerceklesmeSekilleri");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.KategoriOrganizator", b =>
@@ -196,41 +132,6 @@ namespace EGM.Infrastructure.Migrations
                     b.ToTable("KategoriOrganizatorler");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.KatilimciGrup", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("GrupAdi")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int?>("GrupKatilimciSayisi")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("OperasyonelFaaliyetId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OperasyonelFaaliyetId");
-
-                    b.ToTable("KatilimciGruplar");
-                });
-
             modelBuilder.Entity("EGM.Domain.Entities.Konu", b =>
                 {
                     b.Property<Guid>("Id")
@@ -253,10 +154,18 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Tur")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("UstKonuId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UstKonuId");
 
                     b.ToTable("Konular");
                 });
@@ -315,10 +224,10 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<string>("Aciklama")
                         .HasColumnType("TEXT");
 
-                    b.Property<TimeSpan?>("BaslangicSaati")
-                        .HasColumnType("TEXT");
+                    b.Property<bool>("BaslangicBildirimiGonderildi")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("Baslik")
+                    b.Property<TimeSpan?>("BaslangicSaati")
                         .HasColumnType("TEXT");
 
                     b.Property<TimeSpan?>("BitisSaati")
@@ -337,11 +246,23 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<int>("Durum")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("EvrakNumarasi")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("GercekBaslangicTarihi")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("GercekBitisTarihi")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("GerceklesenKatilimciSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("GerceklesmeSekliId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("GozaltiSayisi")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Hassasiyet")
                         .HasColumnType("INTEGER");
@@ -358,9 +279,6 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<int?>("KatilimciSayisi")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("KaynakKurum")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("KonuId")
                         .HasColumnType("TEXT");
 
@@ -370,17 +288,28 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<double?>("Longitude")
                         .HasColumnType("REAL");
 
+                    b.Property<string>("Mahalle")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Mekan")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime?>("OlayBitisTarihi")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("OlayTuru")
+                        .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("OrganizatorId")
                         .HasColumnType("TEXT");
 
-                    b.Property<double>("RiskPuani")
-                        .HasColumnType("REAL");
+                    b.Property<int?>("SehitOluSayisi")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TakipNo")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Tarih")
                         .HasColumnType("TEXT");
@@ -396,19 +325,55 @@ namespace EGM.Infrastructure.Migrations
 
                     b.HasIndex("Durum");
 
+                    b.HasIndex("GerceklesmeSekliId");
+
                     b.HasIndex("KonuId");
 
                     b.HasIndex("OrganizatorId");
 
                     b.HasIndex("Tarih");
 
+                    b.HasIndex("Latitude", "Longitude")
+                        .HasDatabaseName("IX_Olay_Latitude_Longitude");
+
                     b.ToTable("Olaylar");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.Olu", b =>
+            modelBuilder.Entity("EGM.Domain.Entities.OlayTuru", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedByUserId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("OlayTurleri");
+                });
+
+            modelBuilder.Entity("EGM.Domain.Entities.Organizator", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Aciklama")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Ad")
@@ -421,36 +386,53 @@ namespace EGM.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("DogumTarihi")
+                    b.Property<string>("Eposta")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FaaliyetAlani")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Iletisim")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("KatilimciDurumu")
+                    b.Property<DateTime>("KurulusTarihi")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("OperasyonelFaaliyetId")
+                    b.Property<string>("KutukNumarasi")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Soyad")
+                    b.Property<string>("Logo")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("TcKimlikNo")
-                        .HasMaxLength(256)
+                    b.Property<string>("SiyasiYonelim")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SosyalMedyaHesaplari")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Telefon")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Tur")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("UstKurulusId")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("OperasyonelFaaliyetId");
+                    b.HasIndex("UstKurulusId");
 
-                    b.ToTable("Oluler");
+                    b.ToTable("Organizatorler");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.OperasyonelFaaliyet", b =>
+            modelBuilder.Entity("EGM.Domain.Entities.SandikOlay", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -466,153 +448,52 @@ namespace EGM.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<int>("GozaltiSayisi")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("OlayId")
+                    b.Property<string>("Il")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OlayId");
-
-                    b.ToTable("OperasyonelFaaliyetler");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.Organizator", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Ad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FaaliyetAlani")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Iletisim")
+                    b.Property<string>("Ilce")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("KurulusTarihi")
+                    b.Property<string>("KanitDosyasi")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Organizatorler");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.Parti", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Ad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
+                    b.Property<int>("KatilimciSayisi")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<string>("Konu")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Partiler");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.SecimKaynak", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
+                    b.Property<string>("Mahalle")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<string>("MusahitAdi")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
+                    b.Property<string>("Okul")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsDeleted")
+                    b.Property<string>("OlayKategorisi")
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeSpan>("OlaySaati")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OluSayisi")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("KaynakAdi")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SecimKaynaklar");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.SecimSonucu", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("AdayId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("BolgeId")
+                    b.Property<int>("SandikNo")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("BolgeTipi")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
+                    b.Property<int>("SehitSayisi")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("KaynakId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("KaynakOnayDurumu")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<double>("OyOrani")
-                        .HasColumnType("REAL");
-
-                    b.Property<int>("OySayisi")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("PartiId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SecimTuru")
+                    b.Property<string>("TakipNo")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("Tarih")
@@ -623,58 +504,7 @@ namespace EGM.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AdayId");
-
-                    b.HasIndex("KaynakId");
-
-                    b.HasIndex("PartiId");
-
-                    b.ToTable("SecimSonuclari");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.Sehit", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Ad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DogumTarihi")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Gorev")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("OperasyonelFaaliyetId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Soyad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TcKimlikNo")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OperasyonelFaaliyetId");
-
-                    b.ToTable("Sehitler");
+                    b.ToTable("SandikOlaylar");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.SosyalMedyaOlay", b =>
@@ -690,10 +520,19 @@ namespace EGM.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("EkranGoruntusu")
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("Hassasiyet")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("IcerikOzeti")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Il")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Ilce")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("IlgiliKisiKurum")
@@ -702,7 +541,10 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("OlayId")
+                    b.Property<string>("Konu")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("OlayId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PaylasimLinki")
@@ -714,8 +556,8 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<string>("Platform")
                         .HasColumnType("TEXT");
 
-                    b.Property<double>("SosyalSignalSkoru")
-                        .HasColumnType("REAL");
+                    b.Property<string>("TakipNo")
+                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -727,55 +569,14 @@ namespace EGM.Infrastructure.Migrations
                     b.ToTable("SosyalMedyaOlaylar");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.Supheli", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Ad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("DogumTarihi")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("Gozaltinda")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid>("OperasyonelFaaliyetId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Soyad")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TcKimlikNo")
-                        .HasMaxLength(256)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OperasyonelFaaliyetId");
-
-                    b.ToTable("Supheliler");
-                });
-
             modelBuilder.Entity("EGM.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Birim")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("CityId")
@@ -864,7 +665,16 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
+                    b.Property<double?>("Latitude")
+                        .HasColumnType("REAL");
+
+                    b.Property<double?>("Longitude")
+                        .HasColumnType("REAL");
+
                     b.Property<string>("Mekan")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TakipNo")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Unvan")
@@ -872,6 +682,9 @@ namespace EGM.Infrastructure.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("ZiyaretDurumu")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ZiyaretEdenAdSoyad")
                         .HasColumnType("TEXT");
@@ -937,41 +750,34 @@ namespace EGM.Infrastructure.Migrations
                     b.ToTable("KategoriOrganizatorOrganizator");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.Ekip", b =>
+            modelBuilder.Entity("EGM.Domain.Entities.GerceklesmeSekli", b =>
                 {
-                    b.HasOne("EGM.Domain.Entities.VIPZiyaret", "VIPZiyaret")
-                        .WithMany("EkipAtamasi")
-                        .HasForeignKey("VIPZiyaretId")
+                    b.HasOne("EGM.Domain.Entities.OlayTuru", "OlayTuru")
+                        .WithMany("GerceklesmeSekilleri")
+                        .HasForeignKey("OlayTuruId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("VIPZiyaret");
+                    b.Navigation("OlayTuru");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.GuvenlikPlani", b =>
+            modelBuilder.Entity("EGM.Domain.Entities.Konu", b =>
                 {
-                    b.HasOne("EGM.Domain.Entities.VIPZiyaret", "VIPZiyaret")
-                        .WithMany("GuvenlikPlanlari")
-                        .HasForeignKey("VIPZiyaretId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("EGM.Domain.Entities.Konu", "UstKonu")
+                        .WithMany("AltKonular")
+                        .HasForeignKey("UstKonuId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("VIPZiyaret");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.KatilimciGrup", b =>
-                {
-                    b.HasOne("EGM.Domain.Entities.OperasyonelFaaliyet", "OperasyonelFaaliyet")
-                        .WithMany("KatilimciGruplar")
-                        .HasForeignKey("OperasyonelFaaliyetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OperasyonelFaaliyet");
+                    b.Navigation("UstKonu");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.Olay", b =>
                 {
+                    b.HasOne("EGM.Domain.Entities.GerceklesmeSekli", "GerceklesmeSekli")
+                        .WithMany()
+                        .HasForeignKey("GerceklesmeSekliId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("EGM.Domain.Entities.Konu", "Konu")
                         .WithMany("Olaylar")
                         .HasForeignKey("KonuId")
@@ -984,91 +790,29 @@ namespace EGM.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("GerceklesmeSekli");
+
                     b.Navigation("Konu");
 
                     b.Navigation("Organizator");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.Olu", b =>
+            modelBuilder.Entity("EGM.Domain.Entities.Organizator", b =>
                 {
-                    b.HasOne("EGM.Domain.Entities.OperasyonelFaaliyet", "OperasyonelFaaliyet")
-                        .WithMany("Oluler")
-                        .HasForeignKey("OperasyonelFaaliyetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("EGM.Domain.Entities.Organizator", "UstKurulus")
+                        .WithMany("AltKuruluslar")
+                        .HasForeignKey("UstKurulusId");
 
-                    b.Navigation("OperasyonelFaaliyet");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.OperasyonelFaaliyet", b =>
-                {
-                    b.HasOne("EGM.Domain.Entities.Olay", "Olay")
-                        .WithMany("OperasyonelFaaliyetler")
-                        .HasForeignKey("OlayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Olay");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.SecimSonucu", b =>
-                {
-                    b.HasOne("EGM.Domain.Entities.Aday", "Aday")
-                        .WithMany()
-                        .HasForeignKey("AdayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EGM.Domain.Entities.SecimKaynak", "Kaynak")
-                        .WithMany()
-                        .HasForeignKey("KaynakId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EGM.Domain.Entities.Parti", "Parti")
-                        .WithMany()
-                        .HasForeignKey("PartiId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Aday");
-
-                    b.Navigation("Kaynak");
-
-                    b.Navigation("Parti");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.Sehit", b =>
-                {
-                    b.HasOne("EGM.Domain.Entities.OperasyonelFaaliyet", "OperasyonelFaaliyet")
-                        .WithMany("Sehitler")
-                        .HasForeignKey("OperasyonelFaaliyetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OperasyonelFaaliyet");
+                    b.Navigation("UstKurulus");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.SosyalMedyaOlay", b =>
                 {
                     b.HasOne("EGM.Domain.Entities.Olay", "Olay")
                         .WithMany("SosyalMedyaOlaylar")
-                        .HasForeignKey("OlayId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OlayId");
 
                     b.Navigation("Olay");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.Supheli", b =>
-                {
-                    b.HasOne("EGM.Domain.Entities.OperasyonelFaaliyet", "OperasyonelFaaliyet")
-                        .WithMany("Supheliler")
-                        .HasForeignKey("OperasyonelFaaliyetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("OperasyonelFaaliyet");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.YuruyusRota", b =>
@@ -1099,39 +843,28 @@ namespace EGM.Infrastructure.Migrations
 
             modelBuilder.Entity("EGM.Domain.Entities.Konu", b =>
                 {
+                    b.Navigation("AltKonular");
+
                     b.Navigation("Olaylar");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.Olay", b =>
                 {
-                    b.Navigation("OperasyonelFaaliyetler");
-
                     b.Navigation("SosyalMedyaOlaylar");
 
                     b.Navigation("YuruyusRotasi");
                 });
 
-            modelBuilder.Entity("EGM.Domain.Entities.OperasyonelFaaliyet", b =>
+            modelBuilder.Entity("EGM.Domain.Entities.OlayTuru", b =>
                 {
-                    b.Navigation("KatilimciGruplar");
-
-                    b.Navigation("Oluler");
-
-                    b.Navigation("Sehitler");
-
-                    b.Navigation("Supheliler");
+                    b.Navigation("GerceklesmeSekilleri");
                 });
 
             modelBuilder.Entity("EGM.Domain.Entities.Organizator", b =>
                 {
+                    b.Navigation("AltKuruluslar");
+
                     b.Navigation("Olaylar");
-                });
-
-            modelBuilder.Entity("EGM.Domain.Entities.VIPZiyaret", b =>
-                {
-                    b.Navigation("EkipAtamasi");
-
-                    b.Navigation("GuvenlikPlanlari");
                 });
 #pragma warning restore 612, 618
         }

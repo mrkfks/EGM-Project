@@ -285,6 +285,9 @@ namespace EGM.Infrastructure.Migrations
                     b.Property<double?>("Longitude")
                         .HasColumnType("REAL");
 
+                    b.Property<string>("Mahalle")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Mekan")
                         .HasColumnType("TEXT");
 
@@ -292,6 +295,8 @@ namespace EGM.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("OlayTuru")
+                        .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("OrganizatorId")
@@ -324,6 +329,9 @@ namespace EGM.Infrastructure.Migrations
                     b.HasIndex("OrganizatorId");
 
                     b.HasIndex("Tarih");
+
+                    b.HasIndex("Latitude", "Longitude")
+                        .HasDatabaseName("IX_Olay_Latitude_Longitude");
 
                     b.ToTable("Olaylar");
                 });

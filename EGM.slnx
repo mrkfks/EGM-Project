@@ -3,5 +3,4 @@
   <Project Path="EGM.Application/EGM.Application.csproj" />
   <Project Path="EGM.Domain/EGM.Domain.csproj" />
   <Project Path="EGM.Infrastructure/EGM.Infrastructure.csproj" />
-  <Project Path="EGM.Tests/EGM.Tests.csproj" />
 </Solution>

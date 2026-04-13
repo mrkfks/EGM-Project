@@ -52,7 +52,7 @@ export const routes: Routes = [
     { path: 'olu',             loadComponent: () => import('./pages/olu/olu').then(m => m.Olu),                            canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
     { path: 'supheli',         loadComponent: () => import('./pages/supheli/supheli').then(m => m.Supheli),                canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
     { path: 'operasyonel',     loadComponent: () => import('./pages/operasyonel/operasyonel').then(m => m.Operasyonel),    canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
-    { path: 'sehit',           loadComponent: () => import('./pages/sehit/sehit').then(m => m.Sehit),                      canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
+    // { path: 'sehit',           loadComponent: () => import('./pages/sehit/sehit').then(m => m.Sehit),                      canActivate: [authGuard, roleGuard(IL_YONETICISI_VE_UZERI)] },
 
     // ── Başkanlık Yöneticisi ve Yetkili ─────────────────────────────────
     { path: 'veri-yonetimi',   loadComponent: () => import('./pages/veri-yonetimi/veri-yonetimi').then(m => m.VeriYonetimi), canActivate: [authGuard, roleGuard(HQ_YONETICISI_VE_UZERI)] },

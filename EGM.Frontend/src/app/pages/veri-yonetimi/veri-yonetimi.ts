@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
+import { GeoService } from '../../services/geo.service';
 
 const API = 'http://localhost:5117/api';
 
@@ -9,6 +10,7 @@ const HASSASIYET_LABELS = ['Düşük', 'Orta', 'Yüksek', 'Kritik'];
 const HASSASIYET_RENK   = ['#27ae60', '#f39c12', '#e74c3c', '#8e44ad'];
 
 // ── Tip tanımları ──────────────────────────────────────────────────────────
+declare var ILLER: string; // Frontend'den gelir
 interface SokakOlay {
   id: string; olayTuru?: string; il?: string; ilce?: string;
   tarih: string; hassasiyet: number; katilimciSayisi?: number;
@@ -56,6 +58,8 @@ type AktifSekme = 'sokak' | 'sosyal' | 'secim' | 'vip';
 })
 export class VeriYonetimi implements OnInit {
 
+  ILLER: string[] = [];
+
   aktifSekme: AktifSekme = 'sokak';
 
   yukleniyor = false;
@@ -81,19 +85,6 @@ export class VeriYonetimi implements OnInit {
 
   readonly hassasiyetler = HASSASIYET_LABELS.map((l, i) => ({ value: i, label: l, renk: HASSASIYET_RENK[i] }));
 
-  readonly ILLER = [
-    'Adana','Adıyaman','Afyonkarahisar','Ağrı','Amasya','Ankara','Antalya','Artvin',
-    'Aydın','Balıkesir','Bilecik','Bingöl','Bitlis','Bolu','Burdur','Bursa',
-    'Çanakkale','Çankırı','Çorum','Denizli','Diyarbakır','Edirne','Elazığ','Erzincan',
-    'Erzurum','Eskişehir','Gaziantep','Giresun','Gümüşhane','Hakkari','Hatay','Isparta',
-    'Mersin','İstanbul','İzmir','Kars','Kastamonu','Kayseri','Kırklareli','Kırşehir',
-    'Kocaeli','Konya','Kütahya','Malatya','Manisa','Kahramanmaraş','Mardin','Muğla',
-    'Muş','Nevşehir','Niğde','Ordu','Rize','Sakarya','Samsun','Siirt','Sinop',
-    'Sivas','Tekirdağ','Tokat','Trabzon','Tunceli','Şanlıurfa','Uşak','Van',
-    'Yozgat','Zonguldak','Aksaray','Bayburt','Karaman','Kırıkkale','Batman',
-    'Şırnak','Bartın','Ardahan','Iğdır','Yalova','Karabük','Kilis','Osmaniye','Düzce',
-  ];
-
   readonly PLATFORMLAR = ['Twitter / X','Facebook','Instagram','YouTube','TikTok','Telegram','WhatsApp','LinkedIn','Diğer'];
   readonly KATEGORILER = ['Müşahit Engellenmesi','Mükerrer Oy Denemesi','Seçmen Baskısı','Sandık Usulsüzlüğü','Fiziksel Çatışma','Kural İhlali','Diğer'];
   readonly VIP_UNVANLAR = ['Bakan','Milletvekili','Vali','Kaymakam','Emniyet Müdürü','Parti Yetkilisi','Diğer'];
@@ -101,9 +92,23 @@ export class VeriYonetimi implements OnInit {
   readonly VIP_DURUMLAR: Record<number, string> = { 0: 'Planlandı', 1: 'Varış Yapıldı', 2: 'Ayrıldı', 3: 'İptal Edildi' };
   readonly OLAY_DURUMLAR: Record<number, string> = { 0: 'Planlandı', 1: 'Devam Ediyor', 2: 'Gerçekleşti', 3: 'İptal' };
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(private http: HttpClient, private geoService: GeoService, private cdr: ChangeDetectorRef) {}
 
-  ngOnInit(): void { this.tumVerileriYukle(); }
+  ngOnInit(): void {
+    this.loadProvinces();
+  }
+
+  private loadProvinces(): void {
+    this.geoService.getProvinces().subscribe(
+      (provinces: any[]) => {
+        this.ILLER = provinces.map(p => typeof p === 'string' ? p : p.name);
+        this.cdr.markForCheck();
+      },
+      (error) => {
+        console.error('Error loading provinces:', error);
+      }
+    );
+  }
 
   private token(): HttpHeaders {
     const t = localStorage.getItem('token') ?? '';

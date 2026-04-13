@@ -3,34 +3,34 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export interface GeoJsonFeature {
-  type: 'Feature';
-  id: string;
-  properties: Record<string, any>;
-  geometry: {
-    type: 'Point' | 'Polygon' | 'MultiPolygon';
-    coordinates: any;
-  };
-}
-
-export interface GeoJsonFeatureCollection {
-  type: 'FeatureCollection';
-  features: GeoJsonFeature[];
-}
-
-export interface Province {
-  name: string;
-  osmId: number;
-}
-
 export interface District {
+  id: number;
   name: string;
-  osmId: number;
 }
 
 export interface Coordinates {
   latitude: number;
   longitude: number;
+}
+
+export interface GeoJsonFeature {
+  id?: string | number;
+  type: string;
+  geometry: {
+    type: string;
+    coordinates: any[];
+  };
+  properties: Record<string, any>;
+}
+
+export interface GeoJsonFeatureCollection {
+  type: string;
+  features: GeoJsonFeature[];
+}
+
+export interface Province {
+  id: number;
+  name: string;
 }
 
 @Injectable({
@@ -44,8 +44,8 @@ export class GeoService {
   /**
    * Harita için tüm illeri döner
    */
-  getProvinces(): Observable<Province[]> {
-    return this.http.get<Province[]>(`${this.apiUrl}/provinces-geopackage`);
+  getProvinces(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/provinces-geopackage`);
   }
 
   /**
@@ -120,5 +120,12 @@ export class GeoService {
    */
   getGeometry(id: number): Observable<GeoJsonFeature> {
     return this.http.get<GeoJsonFeature>(`${this.apiUrl}/provinces/${id}/geometry`);
+  }
+
+  /**
+   * Verilen şehir ID'sine ait ilçeleri döner
+   */
+  getDistrictsByCityId(cityId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/${cityId}`);
   }
 }

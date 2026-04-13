@@ -1,4 +1,3 @@
-
 using EGM.Application.DTOs;
 using EGM.Application.Helpers;
 using EGM.Domain.Constants;
@@ -9,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace EGM.Application.Services
 {
-    public class OlayService
+    public class OlayService : IOlayService
     {
         private readonly IOlayRepository _olayRepository;
         private readonly IRepository<YuruyusRota> _rotaRepository;
@@ -49,7 +48,12 @@ namespace EGM.Application.Services
                 cityId = _currentUser.CityId.Value;
 
             var (items, total) = await _olayRepository.GetFilteredPagedAsync(
-                durum, tarihBaslangic, tarihBitis, cityId, page, pageSize);
+                durum: durum,
+                tarihBaslangic: tarihBaslangic,
+                tarihBitis: tarihBitis,
+                cityId: cityId,
+                page: page,
+                pageSize: pageSize);
 
             return new PagedResult<Olay>
             {
@@ -63,7 +67,7 @@ namespace EGM.Application.Services
         // ── ID ile getir ─────────────────────────────────────────────────
         public async Task<Olay?> GetByIdAsync(Guid id)
         {
-            var olay = await _olayRepository.GetByIdWithDetailsAsync(id);
+            var olay = await _olayRepository.GetByIdAsync(id);
             if (olay == null) return null;
 
             // İl kısıtlı kullanıcı sadece kendi ilinin olayını görebilir
@@ -90,16 +94,16 @@ namespace EGM.Application.Services
                 cityId = _currentUser.CityId.Value;
 
             var (items, total) = await _olayRepository.GetFilteredMapOlaylarAsync(
-                filter.TarihBaslangic,
-                filter.TarihBitis,
-                filter.KonuId,
-                filter.OrganizatorId,
-                filter.OlayTuru,
-                filter.GerceklesmeSekliId,
-                filter.Durum,
-                cityId,
-                filter.Page,
-                filter.PageSize);
+                tarihBaslangic: filter.TarihBaslangic,
+                tarihBitis: filter.TarihBitis,
+                konuId: filter.KonuId,
+                organizatorId: filter.OrganizatorId,
+                olayTuru: filter.OlayTuru,
+                gerceklesmeSekliId: filter.GerceklesmeSekliId,
+                durum: filter.Durum,
+                cityId: cityId,
+                page: filter.Page,
+                pageSize: filter.PageSize);
 
             return new PagedResult<Olay>
             {
@@ -125,8 +129,7 @@ namespace EGM.Application.Services
             return await _olayRepository.GetByKonuAsync(konuId);
         }
 
-        // ── Oluşturma ────────────────────────────────────────────────────
-        public async Task<Olay> CreateOlayAsync(Olay olay)
+        public async Task<Olay> CreateOlayEntityAsync(Olay olay)
         {
             olay.CreatedByUserId = _currentUser.UserId;
             // Durum, controller'dan dto.Durum ile set edilir; sadece Planlandi(0) ise varsayılan kalır
@@ -145,29 +148,53 @@ namespace EGM.Application.Services
                 o => o.Tarih >= tarihBaslangic && o.Tarih < tarihBitis && o.Il == ilAdi)).Count;
             olay.TakipNo = TakipNoHelper.Generate(TakipNoHelper.SokakOlay, olay.Tarih, plakaKodu, mevcutSayisi + 1);
 
-            var created = await _olayRepository.AddAsync(olay);
+            await _olayRepository.AddAsync(olay);
 
             // Bildirim gönderimi başarısız olursa kayıt etkilenmez; sadece loglanır
             try
             {
-                await _notificationService.NotifyOlayRiskAsync(created);
+                await _notificationService.NotifyOlayRiskAsync(olay);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Olay risk bildirimi gönderilemedi. OlayId: {OlayId}", created.Id);
+                _logger.LogError(ex, "Olay risk bildirimi gönderilemedi. OlayId: {OlayId}", olay.Id);
             }
 
-            return created;
+            return olay;
+        }
+
+        public async Task<OlayDto> CreateOlayAsync(OlayDto olayDto)
+        {
+            var olay = new Olay
+            {
+                OlayTuru = olayDto.OlayTuru,
+                Tarih = olayDto.Tarih,
+                Il = olayDto.Il,
+                Ilce = olayDto.Ilce,
+                Mahalle = olayDto.Mahalle,
+                Hassasiyet = (Hassasiyet)olayDto.Hassasiyet,
+                Aciklama = olayDto.Aciklama,
+                Latitude = olayDto.Latitude,
+                Longitude = olayDto.Longitude,
+                KatilimciSayisi = olayDto.KatilimciSayisi,
+                GozaltiSayisi = olayDto.GozaltiSayisi,
+                SehitOluSayisi = olayDto.SehitOluSayisi,
+                EvrakNumarasi = olayDto.EvrakNumarasi,
+                CityId = olayDto.CityId
+            };
+
+            var created = await CreateOlayEntityAsync(olay);
+            return MapToDto(created);
         }
         /// <summary>
         /// Güncelleme yetkisi:
         ///   • Başkanlık Yöneticisi / İl Yöneticisi → her kaydı düzenleyebilir.
         ///   • İl Personeli / Başkanlık Personeli   → yalnızca kendi oluşturduğu kaydı.
         /// </summary>
-        public async Task<(bool Success, string? Error)> UpdateOlayAsync(Guid id, Olay updated)
+        public async Task<(bool Success, string? Error)> UpdateOlayAsync(Guid id, OlayDto dto)
         {
             var existing = await _olayRepository.GetByIdAsync(id);
-            if (existing == null) return (false, null);
+            if (existing == null) return (false, "Olay bulunamadı.");
 
             // İl kısıtı
             if (Roles.IsCityScoped(_currentUser.Role)
@@ -180,29 +207,20 @@ namespace EGM.Application.Services
             if (isStaffRole && existing.CreatedByUserId != _currentUser.UserId)
                 return (false, "Yalnızca kendi oluşturduğunuz kayıtları düzenleyebilirsiniz.");
 
-            existing.OlayTuru       = updated.OlayTuru;
-            existing.OrganizatorId  = updated.OrganizatorId;
-            existing.KonuId         = updated.KonuId;
-            existing.Tarih          = updated.Tarih;
-            existing.BaslangicSaati = updated.BaslangicSaati;
-            existing.BitisSaati     = updated.BitisSaati;
-            existing.Il             = updated.Il;
-            existing.Ilce           = updated.Ilce;
-            existing.Mahalle        = updated.Mahalle;
-            existing.Mekan          = updated.Mekan;
-            existing.Latitude       = updated.Latitude;
-            existing.Longitude      = updated.Longitude;
-            existing.KatilimciSayisi = updated.KatilimciSayisi;
-            existing.GozaltiSayisi  = updated.GozaltiSayisi;
-            existing.SehitOluSayisi = updated.SehitOluSayisi;
-            existing.Aciklama       = updated.Aciklama;
-            existing.EvrakNumarasi  = updated.EvrakNumarasi;
-            existing.Hassasiyet     = updated.Hassasiyet;
-            existing.Durum          = updated.Durum;
-            existing.CityId         = updated.CityId;
-            existing.OlayBitisTarihi            = updated.OlayBitisTarihi;
-            existing.GerceklesenKatilimciSayisi  = updated.GerceklesenKatilimciSayisi;
-            existing.GerceklesmeSekliId          = updated.GerceklesmeSekliId;
+            existing.OlayTuru       = dto.OlayTuru;
+            existing.Tarih          = dto.Tarih;
+            existing.Il             = dto.Il;
+            existing.Ilce           = dto.Ilce;
+            existing.Mahalle        = dto.Mahalle;
+            existing.Latitude       = dto.Latitude;
+            existing.Longitude      = dto.Longitude;
+            existing.KatilimciSayisi = dto.KatilimciSayisi;
+            existing.GozaltiSayisi  = dto.GozaltiSayisi;
+            existing.SehitOluSayisi = dto.SehitOluSayisi;
+            existing.Aciklama       = dto.Aciklama;
+            existing.EvrakNumarasi  = dto.EvrakNumarasi;
+            existing.Hassasiyet     = (Hassasiyet)dto.Hassasiyet;
+            existing.CityId         = dto.CityId;
 
             await _olayRepository.UpdateAsync(existing);
             var isSelfCorrection = isStaffRole && existing.CreatedByUserId == _currentUser.UserId;
@@ -277,5 +295,67 @@ namespace EGM.Application.Services
             var all = await _rotaRepository.FindAsync(r => r.OlayId == olayId);
             return all.OrderBy(r => r.SiraNo).ToList();
         }
+
+        public async Task<OlayDto?> GetByTakipNoAsync(string takipNo)
+        {
+            var olay = await _olayRepository.GetByTakipNoAsync(takipNo);
+            if (olay == null)
+            {
+                _logger.LogWarning("TakipNo ile eşleşen olay bulunamadı: {TakipNo}", takipNo);
+                return null;
+            }
+
+            return MapToDto(olay);
+        }
+
+        public async Task<List<OlayDto>> GetAllOlaylarAsync()
+        {
+            var (items, _) = await _olayRepository.GetFilteredPagedAsync(
+                durum: null,
+                tarihBaslangic: null,
+                tarihBitis: null,
+                cityId: null,
+                page: 1,
+                pageSize: 10000);
+            return items.Select(MapToDto).ToList();
+        }
+
+        // ── OlayController: durum ve sayfa boyutuna göre listeleme ───────
+        public async Task<List<OlayDto>> GetOlaylarAsync(OlayDurum? durum, int sayfaBoyutu)
+        {
+            int? cityId = null;
+            if (Roles.IsCityScoped(_currentUser.Role) && _currentUser.CityId.HasValue)
+                cityId = _currentUser.CityId.Value;
+
+            var (items, _) = await _olayRepository.GetFilteredPagedAsync(
+                durum: durum,
+                tarihBaslangic: null,
+                tarihBitis: null,
+                cityId: cityId,
+                page: 1,
+                pageSize: sayfaBoyutu);
+            return items.Select(MapToDto).ToList();
+        }
+
+        // ── Olay → OlayDto dönüşümü ─────────────────────────────────────
+        private static OlayDto MapToDto(Olay o) => new OlayDto
+        {
+            Id              = o.Id,
+            OlayTuru        = o.OlayTuru ?? string.Empty,
+            Tarih           = o.Tarih,
+            Il              = o.Il ?? string.Empty,
+            Ilce            = o.Ilce ?? string.Empty,
+            Mahalle         = o.Mahalle ?? string.Empty,
+            Hassasiyet      = (int)o.Hassasiyet,
+            Aciklama        = o.Aciklama ?? string.Empty,
+            Latitude        = o.Latitude,
+            Longitude       = o.Longitude,
+            KatilimciSayisi = o.KatilimciSayisi,
+            GozaltiSayisi   = o.GozaltiSayisi,
+            SehitOluSayisi  = o.SehitOluSayisi,
+            EvrakNumarasi   = o.EvrakNumarasi,
+            TakipNo         = o.TakipNo,
+            CityId          = o.CityId
+        };
     }
 }

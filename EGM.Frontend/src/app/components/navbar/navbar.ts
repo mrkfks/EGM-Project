@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { NotificationCenter } from '../notification-center/notification-center';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'app-navbar',
@@ -54,7 +55,7 @@ export class Navbar implements OnInit, OnDestroy {
     '/faaliyet-yonetimi':    { title: 'Faaliyet Yönetimi',             icon: 'briefcase' },
   };
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private sidebarService: SidebarService) {}
 
   ngOnInit(): void {
     this.decodeToken();
@@ -117,6 +118,10 @@ export class Navbar implements OnInit, OnDestroy {
   }
 
   toggleDropdown(): void { this.dropdownOpen = !this.dropdownOpen; }
+
+  toggleSidebar(): void {
+    this.sidebarService.toggleSidebar();
+  }
 
   logout(): void {
     localStorage.removeItem('token');

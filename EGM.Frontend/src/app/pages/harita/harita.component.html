@@ -3,7 +3,7 @@
   <div #mapContainer class="map-wrapper"></div>
 
   <!-- Filtreleme Paneli (Haritanın Altında) -->
-  <div class="harita-controls-bottom">
+  <div class="harita-controls-bottom" *ngIf="!isMobile">
     <app-harita-control-panel
       [provinces]="provinces"
       [isLoading]="isLoading"

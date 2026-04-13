@@ -1,3 +1,4 @@
+using EGM.Application.DTOs;
 using EGM.Application.Services;
 using EGM.Domain.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -14,14 +15,14 @@ public class GeoController : ControllerBase
 {
     private readonly IGeoService _geoService;
     private readonly IGeoAreaService _geoAreaService;
-    private readonly OlayService _olayService;
+    private readonly IOlayService _olayService;
     private readonly VIPZiyaretService _vipService;
     private readonly ILogger<GeoController> _logger;
 
     public GeoController(
         IGeoService geoService,
         IGeoAreaService geoAreaService,
-        OlayService olayService,
+        IOlayService olayService,
         VIPZiyaretService vipService,
         ILogger<GeoController> logger)
     {

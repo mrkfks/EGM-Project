@@ -90,6 +90,10 @@ namespace EGM.Infrastructure
             modelBuilder.Entity<Olay>()
                 .HasIndex(o => o.CreatedByUserId);
 
+            // Add geospatial index for Latitude and Longitude
+            modelBuilder.Entity<Olay>()
+                .HasIndex(o => new { o.Latitude, o.Longitude })
+                .HasDatabaseName("IX_Olay_Latitude_Longitude");
 
             // ── SosyalMedyaOlay ──────────────────────────────────────────
             modelBuilder.Entity<SosyalMedyaOlay>()

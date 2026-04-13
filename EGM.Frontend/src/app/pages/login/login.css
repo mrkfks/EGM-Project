@@ -301,21 +301,25 @@
 }
 
 /* ── Responsive: mobil ───────────────────────────── */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .login-wrapper { flex-direction: column; }
 
   .login-brand {
-    flex: 0 0 auto;
-    padding: 2rem 1.5rem;
+    display: none !important;
+  }
+
+  .login-form-panel {
+    flex: 1;
+    padding: 1.5rem 1rem;
+    background: #f0f4f8;
+  }
+
+  .login-form-card {
+    box-shadow: 0 8px 40px rgba(6, 26, 42, 0.10), 0 2px 8px rgba(6,26,42,0.06);
+    padding: 1.5rem 1rem;
+    max-width: 100%;
   }
 
   .brand-logo  { width: 72px; height: 72px; }
   .brand-title { font-size: 2rem; }
-
-  .login-form-panel { padding: 1.5rem 1rem; background: #fff; }
-  .login-form-card  {
-    box-shadow: none;
-    padding: 1.5rem 1rem;
-    max-width: 100%;
-  }
 }

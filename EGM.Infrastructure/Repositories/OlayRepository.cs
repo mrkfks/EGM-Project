@@ -79,6 +79,14 @@ namespace EGM.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Olay?> GetByTakipNoAsync(string takipNo)
+        {
+            return await _db.Olaylar
+                .Include(o => o.Organizator)
+                .Include(o => o.Konu)
+                .FirstOrDefaultAsync(o => o.TakipNo == takipNo && !o.IsDeleted);
+        }
+
         /// <summary>
         /// Harita sayfası için gelişmiş filtreleme destekli olayları döner.
         /// Parametreler null ise filtre uygulanmaz.
