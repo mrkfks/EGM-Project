@@ -41,19 +41,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mrkfk\\.nuget\\packages\\": {}
+    "/home/mrkfks/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
+      "projectUniqueName": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj",
       "projectName": "EGM.Domain",
-      "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
-      "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\obj\\",
+      "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj",
+      "packagesPath": "/home/mrkfks/.nuget/packages/",
+      "outputPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\mrkfk\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/mrkfks/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -104,7 +104,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/home/mrkfks/.dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.CSharp": "(,4.7.32767]",
           "Microsoft.VisualBasic": "(,10.4.32767]",

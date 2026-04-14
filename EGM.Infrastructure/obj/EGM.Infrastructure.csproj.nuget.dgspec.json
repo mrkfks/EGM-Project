@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj": {}
+    "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {
+    "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
+        "projectUniqueName": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj",
         "projectName": "EGM.Domain",
-        "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj",
-        "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\obj\\",
+        "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj",
+        "packagesPath": "/home/mrkfks/.nuget/packages/",
+        "outputPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\mrkfk\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/home/mrkfks/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -65,7 +65,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/home/mrkfks/.dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",
@@ -343,17 +343,17 @@
         }
       }
     },
-    "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj": {
+    "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj",
+        "projectUniqueName": "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj",
         "projectName": "EGM.Infrastructure",
-        "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\obj\\",
+        "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj",
+        "packagesPath": "/home/mrkfks/.nuget/packages/",
+        "outputPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\mrkfk\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/home/mrkfks/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -365,8 +365,8 @@
           "net10.0": {
             "targetAlias": "net10.0",
             "projectReferences": {
-              "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj": {
-                "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Domain\\EGM.Domain.csproj"
+              "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj": {
+                "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Domain/EGM.Domain.csproj"
               }
             }
           }
@@ -387,6 +387,10 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.1.0, )"
+            },
             "Microsoft.Data.Sqlite": {
               "target": "Package",
               "version": "[10.0.5, )"
@@ -449,7 +453,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/home/mrkfks/.dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

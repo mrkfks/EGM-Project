@@ -1591,6 +1591,7 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v10.0",
         "dependencies": {
+          "BCrypt.Net-Next": "4.1.0",
           "EGM.Domain": "1.0.0",
           "Microsoft.Data.Sqlite": "10.0.5",
           "Microsoft.EntityFrameworkCore": "10.0.5",
@@ -4359,19 +4360,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\mrkfk\\.nuget\\packages\\": {}
+    "/home/mrkfks/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.API\\EGM.API.csproj",
+      "projectUniqueName": "/home/mrkfks/Projeler/EGM-Project/EGM.API/EGM.API.csproj",
       "projectName": "EGM.API",
-      "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.API\\EGM.API.csproj",
-      "packagesPath": "C:\\Users\\mrkfk\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.API\\obj\\",
+      "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.API/EGM.API.csproj",
+      "packagesPath": "/home/mrkfks/.nuget/packages/",
+      "outputPath": "/home/mrkfks/Projeler/EGM-Project/EGM.API/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\mrkfk\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "/home/mrkfks/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net10.0"
@@ -4383,11 +4384,11 @@
         "net10.0": {
           "targetAlias": "net10.0",
           "projectReferences": {
-            "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj": {
-              "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Application\\EGM.Application.csproj"
+            "/home/mrkfks/Projeler/EGM-Project/EGM.Application/EGM.Application.csproj": {
+              "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Application/EGM.Application.csproj"
             },
-            "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\mrkfk\\Desktop\\EGM-Project\\EGM.Infrastructure\\EGM.Infrastructure.csproj"
+            "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj": {
+              "projectPath": "/home/mrkfks/Projeler/EGM-Project/EGM.Infrastructure/EGM.Infrastructure.csproj"
             }
           }
         }
@@ -4466,7 +4467,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json",
+        "runtimeIdentifierGraphPath": "/home/mrkfks/.dotnet/sdk/10.0.201/PortableRuntimeIdentifierGraph.json",
         "packagesToPrune": {
           "Microsoft.AspNetCore": "(,10.0.32767]",
           "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",

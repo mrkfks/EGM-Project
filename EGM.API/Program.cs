@@ -326,40 +326,11 @@ app.MapHealthChecks("/health", new HealthCheckOptions
     }
 }).AllowAnonymous();
 
-// ── Başlangıçta DB doğrula + ilk kullanıcı seed ─────────────────────────
+
+// ── Başlangıçta DB doğrula + seed verileri ekle ─────────────────────────
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<EGMDbContext>();
-    if (!await db.Database.CanConnectAsync())
-        throw new InvalidOperationException("Veritabanına bağlanılamadı. Bağlantı dizesini kontrol edin.");
-
-    // DB boşsa varsayılan yönetici kullanıcılarını oluştur
-    if (!db.Users.Any())
-    {
-        var seedUsers = app.Configuration.GetSection("Seed:Users").Get<List<SeedUserConfig>>();
-        if (seedUsers is { Count: > 0 })
-        {
-            foreach (var su in seedUsers)
-            {
-                db.Users.Add(new EGM.Domain.Entities.User
-                {
-                    Id           = Guid.NewGuid(),
-                    Sicil        = su.Sicil,
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(su.Password),
-                    Role         = su.Role,
-                    FullName     = su.FullName,
-                    Email        = su.Email ?? string.Empty,
-                    GSM          = su.GSM ?? string.Empty,
-                    Birim        = su.Birim ?? string.Empty,
-                    CityId       = su.CityId,
-                    CreatedAt    = DateTime.UtcNow,
-                    IsDeleted    = false
-                });
-            }
-            await db.SaveChangesAsync();
-            app.Logger.LogInformation("Seed: {Count} kullanıcı oluşturuldu.", seedUsers.Count);
-        }
-    }
+    DataSeeder.Seed(scope.ServiceProvider);
 }
 
 app.Run("http://0.0.0.0:5117");

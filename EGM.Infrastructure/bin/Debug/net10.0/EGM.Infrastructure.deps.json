@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v10.0": {
       "EGM.Infrastructure/1.0.0": {
         "dependencies": {
+          "BCrypt.Net-Next": "4.1.0",
           "EGM.Domain": "1.0.0",
           "Microsoft.EntityFrameworkCore": "10.0.5",
           "Microsoft.EntityFrameworkCore.Design": "10.0.5",
@@ -46,6 +47,14 @@
           "lib/net8.0/Azure.Identity.dll": {
             "assemblyVersion": "1.14.2.0",
             "fileVersion": "1.1400.225.36004"
+          }
+        }
+      },
+      "BCrypt.Net-Next/4.1.0": {
+        "runtime": {
+          "lib/net10.0/BCrypt.Net-Next.dll": {
+            "assemblyVersion": "4.1.0.0",
+            "fileVersion": "4.1.0.0"
           }
         }
       },
@@ -431,17 +440,17 @@
           "runtimes/win-arm64/native/Microsoft.Data.SqlClient.SNI.dll": {
             "rid": "win-arm64",
             "assetType": "native",
-            "fileVersion": "6.2.0.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x64/native/Microsoft.Data.SqlClient.SNI.dll": {
             "rid": "win-x64",
             "assetType": "native",
-            "fileVersion": "6.2.0.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x86/native/Microsoft.Data.SqlClient.SNI.dll": {
             "rid": "win-x86",
             "assetType": "native",
-            "fileVersion": "6.2.0.0"
+            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -691,12 +700,12 @@
           "runtimes/win-x64/native/libiconv-2.dll": {
             "rid": "win-x64",
             "assetType": "native",
-            "fileVersion": "1.15.0.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x64/native/liblzma-5.dll": {
             "rid": "win-x64",
             "assetType": "native",
-            "fileVersion": "5.2.4.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x64/native/libproj-13.dll": {
             "rid": "win-x64",
@@ -711,7 +720,7 @@
           "runtimes/win-x64/native/libwinpthread-1.dll": {
             "rid": "win-x64",
             "assetType": "native",
-            "fileVersion": "1.0.0.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x64/native/libxml2-2.dll": {
             "rid": "win-x64",
@@ -751,12 +760,12 @@
           "runtimes/win-x86/native/libiconv-2.dll": {
             "rid": "win-x86",
             "assetType": "native",
-            "fileVersion": "1.15.0.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x86/native/liblzma-5.dll": {
             "rid": "win-x86",
             "assetType": "native",
-            "fileVersion": "5.2.4.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x86/native/libproj-13.dll": {
             "rid": "win-x86",
@@ -771,7 +780,7 @@
           "runtimes/win-x86/native/libwinpthread-1.dll": {
             "rid": "win-x86",
             "assetType": "native",
-            "fileVersion": "1.0.0.0"
+            "fileVersion": "0.0.0.0"
           },
           "runtimes/win-x86/native/libxml2-2.dll": {
             "rid": "win-x86",
@@ -1139,6 +1148,13 @@
       "sha512": "sha512-YhNMwOTwT+I2wIcJKSdP0ADyB2aK+JaYWZxO8LSRDm5w77LFr0ykR9xmt2ZV5T1gaI7xU6iNFIh/yW1dAlpddQ==",
       "path": "azure.identity/1.14.2",
       "hashPath": "azure.identity.1.14.2.nupkg.sha512"
+    },
+    "BCrypt.Net-Next/4.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-5YT3DKllmtkyW68PjURu/V1TOe4MKiByKwsRNVcfYE1S5KuFTeozdmKzyNzolKiQF391OXCaQtINvYT3j1ERzQ==",
+      "path": "bcrypt.net-next/4.1.0",
+      "hashPath": "bcrypt.net-next.4.1.0.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",
