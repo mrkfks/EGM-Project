@@ -1,6 +1,7 @@
-﻿using EGM.Application.DTOs;
+using EGM.Application.DTOs;
 using EGM.Domain.Enums;
 using EGM.Domain.Interfaces;
+using System.Linq;
 
 namespace EGM.Application.Services
 {
@@ -20,57 +21,50 @@ namespace EGM.Application.Services
             var sonrakiGun   = gunBaslangic.AddDays(1);
             var sonrakiGunBitis = sonrakiGun.AddDays(1).AddTicks(-1);
 
-            // GerÃ§ekleÅŸen olaylar
-            var (gerceklesen, _) = await _olayRepository.GetFilteredPagedAsync(
-                OlayDurum.Gerceklesti, gunBaslangic, gunBitis, null, 1, 500);
+            var res1 = await _olayRepository.GetFilteredPagedAsync(
+                OlayDurum.Gerceklesen, gunBaslangic, gunBitis, null, 1, 500);
+            var gerceklesen = res1.Items;
 
-            // Beklenen olaylar (ertesi gÃ¼n planlanmÄ±ÅŸ)
-            var (beklenen, _) = await _olayRepository.GetFilteredPagedAsync(
-                OlayDurum.Planlandi, sonrakiGun, sonrakiGunBitis, null, 1, 500);
+            var res2 = await _olayRepository.GetFilteredPagedAsync(
+                OlayDurum.Planlanan, sonrakiGun, sonrakiGunBitis, null, 1, 500);
+            var beklenen = res2.Items;
 
-            // Ä°cmal: olay tÃ¼rÃ¼ne gÃ¶re grupla
             var icmal = gerceklesen
-                .GroupBy(o => o.OlayTuru ?? "DÄ°ÄER")
+                .GroupBy(o => o.Tur?.Name ?? "DİĞER")
                 .OrderBy(g => g.Key)
                 .Select((g, i) => new IcmalVeriDto
                 {
                     Tur           = g.Key.ToUpperInvariant(),
                     EylemSayisi   = g.Count(),
-                    KatilimSayisi = g.Sum(o => o.KatilimciSayisi ?? 0),
-                    GozaltiSayisi = g.Sum(o => o.GozaltiSayisi ?? 0),
-                    OluSayisi     = g.Sum(o => o.SehitOluSayisi ?? 0)
+                    KatilimSayisi = g.Sum(o => o.EventDetail?.KatilimciSayisi ?? 0),
+                    GozaltiSayisi = g.Sum(o => o.EventDetail?.GozaltiSayisi ?? 0),
+                    OluSayisi     = g.Sum(o => (o.EventDetail?.SehitSayisi ?? 0) + (o.EventDetail?.OluSayisi ?? 0))
                 })
                 .ToList();
 
-            // GerÃ§ekleÅŸen detaylar
             var gerceklesenDetay = gerceklesen
-                .OrderBy(o => o.BaslangicSaati)
+                .OrderBy(o => o.BaslangicTarihi)
                 .Select((o, i) => new GerceklesenDetayDto
                 {
                     Sn            = i + 1,
-                    Il            = o.Il ?? string.Empty,
-                    EylemEtkinlik = o.OlayTuru ?? string.Empty,
-                    Saat          = o.BaslangicSaati.HasValue
-                                        ? o.BaslangicSaati.Value.ToString(@"hh\:mm")
-                                        : string.Empty,
+                    Il            = o.Locations?.FirstOrDefault()?.Il ?? string.Empty,
+                    EylemEtkinlik = o.Tur?.Name ?? string.Empty,
+                    Saat          = o.BaslangicTarihi.ToString(@"HH\:mm"),
                     OrganizeEden  = o.Organizator?.Ad ?? string.Empty,
                     Aciklama      = o.Aciklama ?? string.Empty,
-                    KatilimSayisi = o.KatilimciSayisi ?? 0
+                    KatilimSayisi = o.EventDetail?.KatilimciSayisi ?? 0
                 })
                 .ToList();
 
-            // Beklenen detaylar
             var beklenenDetay = beklenen
-                .OrderBy(o => o.BaslangicSaati)
+                .OrderBy(o => o.BaslangicTarihi)
                 .Select((o, i) => new BeklenenDetayDto
                 {
                     Sn            = i + 1,
-                    Il            = o.Il ?? string.Empty,
-                    Yer           = o.Mekan ?? string.Empty,
-                    EylemEtkinlik = o.OlayTuru ?? string.Empty,
-                    Saat          = o.BaslangicSaati.HasValue
-                                        ? o.BaslangicSaati.Value.ToString(@"hh\:mm")
-                                        : string.Empty,
+                    Il            = o.Locations?.FirstOrDefault()?.Il ?? string.Empty,
+                    Yer           = o.Locations?.FirstOrDefault()?.Mekan ?? string.Empty,
+                    EylemEtkinlik = o.Tur?.Name ?? string.Empty,
+                    Saat          = o.BaslangicTarihi.ToString(@"HH\:mm"),
                     OrganizeEden  = o.Organizator?.Ad ?? string.Empty,
                     Aciklama      = o.Aciklama ?? string.Empty
                 })

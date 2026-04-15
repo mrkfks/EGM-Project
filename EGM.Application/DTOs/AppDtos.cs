@@ -64,111 +64,90 @@ namespace EGM.Application.DTOs
     // ── Olay ────────────────────────────────────────────────────────────
     public class OlayCreateDto
     {
-        [Required(ErrorMessage = "Olay türü zorunludur.")]
-        [StringLength(100)]
-        public string? OlayTuru { get; set; }
+        [Required]
+        public Guid TurId { get; set; }
 
         [Required]
-        public Guid OrganizatorId { get; set; }
+        public Guid SekilId { get; set; }
 
         [Required]
         public Guid KonuId { get; set; }
 
+        [Required]
+        public Guid OrganizatorId { get; set; }
+
         [Required(ErrorMessage = "Tarih zorunludur.")]
-        public DateTime Tarih { get; set; }
+        public DateTime BaslangicTarihi { get; set; }
+        public DateTime? BitisTarihi { get; set; }
 
-        public TimeSpan? BaslangicSaati { get; set; }
-        public TimeSpan? BitisSaati { get; set; }
-
-        [Required(ErrorMessage = "İl zorunludur.")]
-        [StringLength(100)]
-        public string? Il { get; set; }
-
-        [StringLength(100)]
-        public string? Ilce { get; set; }
-
-        [StringLength(100)]
-        public string? Mahalle { get; set; }
-
-        [StringLength(250)]
-        public string? Mekan { get; set; }
-
-        [Range(-90.0, 90.0, ErrorMessage = "Enlem -90 ile 90 arasında olmalıdır.")]
-        public double? Latitude { get; set; }
-
-        [Range(-180.0, 180.0, ErrorMessage = "Boylam -180 ile 180 arasında olmalıdır.")]
-        public double? Longitude { get; set; }
-
-        [Range(0, int.MaxValue, ErrorMessage = "Katılımcı sayısı negatif olamaz.")]
-        public int? KatilimciSayisi { get; set; }
-
-        [Range(0, int.MaxValue)]
-        public int? GozaltiSayisi { get; set; }
-
-        [Range(0, int.MaxValue)]
-        public int? SehitOluSayisi { get; set; }
-
-        [StringLength(1000)]
         public string? Aciklama { get; set; }
 
-        [StringLength(100)]
-        public string? EvrakNumarasi { get; set; }
+        public OlayDurum Durum { get; set; } = OlayDurum.Planlanan;
 
-        public Hassasiyet Hassasiyet { get; set; }
-        /// <summary>Başkanlık personeli bu alanı göndererek il belirtir. İl personeli için servis otomatik atar.</summary>
+        // İlişkisel Veriler
+        public List<LocationDto> Locations { get; set; } = new();
+        public List<ResourceDto> Resources { get; set; } = new();
+        public EventDetailDto? Details { get; set; }
+        public List<Guid> ParticipantGroupIds { get; set; } = new();
+
+        /// <summary>İl bazlı kısıtlama için plaka kodu.</summary>
         public int? CityId { get; set; }
-        /// <summary>Olay durumu: 0=Planlandi (varsayılan), 1=Gerceklesti</summary>
-        public OlayDurum Durum { get; set; } = OlayDurum.Planlandi;
-
-        /// <summary>Formdan girilen planlanan bitiş tarihi.</summary>
-        public DateTime? OlayBitisTarihi { get; set; }
-
-        /// <summary>Etkinlik sonunda gerçekleşen katılımcı sayısı.</summary>
-        [Range(0, int.MaxValue)]
-        public int? GerceklesenKatilimciSayisi { get; set; }
-
-        /// <summary>Gerçekleşme şekli FK Id'si.</summary>
-        public Guid? GerceklesmeSekliId { get; set; }
-
-        /// <summary>Otomatik üretilen benzersiz takip numarası. Servis tarafından atanır, gönderilmesi gerekmez.</summary>
-        public string? TakipNo { get; set; }
     }
 
     public class OlayResponseDto
     {
         public Guid Id { get; set; }
-        public string? OlayTuru { get; set; }
-        public Guid OrganizatorId { get; set; }
-        public string? OrganizatorAd { get; set; }
+        public string OlayNo { get; set; } = string.Empty;
+        public OlayDurum Durum { get; set; }
+        public DateTime BaslangicTarihi { get; set; }
+        public DateTime? BitisTarihi { get; set; }
+
+        public Guid TurId { get; set; }
+        public string? TurAd { get; set; }
+        public Guid SekilId { get; set; }
+        public string? SekilAd { get; set; }
         public Guid KonuId { get; set; }
         public string? KonuAd { get; set; }
-        public DateTime Tarih { get; set; }
-        public TimeSpan? BaslangicSaati { get; set; }
-        public TimeSpan? BitisSaati { get; set; }
+        public Guid OrganizatorId { get; set; }
+        public string? OrganizatorAd { get; set; }
+
+        public string? Aciklama { get; set; }
+        public Guid PersonelId { get; set; }
+        public int? CityId { get; set; }
+
+        public List<LocationDto> Locations { get; set; } = new();
+        public List<ResourceDto> Resources { get; set; } = new();
+        public EventDetailDto? Details { get; set; }
+        public List<string> ParticipantGroups { get; set; } = new();
+    }
+
+    public class LocationDto
+    {
         public string? Il { get; set; }
         public string? Ilce { get; set; }
         public string? Mahalle { get; set; }
         public string? Mekan { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
-        public int? KatilimciSayisi { get; set; }
-        public int? GozaltiSayisi { get; set; }
-        public int? SehitOluSayisi { get; set; }
+    }
+
+    public class ResourceDto
+    {
+        public string? Platform { get; set; }
+        public string? KullaniciAdi { get; set; }
+        public string? Link { get; set; }
+        public string? GorselPath { get; set; }
         public string? Aciklama { get; set; }
-        public string? EvrakNumarasi { get; set; }
-        public OlayDurum Durum { get; set; }
+    }
+
+    public class EventDetailDto
+    {
         public Hassasiyet Hassasiyet { get; set; }
-        public DateTime? GercekBaslangicTarihi { get; set; }
-        public DateTime? GercekBitisTarihi { get; set; }
-        /// <summary>Kaydı oluşturan kullanıcının sicil numarası (RBAC sahiplik kontrolü için).</summary>
-        public string CreatedByUserId { get; set; } = string.Empty;
-        /// <summary>Olayın gerçekleştiği ilin plaka kodu.</summary>
-        public int? CityId { get; set; }
-        public DateTime? OlayBitisTarihi { get; set; }
-        public int? GerceklesenKatilimciSayisi { get; set; }
-        public Guid? GerceklesmeSekliId { get; set; }
-        /// <summary>Otomatik üretilen benzersiz takip numarası. Örnek: SO-2026040806-001</summary>
-        public string? TakipNo { get; set; }
+        public int KatilimciSayisi { get; set; }
+        public int SupheliSayisi { get; set; }
+        public int GozaltiSayisi { get; set; }
+        public int SehitSayisi { get; set; }
+        public int OluSayisi { get; set; }
     }
 
     /// <summary>Harita sayfasında olayları filtrelemek için kullanılan DTO.</summary>

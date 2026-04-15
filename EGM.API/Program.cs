@@ -63,7 +63,7 @@ builder.Services.AddAuthentication(options =>
         {
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs") || path.StartsWithSegments("/api/file")))
                 context.Token = accessToken;
             return Task.CompletedTask;
         }
@@ -163,6 +163,13 @@ builder.Services.AddRateLimiter(options =>
     {
         opt.PermitLimit = isDev ? 1000 : 5;
         opt.Window = TimeSpan.FromMinutes(isDev ? 1 : 15);
+        opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+        opt.QueueLimit = 0;
+    });
+    options.AddFixedWindowLimiter("upload", opt =>
+    {
+        opt.PermitLimit = isDev ? 100 : 10;
+        opt.Window = TimeSpan.FromMinutes(1);
         opt.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
         opt.QueueLimit = 0;
     });
@@ -286,6 +293,7 @@ app.Use(async (context, next) =>
     await next();
 });
 app.UseCors("AllowFrontend");
+// app.UseStaticFiles(); // Kaldırıldı: Dosyalar yetkisiz erişime kapatıldı.
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();

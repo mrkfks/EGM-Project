@@ -39,104 +39,77 @@ namespace EGM.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOlay([FromBody] OlayDto olayDto)
+        public async Task<IActionResult> CreateOlay([FromBody] OlayCreateDto createDto)
         {
-            _logger.LogInformation("Gelen veri: {@OlayDto}", olayDto);
+            _logger.LogInformation("Yeni Olay Kaydı: {@OlayDto}", createDto);
 
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var createdOlay = await _olayService.CreateOlayAsync(olayDto);
-            return CreatedAtAction(nameof(GetOlaylar), new { takipNo = createdOlay.TakipNo }, createdOlay);
+            var createdOlay = await _olayService.CreateOlayAsync(createDto);
+            return CreatedAtAction(nameof(GetOlayByOlayNo), new { olayNo = createdOlay.OlayNo }, createdOlay);
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateOlay(Guid id, [FromBody] OlayDto olayDto)
+        public async Task<IActionResult> UpdateOlay(Guid id, [FromBody] OlayCreateDto updateDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _olayService.UpdateOlayAsync(id, olayDto);
+            var result = await _olayService.UpdateOlayAsync(id, updateDto);
             if (!result.Success)
                 return BadRequest(result.Error);
 
             return Ok(result);
         }
 
+        [HttpPost("baslat/{id}")]
+        public async Task<IActionResult> BaslatOlay(Guid id)
+        {
+            var result = await _olayService.BaslatOlayAsync(id);
+            return result != null ? Ok(result) : NotFound();
+        }
+
+        [HttpPost("bitir/{id}")]
+        public async Task<IActionResult> BitirOlay(Guid id, [FromBody] EventDetailDto details)
+        {
+            var result = await _olayService.BitirOlayAsync(id, details);
+            return result != null ? Ok(result) : NotFound();
+        }
+
+        [HttpPost("iptal/{id}")]
+        public async Task<IActionResult> IptalEtOlay(Guid id)
+        {
+            var result = await _olayService.IptalEtOlayAsync(id);
+            return result != null ? Ok(result) : NotFound();
+        }
+
         [HttpPost("filtre")]
         public async Task<IActionResult> GetFilteredForMap([FromBody] OlayFilterDto filter)
         {
             var result = await _olayService.GetFilteredMapOlaylarAsync(filter);
-            
-            return Ok(new
-            {
-                items = result.Items.Select(o => new
-                {
-                    o.Id,
-                    o.OlayTuru,
-                    organizatorId = o.OrganizatorId,
-                    o.OrganizatorId,
-                    konuId = o.KonuId,
-                    o.KonuId,
-                    tarih = o.Tarih.ToString("O"),
-                    o.BaslangicSaati,
-                    o.BitisSaati,
-                    o.Il,
-                    o.Ilce,
-                    o.Mahalle,
-                    o.Mekan,
-                    o.Latitude,
-                    o.Longitude,
-                    o.KatilimciSayisi,
-                    o.GozaltiSayisi,
-                    o.SehitOluSayisi,
-                    o.Aciklama,
-                    o.EvrakNumarasi,
-                    durum = (int)o.Durum,
-                    hassasiyet = (int)o.Hassasiyet,
-                    o.Tarih,
-                    gercekBaslangicTarihi = o.GercekBaslangicTarihi?.ToString("O"),
-                    gercekBitisTarihi = o.GercekBitisTarihi?.ToString("O"),
-                    o.CreatedByUserId,
-                    o.CityId,
-                    o.TakipNo,
-                    gerceklesmeSekliId = o.GerceklesmeSekliId?.ToString(),
-                    organizatorAd = o.Organizator?.Ad,
-                    konuAd = o.Konu?.Ad
-                }).ToList(),
-                totalCount = result.TotalCount,
-                result.Page,
-                result.PageSize,
-                result.TotalPages,
-                result.HasNextPage,
-                result.HasPreviousPage
-            });
+            return Ok(result);
         }
 
-        [HttpGet("{takipNo}")]
-        public async Task<IActionResult> GetOlayByTakipNo(string takipNo)
+        [HttpGet("{olayNo}")]
+        public async Task<IActionResult> GetOlayByOlayNo(string olayNo)
         {
-            var olay = await _olayService.GetByTakipNoAsync(takipNo);
+            var olay = await _olayService.GetByOlayNoAsync(olayNo);
             if (olay == null)
-            {
-                return NotFound(new { Message = $"Olay bulunamadı: {takipNo}" });
-            }
+                return NotFound(new { Message = $"Olay bulunamadı: {olayNo}" });
 
             return Ok(olay);
         }
 
-        private static OlayResponseDto MapToResponse(Olay o) => new OlayResponseDto
+        [HttpGet("id/{id}")]
+        public async Task<IActionResult> GetOlayById(Guid id)
         {
-            Id = o.Id,
-            OlayTuru = o.OlayTuru,
-            Durum = o.Durum,
-            Tarih = o.Tarih,
-            Il = o.Il,
-            Ilce = o.Ilce,
-            Mahalle = o.Mahalle,
-            Hassasiyet = o.Hassasiyet,
-            KatilimciSayisi = o.KatilimciSayisi,
-            Aciklama = o.Aciklama
-        };
+            var olay = await _olayService.GetByIdAsync(id);
+            if (olay == null)
+                return NotFound();
+
+            return Ok(olay);
+        }
     }
 }
+

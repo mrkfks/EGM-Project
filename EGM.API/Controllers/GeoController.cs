@@ -282,7 +282,7 @@ public class GeoController : ControllerBase
             // Tüm olayları al (sayfalı)
             var pagedOlaylar = await _olayService.GetAllAsync(
                 page: 1,
-                pageSize: 5000,  // Tüm olayları al
+                pageSize: 5000,
                 durum: null,
                 tarihBaslangic: yil.HasValue ? new DateTime(yil.Value, 1, 1) : null,
                 tarihBitis: yil.HasValue ? new DateTime(yil.Value, 12, 31) : null
@@ -290,12 +290,17 @@ public class GeoController : ControllerBase
 
             foreach (var olay in pagedOlaylar.Items)
             {
+                var location = olay.Locations?.FirstOrDefault();
+                var lat = location?.Latitude;
+                var lon = location?.Longitude;
+                var olayIl = location?.Il;
+
                 // Filtreleme
-                if (!string.IsNullOrWhiteSpace(il) && olay.Il != il)
+                if (!string.IsNullOrWhiteSpace(il) && olayIl != il)
                     continue;
 
                 // Koordinatları kontrol et
-                if (!olay.Latitude.HasValue || !olay.Longitude.HasValue)
+                if (!lat.HasValue || !lon.HasValue)
                     continue;
 
                 // GeoJSON Feature oluştur
@@ -306,23 +311,23 @@ public class GeoController : ControllerBase
                     properties = new
                     {
                         id = olay.Id,
-                        takipNo = olay.TakipNo,
-                        il = olay.Il,
-                        ilce = olay.Ilce,
-                        mahalle = olay.Mahalle,
-                        mekan = olay.Mekan,
-                        tarih = olay.Tarih,
+                        takipNo = olay.OlayNo,
+                        il = olayIl,
+                        ilce = location?.Ilce,
+                        mahalle = location?.Mahalle,
+                        mekan = location?.Mekan,
+                        tarih = olay.BaslangicTarihi,
                         durum = (int)olay.Durum,
-                        hassasiyet = (int)olay.Hassasiyet,
-                        olayTuru = olay.OlayTuru,
+                        hassasiyet = (int)(olay.EventDetail?.Hassasiyet ?? 0),
+                        olayTuru = olay.Tur?.Name ?? "Olay",
                         aciklama = olay.Aciklama,
-                        latitude = olay.Latitude,
-                        longitude = olay.Longitude
+                        latitude = lat,
+                        longitude = lon
                     },
                     geometry = new
                     {
                         type = "Point",
-                        coordinates = new[] { olay.Longitude.Value, olay.Latitude.Value }
+                        coordinates = new[] { lon.Value, lat.Value }
                     }
                 };
 

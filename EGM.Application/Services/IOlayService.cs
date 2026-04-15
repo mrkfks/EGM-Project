@@ -9,14 +9,20 @@ namespace EGM.Application.Services
 {
     public interface IOlayService
     {
-        // ── OlayController metotları ──────────────────────────────────
-        Task<List<OlayDto>> GetOlaylarAsync(OlayDurum? durum, int sayfaBoyutu);
-        Task<List<OlayDto>> GetAllOlaylarAsync();
-        Task<OlayDto> CreateOlayAsync(OlayDto olayDto);
-        Task<(bool Success, string? Error)> UpdateOlayAsync(Guid id, OlayDto olayDto);
-        Task<OlayDto?> GetByTakipNoAsync(string takipNo);
+        // ── Olay Yönetimi Metotları ──────────────────────────────────
+        Task<List<OlayResponseDto>> GetOlaylarAsync(OlayDurum? durum, int sayfaBoyutu);
+        Task<List<OlayResponseDto>> GetAllOlaylarAsync();
+        Task<OlayResponseDto> CreateOlayAsync(OlayCreateDto createDto);
+        Task<(bool Success, string? Error)> UpdateOlayAsync(Guid id, OlayCreateDto updateDto);
+        Task<OlayResponseDto?> GetByOlayNoAsync(string olayNo);
+        Task<OlayResponseDto?> GetByIdAsync(Guid id);
 
-        // ── GeoController / Harita metotları ──────────────────────────
+        // ── Durum Geçiş Metotları ─────────────────────────────────────
+        Task<Olay?> BaslatOlayAsync(Guid olayId);
+        Task<Olay?> BitirOlayAsync(Guid olayId, EventDetailDto details);
+        Task<Olay?> IptalEtOlayAsync(Guid olayId);
+
+        // ── Filtreleme ve Harita Metotları ──────────────────────────
         Task<PagedResult<Olay>> GetAllAsync(
             int page = 1,
             int pageSize = 20,
@@ -25,4 +31,4 @@ namespace EGM.Application.Services
             DateTime? tarihBitis = null);
         Task<PagedResult<Olay>> GetFilteredMapOlaylarAsync(OlayFilterDto filter);
     }
-}
+}

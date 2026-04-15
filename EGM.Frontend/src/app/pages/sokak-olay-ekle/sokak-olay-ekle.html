@@ -1,332 +1,201 @@
 <div class="ekle-page">
-  <!-- ── Sol Panel: Planlanan Olaylar ───────────────────────── -->
-  <div class="side-panel">
-    <h3 class="side-panel-title">
-      <span class="side-dot planned"></span> Planlanan ve Devam Edenler
-      <span class="side-count">{{ userPlans.length }}</span>
-    </h3>
-    <div *ngIf="isLoadingPlanned" class="side-loading">Yükleniyor…</div>
-    <div *ngIf="!isLoadingPlanned && userPlans.length === 0" class="side-empty">
-      Henüz bir planlama eklenmedi.
-    </div>
-    <div *ngFor="let plan of userPlans; trackBy: trackById"
-         class="side-card"
-         [class.side-card-selected]="selectedPlanId === plan.id"
-         [class.side-card-active]="plan.durum === 3 && selectedPlanId !== plan.id"
-         (click)="selectPlanForCompletion(plan)"
-         title="Gerçekleşenler formuna yükle">
-      <div class="side-card-header">
-        <span class="side-card-tur">{{ plan.olayTuru || '—' }}</span>
-        <span class="side-card-il">{{ plan.il }}</span>
-      </div>
-      <div class="side-card-baslik">{{ plan.olayTuru + ' – ' + plan.il }}</div>
-      <div class="side-card-meta">
-        <span>{{ plan.tarih | date:'dd.MM.yyyy' }}</span>
-        <span *ngIf="plan.katilimciSayisi">· {{ plan.katilimciSayisi | number }} kişi</span>
-      </div>
-      <div class="side-card-takipno">
-        <span class="takipno-label">Takip No:</span>
-        <span class="takipno-value">{{ plan.takipNo || '—' }}</span>
-      </div>
-      <span class="side-card-status in-progress" *ngIf="plan.durum === 3">Devam Ediyor</span>
-      <div class="side-card-hint">Gerçekleşti olarak işaretle →</div>
-    </div>
-  </div>
-
   <div class="content" [formGroup]="form">
-    <!-- Takip No Bandı -->
-    <div class="takip-no-banner takip-so" *ngIf="takipNo">
-      <span class="takip-no-etiket">Takip No</span>
-      <span class="takip-no-deger">{{ takipNo }}</span>
-      <button type="button" class="takip-no-kapat" (click)="takipNo = null" title="Kapat">&#10005;</button>
-    </div>
-
-    <!-- Hangi planın doldurulduğunu gösteren bilgi bandı -->
-    <div class="selected-plan-banner" *ngIf="selectedPlanId">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-           stroke-linecap="round" stroke-linejoin="round" width="15" height="15">
-        <polyline points="20 6 9 17 4 12"/>
-      </svg>
-      Planlanan olay gerçekleşenler formuna yüklendi. Bilgileri tamamlayıp kaydedin.
-      <button type="button" class="banner-iptal" (click)="switchToCompletedForm()">İptal</button>
-    </div>
-
-    <!-- Buttons above Temel Bilgiler -->
-    <div class="form-switch-buttons">
-      <button type="button"
-        [class.active]="activeForm === 'planned'"
-        class="btn full-width"
-        (click)="switchToPlannedForm()">Planlananlar Formu</button>
-      <button type="button"
-        [class.active]="activeForm === 'completed'"
-        class="btn full-width"
-        (click)="switchToCompletedForm()">Gerçekleşenler Formu</button>
-    </div>
-
-    <!-- Temel Bilgiler -->
-    <fieldset class="form-section">
-      <legend>Temel Bilgiler</legend>
-
-      <div class="form-takipno-satir" *ngIf="activeForm === 'completed' && takipNo">
-        <span class="form-takipno-etiket">Takip No</span>
-        <span class="form-takipno-deger">{{ takipNo }}</span>
+    
+    <!-- Üst Başlık ve Statü Seçimi -->
+    <div class="page-header-premium">
+      <div class="header-left">
+        <h1>Yeni Olay Bildirimi</h1>
+        <p>İlişkisel mimariye dayalı, çoklu konum ve kaynak destekli olay girişi.</p>
       </div>
+      <div class="header-right">
+        <div class="status-toggle">
+          <label>Olay Durumu:</label>
+          <select formControlName="durum">
+            <option [ngValue]="0">Planlanan</option>
+            <option [ngValue]="2">Gerçekleşen</option>
+          </select>
+        </div>
+      </div>
+    </div>
 
+    <!-- Hata / Başarı Bilgisi -->
+    <div class="form-alert form-alert-error" *ngIf="formError">{{ formError }}</div>
+    <div class="form-alert form-alert-success" *ngIf="formSuccess">{{ formSuccess }}</div>
+
+    <!-- Olay Temel Bilgileri -->
+    <fieldset class="form-section">
+      <legend>Olay Bilgileri</legend>
       <div class="form-grid">
-
         <div class="form-field">
           <label>Olay Türü <span class="req">*</span></label>
-          <select formControlName="olayTuru" [class.is-invalid]="fieldError('olayTuru')">
+          <select formControlName="turId">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let t of olayTurleri; trackBy: trackById" [value]="t.id">{{ t.name }}</option>
+            <option *ngFor="let t of olayTurleri" [value]="t.id">{{ t.name }}</option>
           </select>
-          <div class="field-error" *ngIf="fieldError('olayTuru')">Olay türü zorunludur.</div>
         </div>
-
         <div class="form-field">
-          <label>Olayın Gerçekleşme Şekli <span class="req">*</span></label>
-          <select formControlName="olayinGerceklesmeSekli" [class.is-invalid]="fieldError('olayinGerceklesmeSekli')">
+          <label>Gerçekleşme Şekli <span class="req">*</span></label>
+          <select formControlName="sekilId">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let sekil of filtreliGerceklesmeSekilleri; trackBy: trackById" [value]="sekil.id">{{ sekil.name }}</option>
-          </select>
-          <div class="field-error" *ngIf="fieldError('olayinGerceklesmeSekli')">Olayın gerçekleşme şekli zorunludur.</div>
-        </div>
-
-        <div class="form-field">
-          <label>Hassasiyet <span class="req">*</span></label>
-          <select formControlName="hassasiyet">
-            <option *ngFor="let h of HASSASIYET" [value]="h.value">{{ h.label }}</option>
+            <option *ngFor="let s of sekiller" [value]="s.id">{{ s.name }}</option>
           </select>
         </div>
-
-        <div class="form-field">
-          <label>Organizatör <span class="req">*</span></label>
-          <select formControlName="organizatorId" [class.is-invalid]="fieldError('organizatorId')">
-            <option value="">— Seçiniz —</option>
-            <option *ngFor="let o of organizatorler; trackBy: trackById" [value]="o.id">{{ o.ad }}</option>
-          </select>
-          <div class="field-error" *ngIf="fieldError('organizatorId')">Organizatör zorunludur.</div>
-        </div>
-
         <div class="form-field">
           <label>Konu <span class="req">*</span></label>
-          <select formControlName="konuId" [class.is-invalid]="fieldError('konuId')">
+          <select formControlName="konuId">
             <option value="">— Seçiniz —</option>
-            <option *ngFor="let k of konular; trackBy: trackById" [value]="k.id">{{ k.ad }}</option>
+            <option *ngFor="let k of konular" [value]="k.id">{{ k.ad }}</option>
           </select>
-          <div class="field-error" *ngIf="fieldError('konuId')">Konu zorunludur.</div>
         </div>
-
         <div class="form-field">
-          <label>Başlangıç Tarihi &amp; Saati <span class="req">*</span></label>
-          <input type="datetime-local" formControlName="tarih" [class.is-invalid]="fieldError('tarih')"
-                 [min]="activeForm === 'planned' ? minTarih : ''" [attr.min]="activeForm === 'planned' ? minTarih : null">
-          <div class="field-error" *ngIf="form.get('tarih')?.errors?.['required'] && form.get('tarih')?.touched">Tarih zorunludur.</div>
-          <div class="field-error" *ngIf="form.get('tarih')?.errors?.['gecmisTarih']">Planlanan olay geçmiş bir tarihe girilemez.</div>
+          <label>Organizatör <span class="req">*</span></label>
+          <select formControlName="organizatorId">
+            <option value="">— Seçiniz —</option>
+            <option *ngFor="let o of organizatorler" [value]="o.id">{{ o.ad }}</option>
+          </select>
         </div>
-
-        <!-- Gerçekleşenler formuna özel: Bitiş Tarihi & Saati -->
-        <div class="form-field" *ngIf="activeForm === 'completed'">
-          <label>Bitiş Tarihi &amp; Saati</label>
+        <div class="form-field">
+          <label>Başlangıç Tarihi <span class="req">*</span></label>
+          <input type="datetime-local" formControlName="baslangicTarihi">
+        </div>
+        <div class="form-field">
+          <label>Tahmini Bitiş Tarihi</label>
           <input type="datetime-local" formControlName="bitisTarihi">
         </div>
-
-      </div>
-    </fieldset>
-
-    <!-- Konum & Katılım -->
-    <fieldset class="form-section">
-      <legend>Konum &amp; Katılım</legend>
-      <div class="form-grid">
-
-        <div class="form-field">
-          <label>İl <span class="req">*</span></label>
-          <select formControlName="il" [class.is-invalid]="fieldError('il')"
-                   *ngIf="!isCityScoped">
-            <option value="">— Seçiniz —</option>
-            <option *ngFor="let il of tumIller" [value]="il.name">{{ il.name }}</option>
-          </select>
-          <input type="text" formControlName="il" readonly *ngIf="isCityScoped"
-                 class="locked-input" title="Yetki alanınızdaki il otomatik seçilmiştir.">
-          <div class="field-error" *ngIf="fieldError('il')">İl zorunludur.</div>
-          <small style="color:#666;margin-top:4px;display:block">💡 İl seçilirse koordinat otomatik doldurulur</small>
-        </div>
-
-        <div class="form-field">
-          <label>İlçe</label>
-          <select formControlName="ilce" *ngIf="filtreliIlceler.length > 0">
-            <option value="">— Seçiniz —</option>
-            <option *ngFor="let ilce of filtreliIlceler" [value]="ilce.name">{{ ilce.name }}</option>
-          </select>
-          <input type="text" formControlName="ilce" placeholder="İlçe adı…" *ngIf="filtreliIlceler.length === 0">
-          <small style="color:#666;margin-top:4px;display:block">💡 İlçe seçilirse koordinat daha hassas doldurulur</small>
-        </div>
-
-        <div class="form-field">
-          <label>Mahalle</label>
-          <select formControlName="mahalle" 
-                  *ngIf="filtreliMahalleler.length > 0">
-            <option value="">— Seçiniz —</option>
-            <option *ngFor="let mahalle of filtreliMahalleler" [value]="mahalle.name">{{ mahalle.name }}</option>
-          </select>
-          <input type="text" formControlName="mahalle" 
-                 [placeholder]="form.get('ilce')?.value ? 'Mahalle adı…' : 'İlçe seçiniz'"
-                 title="Mahalle alanı ilçe seçildikten sonra aktif olur"
-                 *ngIf="filtreliMahalleler.length === 0">
-          <small style="color:#666;margin-top:4px;display:block">💡 Koordinat bilgisinden otomatik doldurulur</small>
-        </div>
-
-        <div class="form-field">
-          <label>
-            Konum
-            <small style="font-weight:400;color:#888;margin-left:8px">
-              (otomatik veya manuel: enlem, boylam)
-            </small>
-          </label>
-          <input type="text" formControlName="baslangicKonum" 
-                 placeholder="Otomatik doldurulur veya: 39.925533, 32.866287"
-                 inputmode="decimal" autocomplete="off">
-          <div class="field-error" *ngIf="fieldError('baslangicKonum')">Geçerli format: enlem, boylam (örn: 39.925, 32.866)</div>
-          <small style="color:#666;margin-top:4px;display:block">💡 İl/İlçe seçerseniz otomatik doldurulur, manuel de yazabilirsiniz</small>
-        </div>
-
-        <div class="form-field">
-          <label>Mekan</label>
-          <input type="text" formControlName="mekan" placeholder="Etkinlik mekanı…">
-        </div>
-
-        <div class="form-field">
-          <label>{{ activeForm === 'completed' ? 'Katılımcı Sayısı' : 'Tahmini Katılımcı Sayısı' }}</label>
-          <input type="number" formControlName="katilimciSayisi" min="0" placeholder="0">
-        </div>
-        <!-- Gerçekleşenler formuna özel: şehit, ölü, gözaltı -->
-        <div class="form-field" *ngIf="activeForm === 'completed'">
-          <label>Şehit Sayısı</label>
-          <input type="number" formControlName="sehitSayisi" min="0" placeholder="0">
-        </div>
-        <div class="form-field" *ngIf="activeForm === 'completed'">
-          <label>Ölü Sayısı</label>
-          <input type="number" formControlName="oluSayisi" min="0" placeholder="0">
-        </div>
-        <div class="form-field" *ngIf="activeForm === 'completed'">
-          <label>Gözaltı Sayısı</label>
-          <input type="number" formControlName="gozaltiSayisi" min="0" placeholder="0">
-        </div>
-        <div class="form-field" *ngIf="activeForm === 'completed'">
-          <label>Evrak Numarası</label>
-          <input type="text" formControlName="evrakNumarasi" placeholder="Örn: 2026/1234" autocomplete="off">
-        </div>
         <div class="form-field span-2">
-          <label>Açıklama</label>
-          <textarea formControlName="aciklama" rows="3"
-                    placeholder="Olay hakkında kısa notlar…"></textarea>
+          <label>Açıklama <span class="req">*</span></label>
+          <textarea formControlName="aciklama" rows="3" placeholder="Olayın detaylı açıklaması..."></textarea>
         </div>
-
       </div>
     </fieldset>
 
-    <!-- Ek Konumlar -->
-    <div class="ek-konumlar-section">
-      <div class="ek-konumlar-header">
-        <span class="ek-konum-baslik">Ek Konumlar</span>
-        <span class="ek-konum-sayi" *ngIf="ekKonumlar.length > 0">({{ ekKonumlar.length }})</span>
-        <button type="button" class="ek-konum-ekle-btn" (click)="ekKonumEkle()">+ Yeni Konum Ekle</button>
-      </div>
-
-      <div *ngFor="let ek of ekKonumlar; let i = index" class="ek-konum-kart">
-        <div class="ek-konum-kart-header">
-          <span class="ek-konum-sira">Konum {{ i + 2 }}</span>
-          <button type="button" class="ek-konum-sil-btn" (click)="ekKonumSil(i)">&#10005; Kaldır</button>
+    <!-- Konumlar Section -->
+    <fieldset class="form-section" formArrayName="locations">
+      <legend>Konumlar (Multi-Location)</legend>
+      <div *ngFor="let loc of locations.controls; let i=index" [formGroupName]="i" class="array-item-card">
+        <div class="card-header">
+          <span class="card-title">Konum #{{ i + 1 }}</span>
+          <button type="button" class="btn-remove" (click)="removeLocation(i)" *ngIf="locations.length > 1">Kaldır</button>
         </div>
-        <div class="ek-konum-form-grid">
+        <div class="form-grid compact">
           <div class="form-field">
-            <label>İl</label>
-            <select [(ngModel)]="ek.il" [ngModelOptions]="{standalone: true}"
-                    (ngModelChange)="ekKonumIlDegisti(i)">
+            <label>İl <span class="req">*</span></label>
+            <select formControlName="il">
               <option value="">— Seçiniz —</option>
-              <option *ngFor="let il of tumIller" [value]="il.name">{{ il.name }}</option>
+              <option *ngFor="let il of iller" [value]="il.name">{{ il.name }}</option>
             </select>
           </div>
           <div class="form-field">
             <label>İlçe</label>
-            <select [(ngModel)]="ek.ilce" [ngModelOptions]="{standalone: true}"
-                    (ngModelChange)="ekKonumIlceDegisti(i)"
-                    *ngIf="ek.ilceler.length > 0">
-              <option value="">— Seçiniz —</option>
-              <option *ngFor="let ilce of ek.ilceler" [value]="ilce.name">{{ ilce.name }}</option>
-            </select>
-            <input type="text" [(ngModel)]="ek.ilce" [ngModelOptions]="{standalone: true}"
-                   placeholder="İlçe adı…" *ngIf="ek.ilceler.length === 0">
+            <input type="text" formControlName="ilce" placeholder="İlçe adı...">
           </div>
           <div class="form-field">
             <label>Mahalle</label>
-            <select [(ngModel)]="ek.mahalle" [ngModelOptions]="{standalone: true}"
-                    *ngIf="ek.mahalleler.length > 0">
-              <option value="">— Seçiniz —</option>
-              <option *ngFor="let mah of ek.mahalleler" [value]="mah.name">{{ mah.name }}</option>
-            </select>
-            <input type="text" [(ngModel)]="ek.mahalle" [ngModelOptions]="{standalone: true}"
-                   placeholder="Mahalle adı…" *ngIf="ek.mahalleler.length === 0">
-          </div>
-          <div class="form-field">
-            <label>Konum <small style="font-weight:400;color:#888;">(enlem, boylam)</small></label>
-            <input type="text" [(ngModel)]="ek.konum" [ngModelOptions]="{standalone: true}"
-                   placeholder="Otomatik veya: 39.925533, 32.866287" inputmode="decimal" autocomplete="off">
+            <input type="text" formControlName="mahalle" placeholder="Mahalle adı...">
           </div>
           <div class="form-field">
             <label>Mekan</label>
-            <input type="text" [(ngModel)]="ek.mekan" [ngModelOptions]="{standalone: true}"
-                   placeholder="Etkinlik mekanı…">
+            <input type="text" formControlName="mekan" placeholder="Mekan/Adres...">
           </div>
           <div class="form-field">
-            <label>{{ activeForm === 'completed' ? 'Katılımcı Sayısı' : 'Tahmini Katılımcı Sayısı' }}</label>
-            <input type="number" [(ngModel)]="ek.katilimciSayisi" [ngModelOptions]="{standalone: true}"
-                   min="0" placeholder="0">
+            <label>Enlem (Lat)</label>
+            <input type="number" formControlName="latitude" placeholder="39.9">
+          </div>
+          <div class="form-field">
+            <label>Boylam (Lng)</label>
+            <input type="number" formControlName="longitude" placeholder="32.8">
           </div>
         </div>
       </div>
+      <button type="button" class="btn-add-line" (click)="addLocation()">+ Yeni Konum Ekle</button>
+    </fieldset>
+
+    <!-- Kaynaklar Section -->
+    <fieldset class="form-section" formArrayName="resources">
+      <legend>Sosyal Medya & Kaynaklar (Multi-Resource)</legend>
+      <div *ngFor="let res of resources.controls; let i=index" [formGroupName]="i" class="array-item-card resource-card">
+        <div class="card-header">
+          <span class="card-title">Kaynak #{{ i + 1 }}</span>
+          <button type="button" class="btn-remove" (click)="removeResource(i)">Kaldır</button>
+        </div>
+        <div class="form-grid compact">
+          <div class="form-field">
+            <label>Platform</label>
+            <input type="text" formControlName="platform" placeholder="Twitter, Facebook vb.">
+          </div>
+          <div class="form-field">
+            <label>Kullanıcı Adı</label>
+            <input type="text" formControlName="kullaniciAdi" placeholder="@kullanici">
+          </div>
+          <div class="form-field span-2">
+            <label>Kaynak Linki</label>
+            <input type="text" formControlName="link" placeholder="https://...">
+          </div>
+          <div class="form-field span-2">
+            <label>Görsel Yükle (Binary Upload)</label>
+            <div class="upload-zone">
+              <input type="file" (change)="onFileSelected($event, i)" accept="image/*">
+              <div class="preview-path" *ngIf="res.get('gorselPath')?.value">
+                <span class="path-text">Sunucu Yolu: {{ res.get('gorselPath')?.value }}</span>
+                <a [href]="getSecureUrl(res.get('gorselPath')?.value)" target="_blank" class="preview-link">Görüntüle</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn-add-line" (click)="addResource()">+ Yeni Kaynak Ekle</button>
+    </fieldset>
+
+    <!-- Detaylar Section -->
+    <fieldset class="form-section" formGroupName="details">
+      <legend>Olay Detayları & Sayılar</legend>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>Hassasiyet</label>
+          <select formControlName="hassasiyet">
+            <option [ngValue]="0">Düşük</option>
+            <option [ngValue]="1">Orta</option>
+            <option [ngValue]="2">Yüksek</option>
+            <option [ngValue]="3">Kritik</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>Katılımcı Sayısı {{ form.get('durum')?.value === 2 ? '*' : '' }}</label>
+          <input type="number" formControlName="katilimciSayisi">
+        </div>
+        <div class="form-field">
+          <label>Şüpheli Sayısı</label>
+          <input type="number" formControlName="supheliSayisi">
+        </div>
+        <div class="form-field">
+          <label>Gözaltı Sayısı</label>
+          <input type="number" formControlName="gozaltiSayisi">
+        </div>
+        <div class="form-field">
+          <label>Şehit Sayısı</label>
+          <input type="number" formControlName="sehitSayisi">
+        </div>
+        <div class="form-field">
+          <label>Ölü Sayısı</label>
+          <input type="number" formControlName="oluSayisi">
+        </div>
+        <div class="form-field span-2">
+          <label>Katılımcı Gruplar</label>
+          <select formControlName="participantGroupIds" multiple class="multi-select">
+            <option *ngFor="let g of gruplar" [value]="g.id">{{ g.name }}</option>
+          </select>
+          <small class="hint">Birden fazla seçmek için Ctrl tuşuna basılı tutun.</small>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="form-actions-premium">
+      <button type="button" class="btn-cancel" (click)="goBack()">İptal</button>
+      <button type="button" class="btn-save" [disabled]="isSaving" (click)="kaydet()">
+        <span *ngIf="isSaving" class="spinner-sm"></span>
+        {{ isSaving ? 'Kaydediliyor...' : 'Olayı Bildir' }}
+      </button>
     </div>
 
-    <!-- Hata / Başarı -->
-    <div class="form-alert form-alert-error" *ngIf="formError">
-      {{ formError }}
-    </div>
-    <div class="form-alert form-alert-success" *ngIf="formSuccess">
-      {{ formSuccess }}
-    </div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-danger" *ngIf="selectedPlanId" (click)="iptalEt()" [disabled]="isSaving">İptal Edildi</button>
-      <button type="button" class="btn btn-primary" (click)="kaydet()" [disabled]="isSaving">Kaydet</button>
-    </div>
-
-  </div>
-
-  <!-- ── Sağ Panel: Gerçekleşen Olaylar ───────────────────────── -->
-  <div class="side-panel">
-    <h3 class="side-panel-title">
-      <span class="side-dot completed"></span> Gerçekleşen Olaylar
-      <span class="side-count">{{ completedEvents.length }}</span>
-    </h3>
-    <div *ngIf="isLoadingCompleted" class="side-loading">Yükleniyor…</div>
-    <div *ngIf="!isLoadingCompleted && completedEvents.length === 0" class="side-empty">
-      Henüz gerçekleşen bir olay yok.
-    </div>
-    <div *ngFor="let event of completedEvents; trackBy: trackById" class="side-card" [class.side-card-cancelled]="event.durum === 2">
-      <div class="side-card-header">
-        <span class="side-card-tur">{{ event.olayTuru || '—' }}</span>
-        <span class="side-card-il">{{ event.il }}</span>
-      </div>
-      <div class="side-card-baslik">{{ event.olayTuru + ' – ' + event.il }}</div>
-      <div class="side-card-meta">
-        <span>{{ event.tarih | date:'dd.MM.yyyy' }}</span>
-        <span *ngIf="event.katilimciSayisi">· {{ event.katilimciSayisi | number }} kişi</span>
-      </div>
-      <div class="side-card-takipno">
-        <span class="takipno-label">Takip No:</span>
-        <span class="takipno-value">{{ event.takipNo || '—' }}</span>
-      </div>
-      <span class="side-card-status cancelled" *ngIf="event.durum === 2">İptal Edildi</span>
-      <span class="side-card-status completed" *ngIf="event.durum === 1">Gerçekleşti</span>
-    </div>
   </div>
 </div>

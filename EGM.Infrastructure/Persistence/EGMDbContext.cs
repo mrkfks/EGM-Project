@@ -1,4 +1,4 @@
-﻿using EGM.Domain.Attributes;
+using EGM.Domain.Attributes;
 using EGM.Domain.Entities;
 using EGM.Domain.Interfaces;
 using EGM.Infrastructure.Persistence;
@@ -47,6 +47,12 @@ namespace EGM.Infrastructure
         public DbSet<OlayTuru> OlayTurleri { get; set; } = null!;
         public DbSet<GerceklesmeSekli> GerceklesmeSekilleri { get; set; } = null!;
 
+        // Yeni İlişkisel Yapı
+        public DbSet<Resource> Resources { get; set; } = null!;
+        public DbSet<Location> Locations { get; set; } = null!;
+        public DbSet<EventDetail> EventDetails { get; set; } = null!;
+        public DbSet<Group> Groups { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -64,6 +70,10 @@ namespace EGM.Infrastructure
             modelBuilder.Entity<SandikOlay>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<VIPZiyaret>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Notification>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Resource>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Location>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<EventDetail>().HasQueryFilter(e => !e.IsDeleted);
+            modelBuilder.Entity<Group>().HasQueryFilter(e => !e.IsDeleted);
 
             // ── User ────────────────────────────────────────────────────
             modelBuilder.Entity<User>()
@@ -79,21 +89,53 @@ namespace EGM.Infrastructure
 
             // ── Olay ────────────────────────────────────────────────────
             modelBuilder.Entity<Olay>()
+                .HasIndex(o => o.OlayNo)
+                .IsUnique();
+
+            modelBuilder.Entity<Olay>()
                 .HasIndex(o => o.CityId);
 
             modelBuilder.Entity<Olay>()
-                .HasIndex(o => o.Tarih);
+                .HasIndex(o => o.BaslangicTarihi);
 
             modelBuilder.Entity<Olay>()
                 .HasIndex(o => o.Durum);
 
             modelBuilder.Entity<Olay>()
-                .HasIndex(o => o.CreatedByUserId);
+                .HasIndex(o => o.PersonelId);
 
-            // Add geospatial index for Latitude and Longitude
+            // ── Olay İlişkileri ──────────────────────────────────────────
             modelBuilder.Entity<Olay>()
-                .HasIndex(o => new { o.Latitude, o.Longitude })
-                .HasDatabaseName("IX_Olay_Latitude_Longitude");
+                .HasMany(o => o.Resources)
+                .WithOne(r => r.Olay)
+                .HasForeignKey(r => r.OlayId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Olay>()
+                .HasMany(o => o.Locations)
+                .WithOne(l => l.Olay)
+                .HasForeignKey(l => l.OlayId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Olay>()
+                .HasOne(o => o.EventDetail)
+                .WithOne(d => d.Olay)
+                .HasForeignKey<EventDetail>(d => d.OlayId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Olay>()
+                .HasMany(o => o.ParticipantGroups)
+                .WithMany(g => g.Events);
+
+            modelBuilder.Entity<Olay>()
+                .HasOne(o => o.Tur)
+                .WithMany()
+                .HasForeignKey(o => o.TurId);
+
+            modelBuilder.Entity<Olay>()
+                .HasOne(o => o.Sekil)
+                .WithMany()
+                .HasForeignKey(o => o.SekilId);
 
             // ── SosyalMedyaOlay ──────────────────────────────────────────
             modelBuilder.Entity<SosyalMedyaOlay>()
@@ -131,13 +173,13 @@ namespace EGM.Infrastructure
             // ── SosyalMedyaOlay - Olay ──────────────────────────────────
             modelBuilder.Entity<SosyalMedyaOlay>()
                 .HasOne(s => s.Olay)
-                .WithMany(o => o.SosyalMedyaOlaylar)
+                .WithMany()
                 .HasForeignKey(s => s.OlayId);
 
             // ── YuruyusRota - Olay ──────────────────────────────────────
             modelBuilder.Entity<YuruyusRota>()
                 .HasOne(r => r.Olay)
-                .WithMany(o => o.YuruyusRotasi)
+                .WithMany()
                 .HasForeignKey(r => r.OlayId);
 
             // ── KategoriOrganizator - Organizator (M:N) ─────────────────
@@ -184,13 +226,7 @@ namespace EGM.Infrastructure
                 .HasForeignKey(g => g.OlayTuruId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // ── Olay - GerceklesmeSekli (optional FK) ───────────────────
-            modelBuilder.Entity<Olay>()
-                .HasOne(o => o.GerceklesmeSekli)
-                .WithMany()
-                .HasForeignKey(o => o.GerceklesmeSekliId)
-                .OnDelete(DeleteBehavior.SetNull)
-                .IsRequired(false);
+
         }
     }
 }

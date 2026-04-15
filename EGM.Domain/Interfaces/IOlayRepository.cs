@@ -47,5 +47,6 @@ namespace EGM.Domain.Interfaces
 
         /// <summary>TakipNo ile olay getirir.</summary>
         Task<Olay?> GetByTakipNoAsync(string takipNo);
+        Task<Olay?> GetByOlayNoAsync(string olayNo);
     }
 }

@@ -1,630 +1,227 @@
-/* ═══════════════════════════════════════════════════════════════════
-   Sokak Olayı Ekle - Açık Tema (Sosyal Medya / Seçim sayfalarıyla uyumlu)
-   ═══════════════════════════════════════════════════════════════════ */
-
-:host {
-  display: block;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-.ekle-page {
-  display: grid;
-  grid-template-columns: 220px 1fr 220px;
-  gap: 14px;
-  padding: 16px 12px 40px;
-  max-width: 100%;
-  font-family: "Segoe UI", system-ui, sans-serif;
-  color: #1a1a2e;
-  box-sizing: border-box;
-  min-height: 100%;
-}
-
-/* ── Yan Paneller ───────────────────────────────────────────── */
-.side-panel {
-  background: #fff;
-  border: 1px solid #e8ecf0;
-  border-radius: 12px;
-  padding: 16px 14px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  overflow-y: auto;
-  max-height: calc(100vh - 120px);
-  box-sizing: border-box;
-}
-
-.side-panel-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #1a3a5c;
-  margin: 0 0 14px 0;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.side-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.side-dot.planned   { background: #2c5f8a; }
-.side-dot.completed { background: #27ae60; }
-
-.side-count {
-  margin-left: auto;
-  background: #f0f3f7;
-  color: #4a5568;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 10px;
-  min-width: 22px;
-  text-align: center;
-}
-
-.side-empty {
-  font-size: 0.83rem;
-  color: #7f8c8d;
-  font-style: italic;
-  padding: 8px 4px;
-}
-
-.side-loading {
-  font-size: 0.83rem;
-  color: #7f8c8d;
-  padding: 8px 4px;
-}
-
-.side-card {
-  padding: 10px 12px;
-  border: 1px solid #e8ecf0;
-  border-radius: 8px;
-  background: #f8f9fa;
-  margin-bottom: 8px;
-  cursor: default;
-}
-
-.side-card:last-child { margin-bottom: 0; }
-
-.side-card-header {
+/* ── Premium Başlık ────────────────────────────────────────── */
+.page-header-premium {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
-}
-
-.side-card-tur {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #2c5f8a;
-  background: #eaf3fb;
-  padding: 2px 7px;
-  border-radius: 5px;
-  white-space: nowrap;
-}
-
-.side-card-il {
-  font-size: 0.75rem;
-  color: #7f8c8d;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.side-card-baslik {
-  font-size: 0.83rem;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin-bottom: 4px;
-  line-height: 1.3;
-}
-
-.side-card-meta {
-  font-size: 0.75rem;
-  color: #7f8c8d;
-  display: flex;
-  gap: 6px;
-}
-
-.side-card-hint {
-  font-size: 0.72rem;
-  color: #2c5f8a;
-  margin-top: 5px;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-/* ── Takip No in side cards ── */
-.side-card-takipno {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 5px;
-  font-size: 0.72rem;
-}
-.takipno-label {
-  color: #6b7280;
-  font-weight: 500;
-}
-.takipno-value {
-  font-family: "Consolas", "Courier New", monospace;
-  color: #2563eb;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
-/* ── Takip No in form ── */
-.form-takipno-satir {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding: 7px 14px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  font-size: 0.82rem;
-}
-.form-takipno-etiket {
-  color: #3b82f6;
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.form-takipno-deger {
-  font-family: "Consolas", "Courier New", monospace;
-  color: #1d4ed8;
-  font-weight: 700;
-  font-size: 0.88rem;
-  letter-spacing: 0.04em;
-}
-
-.side-card {
-  cursor: pointer;
-}
-
-.side-card:hover .side-card-hint {
-  opacity: 1;
-}
-
-.side-card:hover {
-  border-color: #2c5f8a;
-  background: #eaf3fb;
-}
-
-.side-card-selected {
-  border-color: #27ae60 !important;
-  background: #eafaf1 !important;
-}
-
-.side-card-selected .side-card-hint {
-  opacity: 1;
-  color: #1e8449;
-}
-
-.side-card-active {
-  border-left: 4px solid #f39c12 !important;
-  background: #fffdf5 !important;
-}
-
-.side-card-cancelled {
-  border-color: #e74c3c !important;
-  background: #fdf2f2 !important;
-  opacity: 0.85;
-}
-
-.side-card-status {
-  display: inline-block;
-  margin-top: 6px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-}
-
-.side-card-status.cancelled {
-  background: #fdecea;
-  color: #c0392b;
-  border: 1px solid #e57373;
-}
-
-.side-card-status.completed {
-  background: #eafaf1;
-  color: #1e8449;
-  border: 1px solid #a9dfbf;
-}
-
-.side-card-status.in-progress {
-  background: #fff8ec;
-  color: #d35400;
-  border: 1px solid #f39c12;
-  animation: statusPulse 2s infinite;
-}
-
-@keyframes statusPulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4); }
-  70% { transform: scale(1.02); box-shadow: 0 0 0 6px rgba(243, 156, 18, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
-}
-
-/* ── Seçili Plan Bandı ──────────────────────────────────────── */
-.selected-plan-banner {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #eafaf1;
-  border: 1px solid #a9dfbf;
-  border-radius: 8px;
-  padding: 10px 14px;
-  margin-bottom: 14px;
-  font-size: 0.86rem;
-  color: #1e8449;
-  font-weight: 500;
-}
-
-.banner-iptal {
-  margin-left: auto;
-  background: none;
-  border: 1px solid #a9dfbf;
-  border-radius: 6px;
-  color: #1e8449;
-  font-size: 0.8rem;
-  padding: 3px 10px;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.banner-iptal:hover { background: #d5f5e3; }
-
-/* Sayfa başlık ve alert stilleri global styles.css dosyasında tanımlıdır */
-
-.btn-back {
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.35);
-  color: #fff;
-  padding: 7px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.88rem;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: background 0.2s;
-  flex-shrink: 0;
-}
-
-.btn-back:hover {
-  background: rgba(255,255,255,0.25);
-}
-
-/* ── Risk önizleme bandı ──────────────────────────────────────── */
-.risk-preview-bar {
+  padding: 24px;
   background: #fff;
-  border: 1px solid #e8ecf0;
-  border-radius: 10px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.high-risk-bar {
-  border-color: #e74c3c;
-  background: #fff9f9;
+.header-left h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1e293b;
+  font-weight: 800;
 }
 
-.rpb-label {
-  font-size: 0.85rem;
-  color: #4a5568;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: 8px;
-}
-
-.rpb-label strong {
+.header-left p {
+  margin: 4px 0 0;
+  color: #64748b;
   font-size: 0.9rem;
-  font-weight: 700;
 }
 
-.risk-warn-icon {
-  color: #e74c3c;
-  font-weight: 700;
-  font-size: 0.83rem;
-}
-
-.rpb-track {
-  height: 8px;
-  background: #f0f2f5;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.rpb-fill {
-  height: 100%;
-  border-radius: 4px;
-  transition: width 0.4s, background 0.3s;
-}
-
-/* ── Form ──────────────────────────────────────────────────────── */
-.olay-form {
+.status-toggle {
   display: flex;
-  flex-direction: column;
-  gap: 20px;
+  align-items: center;
+  gap: 12px;
+  background: #f1f5f9;
+  padding: 8px 16px;
+  border-radius: 30px;
 }
 
-/* ── Form switch butonları ──────────────────────────────────── */
-.form-switch-buttons {
-  display: flex;
-  gap: 4px;
-  background: #f0f3f7;
-  border-radius: 10px;
-  padding: 4px;
+.status-toggle label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #475569;
 }
 
-.btn {
-  flex: 1;
-  padding: 9px 16px;
-  border-radius: 8px;
+.status-toggle select {
   border: none;
   background: transparent;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #7f8c8d;
+  font-weight: 700;
+  color: #2563eb;
   cursor: pointer;
-  font-family: inherit;
-  transition: all 0.2s;
+  outline: none;
 }
 
-.btn.full-width { width: 100%; text-align: center; }
-
-.btn:hover { color: #1a3a5c; background: #fff; }
-
-.btn.active {
-  background: #1a3a5c;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-/* ── Form bölümleri ───────────────────────────────────────────── */
+/* ── Form Bölümleri ────────────────────────────────────────── */
 .form-section {
   background: #fff;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  border: 1px solid #e8ecf0;
+  margin-bottom: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 
 .form-section legend {
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: #2c5f8a;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #2563eb;
   padding: 0 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Dinamik Kart Yapısı (FormArray için) ──────────────────── */
+.array-item-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.array-item-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.btn-remove {
+  background: #fee2e2;
+  color: #ef4444;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-add-line {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1px dashed #2563eb;
+  padding: 10px;
+  width: 100%;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-add-line:hover {
+  background: #dbeafe;
+}
+
+/* ── Upload Zone ────────────────────────────────────────────── */
+.upload-zone {
+  border: 2px dashed #cbd5e1;
+  padding: 12px;
+  border-radius: 8px;
   background: #fff;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px 20px;
-  margin-top: 14px;
-}
-
-.span-2 { grid-column: span 2; }
-
-/* ── Alan grupları ────────────────────────────────────────────── */
-.form-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
-.form-field label {
-  font-size: 0.87rem;
-  font-weight: 600;
-  color: #2c3e50;
+.upload-zone input[type="file"] {
+  font-size: 0.85rem;
+  color: #64748b;
 }
 
-.req { color: #e74c3c; margin-left: 2px; }
-.hint { font-size: 0.75rem; color: #95a5a6; font-weight: 400; text-transform: none; }
-
-.form-field input,
-.form-field select,
-.form-field textarea {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1.5px solid #d1d9e0;
-  border-radius: 8px;
-  font-size: 0.92rem;
-  color: #1a1a2e;
-  background: #f8f9fa;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box;
-  font-family: inherit;
+.preview-path {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f0fdf4;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #bbf7d0;
 }
 
-.form-field input:focus,
-.form-field select:focus,
-.form-field textarea:focus {
-  outline: none;
-  border-color: #2c5f8a;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(44, 95, 138, 0.12);
+.path-text {
+  font-size: 0.75rem;
+  color: #166534;
+  word-break: break-all;
+  max-width: 80%;
 }
 
-.form-field input.is-invalid,
-.form-field select.is-invalid {
-  border-color: #e74c3c;
-  background: #fef9f9;
+.preview-link {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #2563eb;
+  text-decoration: none;
 }
 
-.form-field textarea {
-  resize: vertical;
-  min-height: 88px;
+/* ── Multi Select ───────────────────────────────────────────── */
+.multi-select {
+  height: 120px !important;
+  background: #fff !important;
 }
 
-.locked-input {
-  opacity: 0.65;
-  cursor: not-allowed;
-  background: #eef0f3 !important;
-}
-
-.field-error {
-  font-size: 0.78rem;
-  color: #e74c3c;
-  margin-top: 2px;
-  font-weight: 500;
-}
-
-/* ── Form Uyarı Mesajları ─────────────────────────────────────── */
-.form-alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-.form-alert-error {
-  background: #fff0f0;
-  border: 1px solid #f5c6cb;
-  color: #c0392b;
-}
-.form-alert-success {
-  background: #f0fff4;
-  border: 1px solid #b7dfcb;
-  color: #1e8449;
-}
-
-/* ── Alt Butonlar ─────────────────────────────────────────────── */
-.form-actions {
+/* ── Form Actions ───────────────────────────────────────────── */
+.form-actions-premium {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 0 4px 0;
+  gap: 16px;
+  padding: 24px 0;
 }
 
-.btn-ghost {
+.btn-cancel {
   background: #fff;
-  border: 1.5px solid #d1d9e0;
-  color: #4a5568;
-  padding: 10px 24px;
+  border: 1px solid #e2e8f0;
+  padding: 12px 32px;
   border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
+  color: #64748b;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
 }
 
-.btn-ghost:hover {
-  border-color: #2c5f8a;
-  color: #2c5f8a;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #1a3a5c 0%, #2c5f8a 100%);
-  border: none;
+.btn-save {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: #fff;
-  padding: 10px 32px;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: opacity 0.2s, transform 0.15s;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.btn-primary:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.btn-danger {
-  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
   border: none;
-  color: #fff;
-  padding: 10px 24px;
+  padding: 12px 48px;
   border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: opacity 0.2s, transform 0.15s;
-}
-
-.btn-danger:hover:not(:disabled) {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.btn-danger:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* ── Spinner ──────────────────────────────────────────────────── */
-.spinner-sm {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255,255,255,0.35);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* ── Ek Konumlar ───────────────────────────────────────────────── */
-.ek-konumlar-section {
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e8ecf0;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
-  padding: 18px 24px;
-}
-
-.ek-konumlar-header {
+  box-shadow: 0 4px 14px rgba(37,99,235,0.3);
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.ek-konum-baslik {
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: #2c5f8a;
+.btn-save:disabled {
+  opacity: 0.6;
 }
 
-.ek-konum-sayi {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #2563eb;
-  background: #dbeafe;
-  padding: 2px 8px;
-  border-radius: 20px;
+/* ── Utility ────────────────────────────────────────────────── */
+.form-grid.compact {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
 }
 
-.ek-konum-ekle-btn {
-  margin-left: auto;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
+@media (max-width: 1024px) {
+  .form-grid.compact { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .form-grid.compact { grid-template-columns: 1fr; }
+  .page-header-premium { flex-direction: column; align-items: flex-start; gap: 16px; }
+}
+s: 8px;
   padding: 7px 16px;
   font-size: 0.84rem;
   font-weight: 600;

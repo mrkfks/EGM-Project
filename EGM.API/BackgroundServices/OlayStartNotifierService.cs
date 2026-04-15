@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 namespace EGM.API.BackgroundServices
 {
     /// <summary>
-    /// Her dakika çalışır; başlangıç saati gelmiş ancak bildirim gönderilmemiş
-    /// olayları tespit ederek ilgili personele "Olay Başladı" bildirimi gönderir.
+    /// Her dakika çalışır; başlangıç zamanı gelmiş ancak bildirim gönderilmemiş
+    /// olayları tespit ederek otomatik olarak "Devam Eden" statüsüne çeker ve bildirim gönderir.
     /// </summary>
     public class OlayStartNotifierService : BackgroundService
     {
@@ -49,54 +49,43 @@ namespace EGM.API.BackgroundServices
             var context     = scope.ServiceProvider.GetRequiredService<EGMDbContext>();
             var notifier    = scope.ServiceProvider.GetRequiredService<IInAppNotificationService>();
 
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
 
-            // Başlangıç saati belirtilmiş, henüz bildirilmemiş ve iptal edilmemiş olaylar
+            // Başlangıç tarihi gelmiş, henüz bildirilmemiş ve Planlanan durumundaki olaylar
             var bekleyenOlaylar = await context.Olaylar
                 .Where(o =>
                     !o.IsDeleted &&
                     !o.BaslangicBildirimiGonderildi &&
-                    o.BaslangicSaati != null &&
-                    o.Durum != OlayDurum.Iptal)
+                    o.BaslangicTarihi <= now &&
+                    o.Durum == OlayDurum.Planlanan)
                 .ToListAsync(ct);
 
-            // Bellek içinde başlangıç zamanı hesaplaması (SQLite TimeSpan uyumsuzlukları için)
-            var gecmisOlaylar = bekleyenOlaylar
-                .Where(o => o.Tarih.Date.Add(o.BaslangicSaati!.Value) <= now)
-                .ToList();
-
-            if (gecmisOlaylar.Count == 0) return;
+            if (bekleyenOlaylar.Count == 0) return;
 
             _logger.LogInformation(
-                "{Count} olay için başlangıç bildirimi gönderilecek.",
-                gecmisOlaylar.Count);
+                "{Count} olay için başlangıç bildirimi gönderilecek ve statü güncellenecek.",
+                bekleyenOlaylar.Count);
 
-            foreach (var olay in gecmisOlaylar)
+            foreach (var olay in bekleyenOlaylar)
             {
                 try
                 {
                     await notifier.NotifyOlayBasladiAsync(olay);
                     olay.BaslangicBildirimiGonderildi = true;
-                    // Durumu otomatik olarak "Devam Ediyor" yap
-                    if (olay.Durum == EGM.Domain.Enums.OlayDurum.Planlandi)
-                    {
-                        olay.Durum = EGM.Domain.Enums.OlayDurum.DevamEdiyor;
-                        olay.GercekBaslangicTarihi = now;
-                        _logger.LogInformation(
-                            "Olay {TakipNo} durumu otomatik olarak Devam Ediyor olarak güncellendi.",
-                            olay.TakipNo ?? olay.Id.ToString());
-                    }
+                    
+                    // Durumu otomatik olarak "Devam Eden" yap
+                    olay.Durum = OlayDurum.DevamEden;
+                    
                     _logger.LogInformation(
-                        "Olay {TakipNo} için başlangıç bildirimi gönderildi.",
-                        olay.TakipNo ?? olay.Id.ToString());
+                        "Olay {OlayNo} durumu otomatik olarak Devam Eden olarak güncellendi.",
+                        olay.OlayNo ?? olay.Id.ToString());
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(
                         ex,
-                        "Olay {TakipNo} için bildirim gönderilirken hata oluştu.",
-                        olay.TakipNo ?? olay.Id.ToString());
-                    // Hata durumunda bu olay için flag'i güncelleme, bir sonraki döngüde yeniden dene
+                        "Olay {OlayNo} için işlem yapılırken hata oluştu.",
+                        olay.OlayNo ?? olay.Id.ToString());
                 }
             }
 
@@ -104,3 +93,4 @@ namespace EGM.API.BackgroundServices
         }
     }
 }
+

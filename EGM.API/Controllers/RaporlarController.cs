@@ -38,7 +38,7 @@ namespace EGM.API.Controllers
             // ── Sokak Olayları ────────────────────────────────────────────
             rows.AddRange((await _context.Olaylar
                 .OrderByDescending(o => o.CreatedAt).Take(limit)
-                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.OlayTuru })
+                .Select(o => new { o.CreatedByUserId, o.CreatedAt, OlayTuru = o.Tur != null ? o.Tur.Name : string.Empty })
                 .ToListAsync())
                 .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.OlayTuru, o.OlayTuru, "Sokak Olayı")));
 

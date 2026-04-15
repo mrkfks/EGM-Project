@@ -52,7 +52,22 @@ namespace EGM.Infrastructure.Persistence
                     );
 
                     context.SaveChanges();
-                    Console.WriteLine("DataSeeder: Seeding completed successfully.");
+                    Console.WriteLine("DataSeeder: User seeding completed successfully.");
+                }
+
+                if (!context.Groups.Any())
+                {
+                    context.Groups.AddRange(
+                        new Group { Id = Guid.NewGuid(), Name = "Siyasi Parti" },
+                        new Group { Id = Guid.NewGuid(), Name = "Sendika" },
+                        new Group { Id = Guid.NewGuid(), Name = "STK" },
+                        new Group { Id = Guid.NewGuid(), Name = "Meslek Örgütü" },
+                        new Group { Id = Guid.NewGuid(), Name = "Öğrenci Grubu" },
+                        new Group { Id = Guid.NewGuid(), Name = "İnisiyatifler" },
+                        new Group { Id = Guid.NewGuid(), Name = "Spor Taraftar Grubu" }
+                    );
+                    context.SaveChanges();
+                    Console.WriteLine("DataSeeder: Group seeding completed successfully.");
                 }
             }
             catch (Exception ex)

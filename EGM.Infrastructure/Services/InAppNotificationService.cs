@@ -10,10 +10,6 @@ namespace EGM.Infrastructure.Services
 {
     public class InAppNotificationService : IInAppNotificationService
     {
-        // Kritik risk eşiği: Hassasiyet.Kritik (20 puan) veya katılımcı > 1000 (10 puan)
-        // Hassasiyet >= Yüksek (2) → şehir yöneticileri; Hassasiyet == Kritik (3) → merkez yöneticileri de
-
-        // Aynı olay için 30 saniye içinde tekrar bildirim gönderilmesini engelle
         private static readonly Dictionary<string, DateTime> _rateLimitMap = new();
         private static readonly TimeSpan _rateLimitWindow = TimeSpan.FromSeconds(30);
 
@@ -31,12 +27,11 @@ namespace EGM.Infrastructure.Services
             _currentUser = currentUser;
         }
 
-        // ─── Olay Risk Bildirimi ─────────────────────────────────────────
         public async Task NotifyOlayRiskAsync(Olay olay, bool isSelfCorrection = false)
         {
-            if (olay.Hassasiyet == Hassasiyet.Dusuk && !isSelfCorrection) return;
+            var hassasiyet = olay.EventDetail?.Hassasiyet ?? Hassasiyet.Dusuk;
+            if (hassasiyet == Hassasiyet.Dusuk && !isSelfCorrection) return;
 
-            // Rate limiting: aynı olay için 30 sn içinde tekrar bildirim gönderme
             var rateLimitKey = $"{olay.Id}_{(isSelfCorrection ? "correction" : "risk")}";
             lock (_rateLimitMap)
             {
@@ -46,31 +41,30 @@ namespace EGM.Infrastructure.Services
                 _rateLimitMap[rateLimitKey] = DateTime.UtcNow;
             }
 
-            var isCritical = olay.Hassasiyet == Hassasiyet.Kritik;
+            var isCritical = hassasiyet == Hassasiyet.Kritik;
+            var il = olay.Locations?.FirstOrDefault()?.Il ?? "Bilinmiyor";
+            var tur = olay.Tur?.Name ?? "Olay";
 
             var title = isSelfCorrection
-                ? $"[Düzeltme] Olay Güncellendi: {olay.OlayTuru ?? olay.Il ?? "Olay"}"
-                : $"[Uyarı] Yüksek Hassasiyetli Olay: {olay.OlayTuru ?? olay.Il ?? "Olay"}";
+                ? $"[Düzeltme] Olay Güncellendi: {tur}"
+                : $"[Uyarı] Yüksek Hassasiyetli Olay: {tur}";
 
             var message =
-                $"Hassasiyet: {olay.Hassasiyet} | " +
-                $"Tarih: {olay.Tarih:dd.MM.yyyy}" +
+                $"Hassasiyet: {hassasiyet} | " +
+                $"Tarih: {olay.BaslangicTarihi:dd.MM.yyyy}" +
                 (isSelfCorrection ? " | Kayıt sahibi tarafından düzeltildi." : string.Empty);
 
             var type = NotificationType.Risk;
 
-            // ── Hedef kullanıcıları bul ───────────────────────────────
-            // İl personeli + il yöneticileri (şehir bazlı)
             var ilKullanicilari = await _context.Users
                 .Where(u => (u.Role == Roles.IlPersoneli || u.Role == Roles.IlYoneticisi) && !u.IsDeleted)
                 .Where(u => !olay.CityId.HasValue || u.CityId == olay.CityId)
                 .ToListAsync();
 
             var notifications = ilKullanicilari
-                .Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)olay.Hassasiyet * 10, type))
+                .Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)hassasiyet * 10, type))
                 .ToList();
 
-            // Kritik olaylar → tüm başkanlık personeline de gönder
             if (isCritical)
             {
                 var hqKullanicilari = await _context.Users
@@ -78,15 +72,13 @@ namespace EGM.Infrastructure.Services
                     .ToListAsync();
 
                 notifications.AddRange(
-                    hqKullanicilari.Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)olay.Hassasiyet * 10, type)));
+                    hqKullanicilari.Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)hassasiyet * 10, type)));
             }
 
             if (notifications.Count == 0) return;
 
-            // ── Bildirimleri kaydet ────────────────────────────────────
             await _context.Bildirimler.AddRangeAsync(notifications);
 
-            // Tetikleyen kullanıcı kimliğini ve hedef grupları audit log'a yaz
             var triggeredBy = _currentUser.IsAuthenticated ? _currentUser.UserId : "system";
             var targetGroups = olay.CityId.HasValue
                 ? $"city_{olay.CityId}" + (isCritical ? ", hq" : string.Empty)
@@ -99,23 +91,24 @@ namespace EGM.Infrastructure.Services
                 Action     = AuditAction.Create,
                 UserId     = triggeredBy,
                 Timestamp  = DateTime.UtcNow,
-                Changes    = $"Bildirim gönderildi → Gruplar: [{targetGroups}] | Hassasiyet: {olay.Hassasiyet}"
+                Changes    = $"Bildirim gönderildi → Gruplar: [{targetGroups}] | Hassasiyet: {hassasiyet}"
             }).ToList();
 
             await _context.AuditLoglar.AddRangeAsync(auditLogs);
             await _context.SaveChangesAsync();
 
-            // ── SignalR üzerinden gönder ───────────────────────────────
-            // Zengin payload: harita güncellemesi için koordinat + hassasiyet dahil
+            var lat = olay.Locations?.FirstOrDefault()?.Latitude ?? 0;
+            var lon = olay.Locations?.FirstOrDefault()?.Longitude ?? 0;
+
             var payload = new
             {
                 title,
                 message,
-                hassasiyet = (int)olay.Hassasiyet,
+                hassasiyet = (int)hassasiyet,
                 type       = type.ToString(),
                 olayId     = olay.Id,
-                latitude   = olay.Latitude,
-                longitude  = olay.Longitude,
+                latitude   = lat,
+                longitude  = lon,
                 cityId     = olay.CityId
             };
 
@@ -130,33 +123,31 @@ namespace EGM.Infrastructure.Services
                     .SendAsync("ReceiveNotification", payload);
         }
 
-        // ─── Olay Başladı Bildirimi ──────────────────────────────────────
         public async Task NotifyOlayBasladiAsync(Olay olay)
         {
-            var saatStr = olay.BaslangicSaati.HasValue
-                ? olay.Tarih.Date.Add(olay.BaslangicSaati.Value).ToString("HH:mm")
-                : olay.Tarih.ToString("HH:mm");
+            var saatStr = olay.BaslangicTarihi.ToString("HH:mm");
+            var tur = olay.Tur?.Name ?? "Olay";
+            var il = olay.Locations?.FirstOrDefault()?.Il ?? "Bilinmiyor";
+            var hassasiyet = olay.EventDetail?.Hassasiyet ?? Hassasiyet.Dusuk;
 
-            var title   = $"[Başladı] {olay.TakipNo ?? olay.OlayTuru ?? "Olay"} — {olay.Il}";
+            var title   = $"[Başladı] {olay.OlayNo ?? tur} — {il}";
             var message = $"Olay başlangıç saatine ulaşıldı. " +
-                          $"Tarih: {olay.Tarih:dd.MM.yyyy} | Saat: {saatStr} | " +
-                          $"Tür: {olay.OlayTuru ?? "-"} | Hassasiyet: {olay.Hassasiyet}";
+                          $"Tarih: {olay.BaslangicTarihi:dd.MM.yyyy} | Saat: {saatStr} | " +
+                          $"Tür: {tur} | Hassasiyet: {hassasiyet}";
             var type    = NotificationType.Operasyonel;
 
-            // ── Hedef kullanıcılar: ilgili il personeli ───────────────
             var ilKullanicilari = await _context.Users
                 .Where(u => (u.Role == Roles.IlPersoneli || u.Role == Roles.IlYoneticisi) && !u.IsDeleted)
                 .Where(u => !olay.CityId.HasValue || u.CityId == olay.CityId)
                 .ToListAsync();
 
-            // ── Hedef kullanıcılar: her zaman tüm başkanlık ──────────
             var hqKullanicilari = await _context.Users
                 .Where(u => (u.Role == Roles.BaskanlikPersoneli || u.Role == Roles.BaskanlikYoneticisi) && !u.IsDeleted)
                 .ToListAsync();
 
             var notifications = ilKullanicilari
                 .Concat(hqKullanicilari)
-                .Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)olay.Hassasiyet * 10, type))
+                .Select(u => BuildNotification(u.Sicil.ToString(), title, message, (double)hassasiyet * 10, type))
                 .ToList();
 
             if (notifications.Count == 0) return;
@@ -164,16 +155,18 @@ namespace EGM.Infrastructure.Services
             await _context.Bildirimler.AddRangeAsync(notifications);
             await _context.SaveChangesAsync();
 
-            // ── SignalR ───────────────────────────────────────────────
+            var lat = olay.Locations?.FirstOrDefault()?.Latitude ?? 0;
+            var lon = olay.Locations?.FirstOrDefault()?.Longitude ?? 0;
+
             var payload = new
             {
                 title,
                 message,
-                hassasiyet = (int)olay.Hassasiyet,
+                hassasiyet = (int)hassasiyet,
                 type       = type.ToString(),
                 olayId     = olay.Id,
-                latitude   = olay.Latitude,
-                longitude  = olay.Longitude,
+                latitude   = lat,
+                longitude  = lon,
                 cityId     = olay.CityId
             };
 
@@ -187,32 +180,27 @@ namespace EGM.Infrastructure.Services
                 .SendAsync("ReceiveNotification", payload);
         }
 
-        // ─── Okundu İşaretle ─────────────────────────────────────────────
         public async Task MarkAsReadAsync(Guid notificationId, string userId)
         {
             var notification = await _context.Bildirimler
                 .FirstOrDefaultAsync(n => n.Id == notificationId && n.UserId == userId && !n.IsDeleted);
 
             if (notification == null) return;
-
             notification.IsRead = true;
             await _context.SaveChangesAsync();
         }
 
-        // ─── Kullanıcı Bildirimleri ───────────────────────────────────────
-                public async Task MarkAllAsReadAsync(string userId)
-                {
-                    var unread = await _context.Bildirimler
-                        .Where(n => n.UserId == userId && !n.IsRead && !n.IsDeleted)
-                        .ToListAsync();
+        public async Task MarkAllAsReadAsync(string userId)
+        {
+            var unread = await _context.Bildirimler
+                .Where(n => n.UserId == userId && !n.IsRead && !n.IsDeleted)
+                .ToListAsync();
 
-                    if (unread.Count == 0) return;
+            if (unread.Count == 0) return;
+            foreach (var n in unread) n.IsRead = true;
+            await _context.SaveChangesAsync();
+        }
 
-                    foreach (var n in unread) n.IsRead = true;
-                    await _context.SaveChangesAsync();
-                }
-
-                // ─── Kullanıcı Bildirimleri ───────────────────────────────────────
         public async Task<IReadOnlyList<Notification>> GetUserNotificationsAsync(string userId)
         {
             return await _context.Bildirimler
@@ -221,7 +209,6 @@ namespace EGM.Infrastructure.Services
                 .ToListAsync();
         }
 
-        // ─── Yardımcı ─────────────────────────────────────────────────────
         private static Notification BuildNotification(
             string userId, string title, string message, double riskScore, NotificationType type)
         {
