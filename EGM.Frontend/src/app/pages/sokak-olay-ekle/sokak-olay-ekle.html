@@ -179,13 +179,18 @@
           <label>Ölü Sayısı</label>
           <input type="number" formControlName="oluSayisi">
         </div>
-        <div class="form-field span-2">
-          <label>Katılımcı Gruplar</label>
-          <select formControlName="participantGroupIds" multiple class="multi-select">
-            <option *ngFor="let g of gruplar" [value]="g.id">{{ g.name }}</option>
-          </select>
-          <small class="hint">Birden fazla seçmek için Ctrl tuşuna basılı tutun.</small>
-        </div>
+<!-- Katılımcı Gruplar: Ana form gridinde, Olay Bilgileri alanının sonunda -->
+</fieldset>
+
+<div class="form-field span-2">
+  <label>Katılımcı Gruplar</label>
+  <select formControlName="participantGroupIds" multiple class="multi-select">
+    <option *ngFor="let g of gruplar" [value]="g.id">{{ g.name }}</option>
+  </select>
+  <small class="hint">Birden fazla seçmek için Ctrl tuşuna basılı tutun.</small>
+</div>
+
+<fieldset class="form-section" formGroupName="details">
       </div>
     </fieldset>
 
