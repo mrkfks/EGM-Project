@@ -88,7 +88,7 @@ namespace EGM.Application.DTOs
         public List<LocationDto> Locations { get; set; } = new();
         public List<ResourceDto> Resources { get; set; } = new();
         public EventDetailDto? Details { get; set; }
-        public List<Guid> ParticipantGroupIds { get; set; } = new();
+        public List<Guid> ParticipantOrganizatorIds { get; set; } = new();
 
         /// <summary>İl bazlı kısıtlama için plaka kodu.</summary>
         public int? CityId { get; set; }
@@ -118,7 +118,7 @@ namespace EGM.Application.DTOs
         public List<LocationDto> Locations { get; set; } = new();
         public List<ResourceDto> Resources { get; set; } = new();
         public EventDetailDto? Details { get; set; }
-        public List<string> ParticipantGroups { get; set; } = new();
+        public List<string> ParticipantOrganizatorlar { get; set; } = new();
     }
 
     public class LocationDto

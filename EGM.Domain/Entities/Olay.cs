@@ -47,7 +47,7 @@ namespace EGM.Domain.Entities
         public ICollection<Resource> Resources { get; set; } = new List<Resource>();
         public ICollection<Location> Locations { get; set; } = new List<Location>();
         public EventDetail? EventDetail { get; set; }
-        public ICollection<Group> ParticipantGroups { get; set; } = new List<Group>();
+        public ICollection<Organizator> ParticipantOrganizators { get; set; } = new List<Organizator>();
 
         /// <summary>
         /// Arka plan servisi için bildirim kontrolü.

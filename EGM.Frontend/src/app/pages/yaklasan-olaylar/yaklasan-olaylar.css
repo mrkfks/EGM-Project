@@ -1,0 +1,233 @@
+.yo-wrap {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 0 24px;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  align-items: start;
+}
+
+/* Yükleniyor ve hata tam genişlik */
+.yo-loading,
+.yo-hata {
+  grid-column: 1 / -1;
+}
+
+/* Yenile butonu da tam genişlik */
+.yo-yenile-wrap {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+/* İki bölüm yan yana — ayraç çizgisi yerine sağ bölüme sol kenarlık */
+.yo-bolum-gecmis {
+  border-top: none;
+  padding-top: 0;
+  border-left: 2px dashed #e2e8f0;
+  padding-left: 24px;
+}
+
+/* ─── Yüklenme / Hata ─────────────────────────────── */
+.yo-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  padding: 48px 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.yo-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.yo-hata {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: #dc2626;
+  font-size: 0.88rem;
+}
+
+.yo-hata button {
+  margin-left: auto;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ─── Bölüm başlıkları ────────────────────────────── */
+.yo-bolum {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.yo-bolum-gecmis {
+  border-top: 2px dashed #e2e8f0;
+  padding-top: 20px;
+}
+
+.yo-bolum-baslik {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.83rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 4px;
+}
+
+.yo-planlanan-baslik { color: #1e40af; }
+.yo-gecmis-baslik    { color: #475569; }
+
+.yo-bolum-ikon { font-size: 1rem; }
+
+.yo-sayi {
+  margin-left: auto;
+  background: #e2e8f0;
+  color: #334155;
+  border-radius: 99px;
+  padding: 2px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.yo-bos {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  font-style: italic;
+  padding: 8px 0;
+}
+
+/* ─── Kartlar ─────────────────────────────────────── */
+.yo-kart {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow 0.15s;
+}
+
+.yo-kart:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.07); }
+
+.yo-kart-planlanan {
+  border-left: 4px solid #3b82f6;
+  background: #f0f7ff;
+}
+
+.yo-kart-gerceklesen {
+  border-left: 4px solid #22c55e;
+  background: #f0fdf4;
+}
+
+.yo-kart-iptal {
+  border-left: 4px solid #f97316;
+  background: #fff7ed;
+}
+
+.yo-kart-ust {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yo-no {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-family: monospace;
+}
+
+.yo-kalan {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #2563eb;
+  background: #dbeafe;
+  border-radius: 5px;
+  padding: 2px 8px;
+}
+
+.yo-tur {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.yo-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.yo-aciklama {
+  font-size: 0.82rem;
+  color: #475569;
+  background: rgba(0,0,0,0.03);
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+/* ─── Badge ───────────────────────────────────────── */
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 99px;
+  padding: 2px 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge-planlanan    { background: #dbeafe; color: #1d4ed8; }
+.badge-gerceklesen  { background: #dcfce7; color: #15803d; }
+.badge-iptal        { background: #ffedd5; color: #c2410c; }
+
+/* ─── Yenile ──────────────────────────────────────── */.yo-yenile-btn {
+  background: none;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 24px;
+  font-size: 0.84rem;
+  color: #475569;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.yo-yenile-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}

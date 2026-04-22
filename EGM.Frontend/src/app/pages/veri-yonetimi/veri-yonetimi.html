@@ -5,15 +5,6 @@
     <button class="vy-sekme" [class.aktif]="aktifSekme==='sokak'"  (click)="sekmeSec('sokak')">
       Sokak Olayları <span class="vy-sayi">{{ sokakOlaylar.length }}</span>
     </button>
-    <button class="vy-sekme" [class.aktif]="aktifSekme==='sosyal'" (click)="sekmeSec('sosyal')">
-      Sosyal Medya <span class="vy-sayi">{{ sosyalOlaylar.length }}</span>
-    </button>
-    <button class="vy-sekme" [class.aktif]="aktifSekme==='secim'"  (click)="sekmeSec('secim')">
-      Seçim Olayları <span class="vy-sayi">{{ secimOlaylar.length }}</span>
-    </button>
-    <button class="vy-sekme" [class.aktif]="aktifSekme==='vip'"    (click)="sekmeSec('vip')">
-      VIP Ziyaret <span class="vy-sayi">{{ vipOlaylar.length }}</span>
-    </button>
   </div>
 
   <!-- ── Yükleniyor ──────────────────────────────────────────── -->

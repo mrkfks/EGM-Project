@@ -35,7 +35,7 @@ namespace EGM.API.Controllers
                 return BadRequest("Dosya seçilmedi.");
 
             // İzin verilen uzantılar
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf", ".docx", ".xlsx" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".pdf", ".docx", ".xlsx", ".tiff", ".tif", ".gif" };
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
             if (!allowedExtensions.Contains(extension))
@@ -52,6 +52,9 @@ namespace EGM.API.Controllers
                     { ".jpg", new List<byte[]> { new byte[] { 0xFF, 0xD8, 0xFF } } },
                     { ".jpeg", new List<byte[]> { new byte[] { 0xFF, 0xD8, 0xFF } } },
                     { ".png", new List<byte[]> { new byte[] { 0x89, 0x50, 0x4E, 0x47 } } },
+                    { ".gif", new List<byte[]> { new byte[] { 0x47, 0x49, 0x46, 0x38 } } },
+                    { ".tiff", new List<byte[]> { new byte[] { 0x49, 0x49, 0x2A, 0x00 }, new byte[] { 0x4D, 0x4D, 0x00, 0x2A } } },
+                    { ".tif",  new List<byte[]> { new byte[] { 0x49, 0x49, 0x2A, 0x00 }, new byte[] { 0x4D, 0x4D, 0x00, 0x2A } } },
                     { ".pdf", new List<byte[]> { new byte[] { 0x25, 0x50, 0x44, 0x46 } } },
                     { ".docx", new List<byte[]> { new byte[] { 0x50, 0x4B, 0x03, 0x04 } } },
                     { ".xlsx", new List<byte[]> { new byte[] { 0x50, 0x4B, 0x03, 0x04 } } }
@@ -127,6 +130,8 @@ namespace EGM.API.Controllers
             {
                 ".jpg" or ".jpeg" => "image/jpeg",
                 ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".tiff" or ".tif" => "image/tiff",
                 ".pdf" => "application/pdf",
                 ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 ".xlsx" => "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

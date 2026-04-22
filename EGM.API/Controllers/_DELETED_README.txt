@@ -1,0 +1,1 @@
+Bu klasörde 21.04.2026 tarihinde SosyalMedyaOlayController.cs, VIPZiyaretController.cs ve SecimController.cs dosyaları silinmiştir.

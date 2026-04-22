@@ -26,6 +26,16 @@ namespace EGM.Infrastructure.Security
             ?? Principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
             ?? string.Empty;
 
+        /// <summary>JWT "userId" claim → veritabanı GUID.</summary>
+        public Guid UserGuid
+        {
+            get
+            {
+                var raw = Principal?.FindFirst("userId")?.Value;
+                return Guid.TryParse(raw, out var id) ? id : Guid.Empty;
+            }
+        }
+
         /// <summary>JWT "role" claim → rol adı.</summary>
         public string Role =>
             Principal?.FindFirst(ClaimTypes.Role)?.Value

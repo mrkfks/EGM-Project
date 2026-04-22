@@ -9,6 +9,9 @@ namespace EGM.Domain.Interfaces
         /// <summary>Kullanıcının sicil numarası (JWT sub claim).</summary>
         string UserId { get; }
 
+        /// <summary>Kullanıcının veritabanı GUID'i (JWT userId claim).</summary>
+        Guid UserGuid { get; }
+
         /// <summary>Kullanıcının rolü (Izleyici, IlPersoneli, …).</summary>
         string Role { get; }
 

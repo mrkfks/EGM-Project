@@ -1,22 +1,5 @@
 <div class="ekle-page">
-  <div class="content" [formGroup]="form">
-    
-    <!-- Üst Başlık ve Statü Seçimi -->
-    <div class="page-header-premium">
-      <div class="header-left">
-        <h1>Yeni Olay Bildirimi</h1>
-        <p>İlişkisel mimariye dayalı, çoklu konum ve kaynak destekli olay girişi.</p>
-      </div>
-      <div class="header-right">
-        <div class="status-toggle">
-          <label>Olay Durumu:</label>
-          <select formControlName="durum">
-            <option [ngValue]="0">Planlanan</option>
-            <option [ngValue]="2">Gerçekleşen</option>
-          </select>
-        </div>
-      </div>
-    </div>
+  <div [formGroup]="form">
 
     <!-- Hata / Başarı Bilgisi -->
     <div class="form-alert form-alert-error" *ngIf="formError">{{ formError }}</div>
@@ -24,7 +7,7 @@
 
     <!-- Olay Temel Bilgileri -->
     <fieldset class="form-section">
-      <legend>Olay Bilgileri</legend>
+      <legend>&#9679; Olay Bilgileri</legend>
       <div class="form-grid">
         <div class="form-field">
           <label>Olay Türü <span class="req">*</span></label>
@@ -71,27 +54,38 @@
 
     <!-- Konumlar Section -->
     <fieldset class="form-section" formArrayName="locations">
-      <legend>Konumlar (Multi-Location)</legend>
+      <legend>&#9679; Konumlar</legend>
       <div *ngFor="let loc of locations.controls; let i=index" [formGroupName]="i" class="array-item-card">
         <div class="card-header">
           <span class="card-title">Konum #{{ i + 1 }}</span>
-          <button type="button" class="btn-remove" (click)="removeLocation(i)" *ngIf="locations.length > 1">Kaldır</button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn-location-auto" (click)="onUseCurrentLocation(i)" title="Şu anki konumu kullan">
+              📍 Konum Kullan
+            </button>
+            <button type="button" class="btn-remove" (click)="removeLocation(i)" *ngIf="locations.length > 1">&#x2715; Kaldır</button>
+          </div>
         </div>
         <div class="form-grid compact">
           <div class="form-field">
             <label>İl <span class="req">*</span></label>
-            <select formControlName="il">
+            <select formControlName="il" (change)="onIlChange(i)">
               <option value="">— Seçiniz —</option>
               <option *ngFor="let il of iller" [value]="il.name">{{ il.name }}</option>
             </select>
           </div>
           <div class="form-field">
             <label>İlçe</label>
-            <input type="text" formControlName="ilce" placeholder="İlçe adı...">
+            <select formControlName="ilce" (change)="onIlceChange(i)">
+              <option value="">— Seçiniz —</option>
+              <option *ngFor="let ilce of locationDistricts[i]" [value]="ilce">{{ ilce }}</option>
+            </select>
           </div>
           <div class="form-field">
             <label>Mahalle</label>
-            <input type="text" formControlName="mahalle" placeholder="Mahalle adı...">
+            <select formControlName="mahalle" (change)="onMahalleChange(i)">
+              <option value="">— Seçiniz —</option>
+              <option *ngFor="let mahalle of locationNeighborhoods[i]" [value]="mahalle">{{ mahalle }}</option>
+            </select>
           </div>
           <div class="form-field">
             <label>Mekan</label>
@@ -107,21 +101,83 @@
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add-line" (click)="addLocation()">+ Yeni Konum Ekle</button>
+      <button type="button" class="btn-add-line" (click)="addLocation()">&#43; Yeni Konum Ekle</button>
     </fieldset>
 
     <!-- Kaynaklar Section -->
     <fieldset class="form-section" formArrayName="resources">
-      <legend>Sosyal Medya & Kaynaklar (Multi-Resource)</legend>
+      <legend>&#9679; Kaynaklar & Görseller</legend>
       <div *ngFor="let res of resources.controls; let i=index" [formGroupName]="i" class="array-item-card resource-card">
         <div class="card-header">
           <span class="card-title">Kaynak #{{ i + 1 }}</span>
-          <button type="button" class="btn-remove" (click)="removeResource(i)">Kaldır</button>
+          <button type="button" class="btn-remove" (click)="removeResource(i)">&#x2715; Kaldır</button>
         </div>
         <div class="form-grid compact">
-          <div class="form-field">
-            <label>Platform</label>
-            <input type="text" formControlName="platform" placeholder="Twitter, Facebook vb.">
+          <div class="form-field span-3">
+            <label>Platform <span class="req">*</span></label>
+            <div class="platform-selector">
+              <div class="platform-btn-wrap" *ngFor="let plat of platforms; let pIdx = index">
+                <button 
+                  type="button"
+                  class="platform-btn"
+                  [class.platform-aktif]="isPlatformSelected(i, plat)"
+                  (click)="togglePlatform(i, plat)"
+                  title="Seçmek için tıkla">
+                  {{ plat }}
+                </button>
+                <button 
+                  type="button" 
+                  class="platform-sil-inline"
+                  (click)="removePlatformFromList(plat)"
+                  title="{{ plat }} platformunu listeden kaldır">
+                  ✕
+                </button>
+              </div>
+
+              <!-- Custom Platform Ekleme -->
+              <div class="platform-yeni-ekle">
+                <button 
+                  type="button" 
+                  class="platform-btn platform-btn-ekle-trigger"
+                  (click)="showCustomPlatformInput(i)"
+                  *ngIf="!isCustomPlatformInputVisible(i)">
+                  + Yeni Platform
+                </button>
+
+                <!-- Custom Platform Input -->
+                <div class="custom-platform-input-inline" *ngIf="isCustomPlatformInputVisible(i)">
+                  <input 
+                    type="text" 
+                    #customPlatformInputs
+                    placeholder="Platform adı..." 
+                    class="platform-input-field"
+                    (keyup.enter)="addCustomPlatform(i, customPlatformInputs)"
+                    (keyup.escape)="hideCustomPlatformInput(i)">
+                  <button 
+                    type="button" 
+                    class="btn-platform-confirm"
+                    (click)="addCustomPlatform(i, customPlatformInputs)">
+                    ✓
+                  </button>
+                  <button 
+                    type="button" 
+                    class="btn-platform-cancel"
+                    (click)="hideCustomPlatformInput(i)">
+                    ✕
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seçili Platformlar Özeti -->
+            <div class="seçili-platformlar-ozet" *ngIf="(res.get('platforms')?.value || []).length > 0">
+              <span class="ozet-baslik">Seçili:</span>
+              <div class="ozet-etiketler">
+                <span class="ozet-etiket" *ngFor="let p of (res.get('platforms')?.value || [])">
+                  {{ p }}
+                </span>
+              </div>
+            </div>
           </div>
           <div class="form-field">
             <label>Kullanıcı Adı</label>
@@ -143,64 +199,192 @@
           </div>
         </div>
       </div>
-      <button type="button" class="btn-add-line" (click)="addResource()">+ Yeni Kaynak Ekle</button>
+      <button type="button" class="btn-add-line" (click)="addResource()">&#43; Yeni Kaynak Ekle</button>
     </fieldset>
 
     <!-- Detaylar Section -->
     <fieldset class="form-section" formGroupName="details">
-      <legend>Olay Detayları & Sayılar</legend>
-      <div class="form-grid">
-        <div class="form-field">
+      <legend>&#9679; Olay Detayları & Sayılar</legend>
+
+      <!-- Hassasiyet -->
+      <div class="details-row">
+        <div class="form-field hassasiyet-field">
           <label>Hassasiyet</label>
-          <select formControlName="hassasiyet">
-            <option [ngValue]="0">Düşük</option>
-            <option [ngValue]="1">Orta</option>
-            <option [ngValue]="2">Yüksek</option>
-            <option [ngValue]="3">Kritik</option>
-          </select>
+          <div class="hassasiyet-options">
+            <label class="hs-opt hs-dusuk">
+              <input type="radio" formControlName="hassasiyet" [value]="0"> Düşük
+            </label>
+            <label class="hs-opt hs-orta">
+              <input type="radio" formControlName="hassasiyet" [value]="1"> Orta
+            </label>
+            <label class="hs-opt hs-yuksek">
+              <input type="radio" formControlName="hassasiyet" [value]="2"> Yüksek
+            </label>
+            <label class="hs-opt hs-kritik">
+              <input type="radio" formControlName="hassasiyet" [value]="3"> Kritik
+            </label>
+          </div>
         </div>
-        <div class="form-field">
-          <label>Katılımcı Sayısı {{ form.get('durum')?.value === 2 ? '*' : '' }}</label>
-          <input type="number" formControlName="katilimciSayisi">
-        </div>
-        <div class="form-field">
-          <label>Şüpheli Sayısı</label>
-          <input type="number" formControlName="supheliSayisi">
-        </div>
-        <div class="form-field">
-          <label>Gözaltı Sayısı</label>
-          <input type="number" formControlName="gozaltiSayisi">
-        </div>
-        <div class="form-field">
-          <label>Şehit Sayısı</label>
-          <input type="number" formControlName="sehitSayisi">
-        </div>
-        <div class="form-field">
-          <label>Ölü Sayısı</label>
-          <input type="number" formControlName="oluSayisi">
-        </div>
-<!-- Katılımcı Gruplar: Ana form gridinde, Olay Bilgileri alanının sonunda -->
-</fieldset>
-
-<div class="form-field span-2">
-  <label>Katılımcı Gruplar</label>
-  <select formControlName="participantGroupIds" multiple class="multi-select">
-    <option *ngFor="let g of gruplar" [value]="g.id">{{ g.name }}</option>
-  </select>
-  <small class="hint">Birden fazla seçmek için Ctrl tuşuna basılı tutun.</small>
-</div>
-
-<fieldset class="form-section" formGroupName="details">
       </div>
+
+      <!-- Sayısal Alanlar -->
+      <div class="sayi-grid">
+        <div class="sayi-kart sayi-katilimci" [class.sayi-kart-acik]="acikKisiPanel === 'katilimci'">
+          <span class="sayi-etiket">Katılımcı {{ form.get('durum')?.value === 2 ? '*' : '' }}</span>
+          <input type="number" formControlName="katilimciSayisi" class="sayi-input" min="0" placeholder="0">
+          <button type="button" class="sayi-kisi-btn" (click)="toggleKisiPanel('katilimci')">
+            <span *ngIf="kisiDetaylari['katilimci'].length > 0">👤 {{ kisiDetaylari['katilimci'].length }} kişi</span>
+            <span *ngIf="kisiDetaylari['katilimci'].length === 0">+ Kişi Ekle</span>
+          </button>
+        </div>
+        <div class="sayi-kart sayi-supheli" [class.sayi-kart-acik]="acikKisiPanel === 'supheli'">
+          <span class="sayi-etiket">Şüpheli</span>
+          <input type="number" formControlName="supheliSayisi" class="sayi-input" min="0" placeholder="0">
+          <button type="button" class="sayi-kisi-btn" (click)="toggleKisiPanel('supheli')">
+            <span *ngIf="kisiDetaylari['supheli'].length > 0">👤 {{ kisiDetaylari['supheli'].length }} kişi</span>
+            <span *ngIf="kisiDetaylari['supheli'].length === 0">+ Kişi Ekle</span>
+          </button>
+        </div>
+        <div class="sayi-kart sayi-gozalti" [class.sayi-kart-acik]="acikKisiPanel === 'gozalti'">
+          <span class="sayi-etiket">Gözaltı</span>
+          <input type="number" formControlName="gozaltiSayisi" class="sayi-input" min="0" placeholder="0">
+          <button type="button" class="sayi-kisi-btn" (click)="toggleKisiPanel('gozalti')">
+            <span *ngIf="kisiDetaylari['gozalti'].length > 0">👤 {{ kisiDetaylari['gozalti'].length }} kişi</span>
+            <span *ngIf="kisiDetaylari['gozalti'].length === 0">+ Kişi Ekle</span>
+          </button>
+        </div>
+        <div class="sayi-kart sayi-sehit" [class.sayi-kart-acik]="acikKisiPanel === 'sehit'">
+          <span class="sayi-etiket">Şehit</span>
+          <input type="number" formControlName="sehitSayisi" class="sayi-input" min="0" placeholder="0">
+          <button type="button" class="sayi-kisi-btn" (click)="toggleKisiPanel('sehit')">
+            <span *ngIf="kisiDetaylari['sehit'].length > 0">👤 {{ kisiDetaylari['sehit'].length }} kişi</span>
+            <span *ngIf="kisiDetaylari['sehit'].length === 0">+ Kişi Ekle</span>
+          </button>
+        </div>
+        <div class="sayi-kart sayi-olu" [class.sayi-kart-acik]="acikKisiPanel === 'olu'">
+          <span class="sayi-etiket">Ölü</span>
+          <input type="number" formControlName="oluSayisi" class="sayi-input" min="0" placeholder="0">
+          <button type="button" class="sayi-kisi-btn" (click)="toggleKisiPanel('olu')">
+            <span *ngIf="kisiDetaylari['olu'].length > 0">👤 {{ kisiDetaylari['olu'].length }} kişi</span>
+            <span *ngIf="kisiDetaylari['olu'].length === 0">+ Kişi Ekle</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Kişi Detay Paneli -->
+      <div class="kisi-panel" *ngIf="acikKisiPanel">
+        <div class="kisi-panel-header">
+          <span class="kisi-panel-baslik">{{ kisiPanelBaslik }} — Kişi Listesi</span>
+          <button type="button" class="kisi-panel-kapat" (click)="acikKisiPanel = null; toggleKisiPanel('')">✕ Kapat</button>
+        </div>
+
+        <div class="kisi-liste" *ngIf="kisiDetaylari[acikKisiPanel!].length > 0">
+          <div class="kisi-satir" *ngFor="let k of kisiDetaylari[acikKisiPanel!]; let idx = index">
+            <span class="kisi-no">{{ idx + 1 }}.</span>
+            <span class="kisi-ad">{{ k.ad }} {{ k.soyad }}</span>
+            <span class="kisi-tc" *ngIf="k.tc">TC: {{ k.tc }}</span>
+            <button type="button" class="kisi-sil" (click)="kisiKaldir(acikKisiPanel!, idx)">✕</button>
+          </div>
+        </div>
+        <p class="kisi-bos" *ngIf="kisiDetaylari[acikKisiPanel!].length === 0">Henüz kişi eklenmedi.</p>
+
+        <div class="kisi-ekle-form">
+          <input class="kisi-input" type="text" placeholder="Ad *" [(ngModel)]="yeniKisi.ad" [ngModelOptions]="{standalone: true}" maxlength="100">
+          <input class="kisi-input" type="text" placeholder="Soyad" [(ngModel)]="yeniKisi.soyad" [ngModelOptions]="{standalone: true}" maxlength="100">
+          <input class="kisi-input" type="text" placeholder="TC Kimlik No" [(ngModel)]="yeniKisi.tc" [ngModelOptions]="{standalone: true}" maxlength="11">
+          <button type="button" class="kisi-ekle-btn" (click)="kisiEkle(acikKisiPanel!)" [disabled]="!yeniKisi.ad.trim()">+ Ekle</button>
+        </div>
+      </div>
+
+
     </fieldset>
 
-    <div class="form-actions-premium">
-      <button type="button" class="btn-cancel" (click)="goBack()">İptal</button>
-      <button type="button" class="btn-save" [disabled]="isSaving" (click)="kaydet()">
-        <span *ngIf="isSaving" class="spinner-sm"></span>
-        {{ isSaving ? 'Kaydediliyor...' : 'Olayı Bildir' }}
-      </button>
+    <!-- Katılımcı Gruplar -->
+    <div class="katilimci-gruplar-wrap" style="margin-top:18px;">
+      <label class="kg-label">Katılımcı Gruplar</label>
+
+      <!-- Seçili etiketler -->
+      <div class="kg-etiketler" *ngIf="selectedParticipantOrgs.length > 0">
+        <span class="kg-etiket" *ngFor="let o of selectedParticipantOrgs">
+          {{ o.ad }}
+          <button type="button" class="kg-etiket-sil" (click)="removeParticipantOrg(o.id)" title="Kaldır">✕</button>
+        </span>
+      </div>
+
+      <!-- Ekle satırı -->
+      <div class="kg-ekle-satir">
+        <select class="kg-select" [(ngModel)]="seciliOrgId" [ngModelOptions]="{standalone: true}">
+          <option value="">— Kuruluş seçin —</option>
+          <option *ngFor="let o of organizatorlerFiltreli" [value]="o.id">{{ o.ad }}</option>
+        </select>
+        <button type="button" class="kg-ekle-btn" (click)="addParticipantOrg()" [disabled]="!seciliOrgId">+ Ekle</button>
+      </div>
     </div>
 
+    <!-- ─── Belge Yükleme ──────────────────────────────── -->
+    <div class="belge-section">
+      <div class="belge-section-baslik">
+        <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="#2563eb" stroke-width="2"/><polyline points="14 2 14 8 20 8" stroke="#2563eb" stroke-width="2"/></svg>
+        <span>Belge &amp; Dosya Ekleri</span>
+      </div>
+
+      <!-- Yüklü belgeler -->
+      <div class="belge-liste" *ngIf="belgeler.length > 0">
+        <div class="belge-satir" *ngFor="let b of belgeler; let idx = index">
+          <span class="belge-ikon">{{ belgeDosyaIkonu(b.ad) }}</span>
+          <span class="belge-ad">{{ b.ad }}</span>
+          <span class="belge-boyut">{{ belgeBoyutu(b.boyut) }}</span>
+          <a class="belge-indir" [href]="b.url" target="_blank" title="Aç / İndir">&#8599;</a>
+          <button type="button" class="belge-sil" (click)="belgeSil(idx)" title="Kaldır">✕</button>
+        </div>
+      </div>
+      <p class="belge-bos" *ngIf="belgeler.length === 0">Henüz belge eklenmedi.</p>
+
+      <!-- Yükleme alanı -->
+      <div class="belge-drop-zone"
+           [class.belge-drop-hover]="belgeDragOver"
+           (dragover)="$event.preventDefault(); belgeDragOver=true"
+           (dragleave)="belgeDragOver=false"
+           (drop)="belgeDrop($event)"
+           (click)="belgeInput.click()">
+        <svg width="32" height="32" fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="#94a3b8" stroke-width="1.5"/><polyline points="17 8 12 3 7 8" stroke="#94a3b8" stroke-width="1.5"/><line x1="12" y1="3" x2="12" y2="15" stroke="#94a3b8" stroke-width="1.5"/></svg>
+        <p>Dosyaları buraya sürükleyin veya <u>seçmek için tıklayın</u></p>
+        <span>JPG, PNG, TIFF, GIF, PDF, DOCX, XLSX — maks. 10 MB</span>
+        <div class="belge-yukleniyor" *ngIf="belgeYukleniyor">
+          <div class="belge-spinner"></div>
+          <span>Yükleniyor...</span>
+        </div>
+      </div>
+      <input #belgeInput type="file" style="display:none"
+        accept=".jpg,.jpeg,.png,.tiff,.tif,.gif,.pdf,.docx,.xlsx"
+        multiple
+        (change)="belgeDosyaSecildi($event)">
+      <p class="belge-hata" *ngIf="belgeHata">{{ belgeHata }}</p>
+    </div>
+
+    <div class="form-actions-premium">
+      <!-- Planlanan: başlangıç tarihi geçmişteyse devre dışı -->
+      <button type="button" class="btn-planlanan"
+              [disabled]="isSaving || baslangicGecmis"
+              [title]="baslangicGecmis ? 'Başlangıç tarihi geçmiş; planlanan olay bildirilemez' : ''"
+              (click)="kaydet(0)">
+        <span *ngIf="isSaving" class="spinner-sm spinner-gray"></span>
+        📅 Planlanan Olay Bildir
+      </button>
+
+      <button type="button" class="btn-iptal-edilen"
+              [disabled]="isSaving"
+              (click)="kaydet(3)">
+        <span *ngIf="isSaving" class="spinner-sm spinner-orange"></span>
+        🚫 İptal Edilen Olay Bildir
+      </button>
+
+      <button type="button" class="btn-gerceklesen"
+              [disabled]="isSaving"
+              (click)="kaydet(2)">
+        <span *ngIf="isSaving" class="spinner-sm"></span>
+        ✅ Gerçekleşen Olay Bildir
+      </button>
+    </div>
   </div>
 </div>

@@ -139,9 +139,6 @@ builder.Services.AddScoped<AuditService>();
 builder.Services.AddScoped<RoleAssignmentService>();
 builder.Services.AddScoped<IOlayService, OlayService>();
 builder.Services.AddScoped<OrganizatorService>();
-builder.Services.AddScoped<SecimService>();
-builder.Services.AddScoped<SosyalMedyaOlayService>();
-builder.Services.AddScoped<VIPZiyaretService>();
 builder.Services.AddScoped<RaporlarService>();
 
 // ── Coğrafi Veri Servisi (TurkiyeRehber.sqlite) ──────────────────────────

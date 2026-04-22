@@ -1,0 +1,81 @@
+<div class="yo-wrap">
+
+  <!-- Yükleniyor -->
+  <div class="yo-loading" *ngIf="yukleniyor">
+    <div class="yo-spinner"></div>
+    <span>Olaylar yükleniyor…</span>
+  </div>
+
+  <!-- Hata -->
+  <div class="yo-hata" *ngIf="hata && !yukleniyor">
+    <span>⚠️ {{ hata }}</span>
+    <button type="button" (click)="yukle()">Tekrar Dene</button>
+  </div>
+
+  <ng-container *ngIf="!yukleniyor && !hata">
+
+    <!-- ─── Planlanan (sonraki 24 saat) ─────────────────── -->
+    <section class="yo-bolum">
+      <div class="yo-bolum-baslik yo-planlanan-baslik">
+        <span class="yo-bolum-ikon">📅</span>
+        <span>Son 24 Saat &amp; Önümüzdeki 24 Saatteki Planlanan Olaylar</span>
+        <span class="yo-sayi">{{ planlananlar.length }}</span>
+      </div>
+
+      <div class="yo-bos" *ngIf="planlananlar.length === 0">
+        Son 24 saat ve önümüzdeki 24 saat içinde planlanan olay bulunmuyor.
+      </div>
+
+      <div class="yo-kart yo-kart-planlanan" *ngFor="let o of planlananlar">
+        <div class="yo-kart-ust">
+          <span class="yo-no">{{ o.olayNo }}</span>
+          <span class="yo-kalan">⏱ {{ kalanSure(o.baslangicTarihi) }}</span>
+          <span class="badge badge-planlanan">Planlanan</span>
+        </div>
+        <div class="yo-tur">{{ o.turAd || '—' }}</div>
+        <div class="yo-meta">
+          <span title="Başlangıç">🕐 {{ formatTarih(o.baslangicTarihi) }}</span>
+          <span title="Konum">📍 {{ konumStr(o) }}</span>
+          <span title="Organizatör" *ngIf="o.organizatorAd">🏢 {{ o.organizatorAd }}</span>
+        </div>
+        <div class="yo-aciklama" *ngIf="o.aciklama">{{ o.aciklama }}</div>
+      </div>
+    </section>
+
+    <!-- ─── Geçmiş 24 saat (Gerçekleşen + İptal) ─────── -->
+    <section class="yo-bolum yo-bolum-gecmis">
+      <div class="yo-bolum-baslik yo-gecmis-baslik">
+        <span class="yo-bolum-ikon">🕐</span>
+        <span>Son 24 Saatte Gerçekleşen / İptal Olan Olaylar</span>
+        <span class="yo-sayi">{{ gecmisOlaylar.length }}</span>
+      </div>
+
+      <div class="yo-bos" *ngIf="gecmisOlaylar.length === 0">
+        Son 24 saat içinde gerçekleşen ya da iptal olan olay bulunmuyor.
+      </div>
+
+      <div class="yo-kart" [class.yo-kart-gerceklesen]="o.durum === 2"
+                           [class.yo-kart-iptal]="o.durum === 3"
+                           *ngFor="let o of gecmisOlaylar">
+        <div class="yo-kart-ust">
+          <span class="yo-no">{{ o.olayNo }}</span>
+          <span class="badge" [ngClass]="durumSinif(o.durum)">{{ durumEtiket(o.durum) }}</span>
+        </div>
+        <div class="yo-tur">{{ o.turAd || '—' }}</div>
+        <div class="yo-meta">
+          <span title="Başlangıç">🕐 {{ formatTarih(o.baslangicTarihi) }}</span>
+          <span title="Konum">📍 {{ konumStr(o) }}</span>
+          <span title="Organizatör" *ngIf="o.organizatorAd">🏢 {{ o.organizatorAd }}</span>
+        </div>
+        <div class="yo-aciklama" *ngIf="o.aciklama">{{ o.aciklama }}</div>
+      </div>
+    </section>
+
+  </ng-container>
+
+  <!-- Yenile butonu -->
+  <div class="yo-yenile-wrap" *ngIf="!yukleniyor">
+    <button type="button" class="yo-yenile-btn" (click)="yukle()">↻ Yenile</button>
+  </div>
+
+</div>

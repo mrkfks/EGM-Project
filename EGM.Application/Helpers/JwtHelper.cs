@@ -15,6 +15,7 @@ namespace EGM.Application.Helpers
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Sicil.ToString()),
                 new Claim(ClaimTypes.NameIdentifier,   user.Sicil.ToString()),
+                new Claim("userId",                    user.Id.ToString()),
                 new Claim(ClaimTypes.Role,             user.Role),
                 new Claim("role",                      user.Role),
                 new Claim("fullName",                  user.FullName ?? string.Empty),

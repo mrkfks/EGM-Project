@@ -24,19 +24,12 @@ namespace EGM.Infrastructure
 
         // Olay Yönetimi
         public DbSet<Olay> Olaylar { get; set; } = null!;
-        public DbSet<SosyalMedyaOlay> SosyalMedyaOlaylar { get; set; } = null!;
         public DbSet<YuruyusRota> YuruyusRotasi { get; set; } = null!;
 
         // Organizator ve Konu
         public DbSet<Organizator> Organizatorler { get; set; } = null!;
         public DbSet<KategoriOrganizator> KategoriOrganizatorler { get; set; } = null!;
         public DbSet<Konu> Konular { get; set; } = null!;
-
-        // Seçim
-        public DbSet<SandikOlay> SandikOlaylar { get; set; } = null!;
-
-        // VIP Ziyaret
-        public DbSet<VIPZiyaret> VIPZiyaretler { get; set; } = null!;
 
         // Audit
         public DbSet<AuditLog> AuditLoglar { get; set; } = null!;
@@ -62,13 +55,10 @@ namespace EGM.Infrastructure
             // otomatik olarak sorgu dışında bırakılır.
             modelBuilder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Olay>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<SosyalMedyaOlay>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<YuruyusRota>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Organizator>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<KategoriOrganizator>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Konu>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<SandikOlay>().HasQueryFilter(e => !e.IsDeleted);
-            modelBuilder.Entity<VIPZiyaret>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Notification>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Resource>().HasQueryFilter(e => !e.IsDeleted);
             modelBuilder.Entity<Location>().HasQueryFilter(e => !e.IsDeleted);
@@ -124,8 +114,9 @@ namespace EGM.Infrastructure
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Olay>()
-                .HasMany(o => o.ParticipantGroups)
-                .WithMany(g => g.Events);
+                .HasMany(o => o.ParticipantOrganizators)
+                .WithMany(org => org.KatilimciOlduguOlaylar)
+                .UsingEntity(j => j.ToTable("OlayKatilimciOrganizator"));
 
             modelBuilder.Entity<Olay>()
                 .HasOne(o => o.Tur)
@@ -136,10 +127,6 @@ namespace EGM.Infrastructure
                 .HasOne(o => o.Sekil)
                 .WithMany()
                 .HasForeignKey(o => o.SekilId);
-
-            // ── SosyalMedyaOlay ──────────────────────────────────────────
-            modelBuilder.Entity<SosyalMedyaOlay>()
-                .HasIndex(s => s.OlayId);
 
             // ── AuditLog ─────────────────────────────────────────────────
             modelBuilder.Entity<AuditLog>()
@@ -169,12 +156,6 @@ namespace EGM.Infrastructure
                 .WithMany(k => k.AltKonular)
                 .HasForeignKey(k => k.UstKonuId)
                 .OnDelete(DeleteBehavior.Restrict);
-
-            // ── SosyalMedyaOlay - Olay ──────────────────────────────────
-            modelBuilder.Entity<SosyalMedyaOlay>()
-                .HasOne(s => s.Olay)
-                .WithMany()
-                .HasForeignKey(s => s.OlayId);
 
             // ── YuruyusRota - Olay ──────────────────────────────────────
             modelBuilder.Entity<YuruyusRota>()

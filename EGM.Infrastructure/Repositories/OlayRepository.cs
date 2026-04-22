@@ -25,7 +25,7 @@ namespace EGM.Infrastructure.Repositories
                 .Include(o => o.Locations)
                 .Include(o => o.Resources)
                 .Include(o => o.EventDetail)
-                .Include(o => o.ParticipantGroups)
+                .Include(o => o.ParticipantOrganizators)
                 .FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
         }
 

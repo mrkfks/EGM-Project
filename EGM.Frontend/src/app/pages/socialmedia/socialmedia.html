@@ -30,8 +30,14 @@
               class="platform-btn"
               [class.selected]="form.platform === p"
               (click)="form.platform = p"
+              title="Seçmek için tıklayın"
             >{{ p }}</button>
-            <button class="platform-sil-btn" type="button" (click)="platformSil(p)" title="{{ p }} platformunu sil">&#10005;</button>
+            <button 
+              class="platform-sil-btn" 
+              type="button" 
+              (click)="platformSil(p)" 
+              title="{{ p }} platformunu sil"
+            >✕</button>
           </div>
           <!-- Yeni platform ekle -->
           <div class="platform-yeni-ekle" [class.acik]="yeniPlatformAcik">
@@ -49,7 +55,7 @@
                 maxlength="40"
               />
               <button class="platform-inline-kaydet" type="button" (click)="platformEkle()" [disabled]="!yeniPlatform.trim()">Ekle</button>
-              <button class="platform-inline-iptal" type="button" (click)="yeniPlatformAcik = false; yeniPlatform = ''">&#10005;</button>
+              <button class="platform-inline-iptal" type="button" (click)="yeniPlatformAcik = false; yeniPlatform = ''">✕</button>
             </ng-container>
           </div>
         </div>

@@ -4,15 +4,16 @@ import { SokakOlayEkle } from '../sokak-olay-ekle/sokak-olay-ekle';
 import { Socialmedia } from '../socialmedia/socialmedia';
 import { Secim } from '../secim/secim';
 import { VIP } from '../vip/vip';
+import { YaklasanOlaylar } from '../yaklasan-olaylar/yaklasan-olaylar';
 
-type Sekme = 'sokak' | 'sosyal' | 'secim' | 'vip';
+type Sekme = 'sokak' | 'yaklasan' | 'sosyal' | 'secim' | 'vip';
 
 const IL_Y_VE_UZERI = ['IlYoneticisi', 'BaskanlikPersoneli', 'BaskanlikYoneticisi', 'Yetkili'];
 
 @Component({
   selector: 'app-olay-bildirim-paneli',
   standalone: true,
-  imports: [CommonModule, SokakOlayEkle, Socialmedia, Secim, VIP],
+  imports: [CommonModule, SokakOlayEkle, Socialmedia, Secim, VIP, YaklasanOlaylar],
   templateUrl: './olay-bildirim-paneli.html',
   styleUrls: ['./olay-bildirim-paneli.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

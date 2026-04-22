@@ -39,6 +39,7 @@ namespace EGM.Domain.Entities
         public ICollection<Organizator> AltKuruluslar { get; set; } = new List<Organizator>();
 
         public ICollection<Olay> Olaylar { get; set; } = new List<Olay>();
+        public ICollection<Olay> KatilimciOlduguOlaylar { get; set; } = new List<Olay>();
         public ICollection<KategoriOrganizator> Kategoriler { get; set; } = new List<KategoriOrganizator>();
     }
 }

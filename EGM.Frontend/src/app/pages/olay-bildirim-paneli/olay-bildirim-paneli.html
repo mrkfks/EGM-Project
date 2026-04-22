@@ -1,22 +1,19 @@
 <div class="ob-kapsayici">
   <div class="ob-sekmeler">
     <button class="ob-sekme" [class.aktif]="aktifSekme === 'sokak'" (click)="sekmeSec('sokak')">
-      <span class="ob-sekme-ikon">⚠️</span> Sokak Olayları
+      <span class="ob-sekme-ikon">⚠️</span> Olay Girişi
     </button>
-    <button class="ob-sekme" [class.aktif]="aktifSekme === 'sosyal'" (click)="sekmeSec('sosyal')">
-      <span class="ob-sekme-ikon">📱</span> Sosyal Medya Olayları
-    </button>
-    <button class="ob-sekme" [class.aktif]="aktifSekme === 'secim'" (click)="sekmeSec('secim')">
-      <span class="ob-sekme-ikon">🗳️</span> Seçim Olayları
-    </button>
-    <button *ngIf="vipGorunsun" class="ob-sekme" [class.aktif]="aktifSekme === 'vip'" (click)="sekmeSec('vip')">
-      <span class="ob-sekme-ikon">⭐</span> Ziyaretçi Olayları
+    <button class="ob-sekme" [class.aktif]="aktifSekme === 'yaklasan'" (click)="sekmeSec('yaklasan')">
+      <span class="ob-sekme-ikon">🔔</span> Yaklaşan &amp; Son Olaylar
     </button>
   </div>
 
   <div class="ob-icerik">
     <ng-container *ngIf="aktifSekme === 'sokak'">
       <app-sokak-olay-ekle></app-sokak-olay-ekle>
+    </ng-container>
+    <ng-container *ngIf="aktifSekme === 'yaklasan'">
+      <app-yaklasan-olaylar></app-yaklasan-olaylar>
     </ng-container>
     <ng-container *ngIf="aktifSekme === 'sosyal'">
       <app-socialmedia></app-socialmedia>

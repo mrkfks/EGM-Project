@@ -16,20 +16,17 @@ public class GeoController : ControllerBase
     private readonly IGeoService _geoService;
     private readonly IGeoAreaService _geoAreaService;
     private readonly IOlayService _olayService;
-    private readonly VIPZiyaretService _vipService;
     private readonly ILogger<GeoController> _logger;
 
     public GeoController(
         IGeoService geoService,
         IGeoAreaService geoAreaService,
         IOlayService olayService,
-        VIPZiyaretService vipService,
         ILogger<GeoController> logger)
     {
         _geoService = geoService;
         _geoAreaService = geoAreaService;
         _olayService = olayService;
-        _vipService = vipService;
         _logger = logger;
     }
 
@@ -349,78 +346,5 @@ public class GeoController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Harita için tüm VIP ziyaretlerini GeoJSON FeatureCollection olarak döndürür.
-    /// GET /api/geo/vipziyaretler?il=Ankara
-    /// </summary>
-    [HttpGet("vipziyaretler")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetVIPZiyaretlerForMap(
-        [FromQuery] string? il = null,
-        CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var features = new List<object>();
-
-            // Tüm VIP ziyaretlerini al
-            var vipZiyaretler = await _vipService.GetAllAsync();
-
-            foreach (var vip in vipZiyaretler.Where(v => !v.IsDeleted))
-            {
-                // Filtreleme
-                if (!string.IsNullOrWhiteSpace(il) && vip.Il != il)
-                    continue;
-
-                // Koordinatları kontrol et
-                if (!vip.Latitude.HasValue || !vip.Longitude.HasValue)
-                    continue;
-
-                // GeoJSON Feature oluştur
-                var feature = new
-                {
-                    type = "Feature",
-                    id = vip.Id,
-                    properties = new
-                    {
-                        id = vip.Id,
-                        takipNo = vip.TakipNo,
-                        ziyaretEdenAdSoyad = vip.ZiyaretEdenAdSoyad,
-                        unvan = vip.Unvan,
-                        il = vip.Il,
-                        mekan = vip.Mekan,
-                        baslangicTarihi = vip.BaslangicTarihi,
-                        bitisTarihi = vip.BitisTarihi,
-                        durum = (int)vip.ZiyaretDurumu,
-                        hassasiyet = (int)vip.Hassasiyet,
-                        guvenlikSeviyesi = vip.GuvenlikSeviyesi,
-                        latitude = vip.Latitude,
-                        longitude = vip.Longitude
-                    },
-                    geometry = new
-                    {
-                        type = "Point",
-                        coordinates = new[] { vip.Longitude.Value, vip.Latitude.Value }
-                    }
-                };
-
-                features.Add(feature);
-            }
-
-            var geoJsonCollection = new
-            {
-                type = "FeatureCollection",
-                features = features
-            };
-
-            return Ok(geoJsonCollection);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "GetVIPZiyaretlerForMap sırasında hata");
-            return StatusCode(500, new { error = "VIP ziyaretlerini getirme başarısız." });
-        }
-    }
 }
 

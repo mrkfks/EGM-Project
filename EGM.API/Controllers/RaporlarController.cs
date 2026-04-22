@@ -1,4 +1,4 @@
-using EGM.Application.Services;
+﻿using EGM.Application.Services;
 using EGM.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -41,28 +41,6 @@ namespace EGM.API.Controllers
                 .Select(o => new { o.CreatedByUserId, o.CreatedAt, OlayTuru = o.Tur != null ? o.Tur.Name : string.Empty })
                 .ToListAsync())
                 .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.OlayTuru, o.OlayTuru, "Sokak Olayı")));
-
-            // ── Sosyal Medya Olayları ─────────────────────────────────────
-            rows.AddRange((await _context.SosyalMedyaOlaylar
-                .OrderByDescending(o => o.CreatedAt).Take(limit)
-                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Konu, o.Platform })
-                .ToListAsync())
-                .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.Konu, o.Platform, "Sosyal Medya Olayı")));
-
-            // ── VIP Ziyaret Olayları ──────────────────────────────────────
-            rows.AddRange((await _context.VIPZiyaretler
-                .OrderByDescending(o => o.CreatedAt).Take(limit)
-                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.ZiyaretEdenAdSoyad, o.Unvan })
-                .ToListAsync())
-                .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.ZiyaretEdenAdSoyad, o.Unvan, "VIP Ziyaret")));
-
-            // ── Sandık Olayları ───────────────────────────────────────────
-            rows.AddRange((await _context.SandikOlaylar
-                .OrderByDescending(o => o.CreatedAt).Take(limit)
-                .Select(o => new { o.CreatedByUserId, o.CreatedAt, o.Konu, o.OlayKategorisi })
-                .ToListAsync())
-                .Select(o => ((string?)o.CreatedByUserId, o.CreatedAt, o.Konu, o.OlayKategorisi, "Sandık Olayı")));
-
             // ── Konu Tanımları ────────────────────────────────────────────
             rows.AddRange((await _context.Konular
                 .OrderByDescending(k => k.CreatedAt).Take(limit)

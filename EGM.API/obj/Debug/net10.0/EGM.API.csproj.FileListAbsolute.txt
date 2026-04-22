@@ -680,3 +680,4 @@ C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\obj\Debug\net10.0\swae.build.ex.cache
 C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\obj\Debug\net10.0\EGM.API.csproj.Up2Date
 C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\obj\Debug\net10.0\EGM.API.genruntimeconfig.cache
 C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\obj\Debug\net10.0\ref\EGM.API.dll
+C:\Users\mrkfk\Desktop\EGM-Project\EGM.API\bin\Debug\net10.0\EGM.API.staticwebassets.runtime.json

@@ -15,20 +15,20 @@ namespace EGM.Application.Services
     public class OlayService : IOlayService
     {
         private readonly IOlayRepository _olayRepository;
-        private readonly IRepository<Group> _groupRepository;
+        private readonly IRepository<Organizator> _organizatorRepository;
         private readonly ICurrentUserService _currentUser;
         private readonly IInAppNotificationService _notificationService;
         private readonly ILogger<OlayService> _logger;
 
         public OlayService(
             IOlayRepository olayRepository,
-            IRepository<Group> groupRepository,
+            IRepository<Organizator> organizatorRepository,
             ICurrentUserService currentUser,
             IInAppNotificationService notificationService,
             ILogger<OlayService> logger)
         {
             _olayRepository = olayRepository;
-            _groupRepository = groupRepository;
+            _organizatorRepository = organizatorRepository;
             _currentUser = currentUser;
             _notificationService = notificationService;
             _logger = logger;
@@ -58,8 +58,8 @@ namespace EGM.Application.Services
                 BaslangicTarihi = createDto.BaslangicTarihi,
                 BitisTarihi = createDto.BitisTarihi,
                 Aciklama = createDto.Aciklama,
-                Durum = OlayDurum.Planlanan,
-                PersonelId = Guid.Parse(_currentUser.UserId),
+                Durum = createDto.Durum,
+                PersonelId = _currentUser.UserGuid,
                 CityId = createDto.CityId ?? _currentUser.CityId,
                 CreatedByUserId = _currentUser.UserId
             };
@@ -85,13 +85,13 @@ namespace EGM.Application.Services
                 Aciklama = r.Aciklama
             }).ToList();
 
-            // Gruplar
-            if (createDto.ParticipantGroupIds.Any())
+            // Katılımcı Kuruluslar
+            if (createDto.ParticipantOrganizatorIds.Any())
             {
-                foreach (var groupId in createDto.ParticipantGroupIds)
+                foreach (var orgId in createDto.ParticipantOrganizatorIds)
                 {
-                    var group = await _groupRepository.GetByIdAsync(groupId);
-                    if (group != null) olay.ParticipantGroups.Add(group);
+                    var org = await _organizatorRepository.GetByIdAsync(orgId);
+                    if (org != null) olay.ParticipantOrganizators.Add(org);
                 }
             }
 
@@ -257,7 +257,7 @@ namespace EGM.Application.Services
                 SehitSayisi = o.EventDetail.SehitSayisi,
                 OluSayisi = o.EventDetail.OluSayisi
             } : null,
-            ParticipantGroups = o.ParticipantGroups.Select(g => g.Name).ToList()
+            ParticipantOrganizatorlar = o.ParticipantOrganizators.Select(org => org.Ad ?? string.Empty).ToList()
         };
     }
 }
